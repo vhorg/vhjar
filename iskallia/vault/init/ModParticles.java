@@ -1,6 +1,7 @@
 package iskallia.vault.init;
 
 import com.mojang.serialization.Codec;
+import iskallia.vault.client.particles.AbsorbingParticle;
 import iskallia.vault.client.particles.AlchemyTableParticle;
 import iskallia.vault.client.particles.AltarFlameParticle;
 import iskallia.vault.client.particles.AltarParticleOptions;
@@ -38,7 +39,7 @@ import iskallia.vault.client.particles.NovaExplosionCloudParticle;
 import iskallia.vault.client.particles.NovaExplosionParticle;
 import iskallia.vault.client.particles.NovaExplosionWaveParticle;
 import iskallia.vault.client.particles.NovaSpeedParticle;
-import iskallia.vault.client.particles.PylonConsumeParticle;
+import iskallia.vault.client.particles.RaidCubeParticle;
 import iskallia.vault.client.particles.ReverseDiffuserParticle;
 import iskallia.vault.client.particles.ReverseDiffuserUpgradedParticle;
 import iskallia.vault.client.particles.ScavengerAltarConsumeParticle;
@@ -109,7 +110,7 @@ public class ModParticles {
    public static final RegistryObject<SimpleParticleType> CHAINING = REGISTRY.register("chaining", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> STUNNED = REGISTRY.register("stunned", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> SHOCKED = REGISTRY.register("shocked", () -> new SimpleParticleType(true));
-   public static final RegistryObject<SimpleParticleType> PYLON_CONSUME = REGISTRY.register("pylon_consume", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> ABSORBING = REGISTRY.register("absorbing", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> FLOATING_ALTAR_ITEM = REGISTRY.register("floating_altar_item", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> LUCKY_HIT_SWEEPING = REGISTRY.register("lucky_hit_sweeping", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> LUCKY_HIT = REGISTRY.register("lucky_hit", () -> new SimpleParticleType(true));
@@ -149,9 +150,6 @@ public class ModParticles {
    public static final RegistryObject<ParticleType<ColoredParticleOptions>> TOTEM_FOUNTAIN = register(
       REGISTRY, "totem_fountain", ColoredParticleOptions.DESERIALIZER, ColoredParticleOptions::codec, true
    );
-   public static final RegistryObject<ParticleType<SphericalParticleOptions>> MANA_SHIELD_RETRIBUTION_EFFECT_RANGE = register(
-      REGISTRY, "mana_shield_retribution_effect_range", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
-   );
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> SIGHT_JAVELIN_RANGE = register(
       REGISTRY, "sight_javelin_range", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
@@ -170,6 +168,7 @@ public class ModParticles {
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> BOSS_WENDARR_EXPLODE = register(
       REGISTRY, "boss_wendarr_explode", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
+   public static final RegistryObject<SimpleParticleType> RAID_EFFECT_CUBE = REGISTRY.register("raid_cube", () -> new SimpleParticleType(true));
 
    @OnlyIn(Dist.CLIENT)
    @SubscribeEvent(
@@ -203,7 +202,7 @@ public class ModParticles {
       particleManager.register((ParticleType)CHAINING.get(), ChainingParticle.Provider::new);
       particleManager.register((ParticleType)STUNNED.get(), StunnedParticle.Provider::new);
       particleManager.register((ParticleType)SHOCKED.get(), ShockedParticle.Provider::new);
-      particleManager.register((ParticleType)PYLON_CONSUME.get(), PylonConsumeParticle.Provider::new);
+      particleManager.register((ParticleType)ABSORBING.get(), AbsorbingParticle.Provider::new);
       particleManager.register((ParticleType)FLOATING_ALTAR_ITEM.get(), FloatingAltarItemParticle.Provider::new);
       particleManager.register((ParticleType)LUCKY_HIT.get(), LuckyHitParticle.Provider::new);
       particleManager.register((ParticleType)LUCKY_HIT_SWEEPING.get(), LuckyHitSweepingParticle.Provider::new);
@@ -239,10 +238,6 @@ public class ModParticles {
          (ParticleType)HEAL_GROUP_EFFECT_RING.get(),
          sprites -> new EffectRangeParticle.CircleProvider(sprites, 1.0F, 60, 1.0F, Tween.inOut(Tween.EASE_OUT_BOUNCE, Tween.LINEAR, 0.25F))
       );
-      particleManager.register(
-         (ParticleType)MANA_SHIELD_RETRIBUTION_EFFECT_RANGE.get(),
-         sprites -> new EffectRangeParticle.SphereProvider(sprites, 0.0F, 60, 1.0F, Tween.inOut(Tween.LINEAR, Tween.EASE_OUT_CUBIC, 0.05F))
-      );
       particleManager.register((ParticleType)SIGHT_JAVELIN_RANGE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 2.0F, 60, 1.0F));
       particleManager.register((ParticleType)IMPLODE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 0.0F, 10, 1.0F));
       particleManager.register((ParticleType)DIVINE_ALTAR.get(), sprites -> new DivineAltarParticle.AltarProvider(sprites, 1.0F));
@@ -251,6 +246,7 @@ public class ModParticles {
       particleManager.register((ParticleType)ASCENSION_FORGE.get(), AscensionForgeParticle.Provider::new);
       particleManager.register((ParticleType)GRID_GATEWAY.get(), GridGatewayParticle.Provider::new);
       particleManager.register((ParticleType)BOSS_WENDARR_EXPLODE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 1.0F, 60, 1.0F));
+      particleManager.register((ParticleType)RAID_EFFECT_CUBE.get(), RaidCubeParticle.Provider::new);
    }
 
    private static <T extends ParticleOptions> RegistryObject<ParticleType<T>> register(

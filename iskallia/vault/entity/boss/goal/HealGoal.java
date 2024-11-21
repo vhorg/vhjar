@@ -17,6 +17,7 @@ public class HealGoal extends Goal implements ITrait {
    private int healCooldown = 0;
    private int healInterval = 20;
    private float healPercentage = 0.1F;
+   private int stackSize;
 
    public HealGoal(VaultBossBaseEntity boss) {
       this.boss = boss;
@@ -41,8 +42,8 @@ public class HealGoal extends Goal implements ITrait {
    @Override
    public void addStack(ITrait trait) {
       if (trait instanceof HealGoal healGoal) {
-         int stackSize = healGoal.healInterval / this.healInterval;
-         this.healInterval = healGoal.healInterval * ++stackSize;
+         this.stackSize++;
+         this.healInterval = healGoal.healInterval * this.stackSize;
       }
    }
 
@@ -76,13 +77,15 @@ public class HealGoal extends Goal implements ITrait {
       nbt.putInt("HealCooldown", this.healCooldown);
       nbt.putInt("HealInterval", this.healInterval);
       nbt.putFloat("HealPercentage", this.healPercentage);
+      nbt.putInt("StackSize", this.stackSize);
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.healCooldown = nbt.getInt("HealCooldown");
       this.healInterval = nbt.getInt("HealInterval");
       this.healPercentage = nbt.getFloat("HealPercentage");
+      this.stackSize = nbt.getInt("StackSize");
    }
 }

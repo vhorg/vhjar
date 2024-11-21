@@ -99,7 +99,7 @@ public class PlayerSnapshotDump {
       snapshot.putGearAttribute(ModGearAttributes.TRAP_DISARMING, VaultGearAttributeTypeMerger.floatSum(), attributeSnapshot);
       snapshot.putGearAttribute(ModGearAttributes.COPIOUSLY, VaultGearAttributeTypeMerger.floatSum(), attributeSnapshot);
       snapshot.putGearAttribute(ModGearAttributes.MINING_SPEED, VaultGearAttributeTypeMerger.floatSum(), attributeSnapshot);
-      snapshot.putGearAttribute(ModGearAttributes.SOUL_CHANCE, () -> SoulChanceHelper.getSoulChance(player));
+      snapshot.putGearAttribute(ModGearAttributes.SOUL_QUANTITY, () -> SoulChanceHelper.getSoulChance(player));
       snapshot.putGearAttribute(ModGearAttributes.LUCKY_HIT_CHANCE, () -> LuckyHitHelper.getLuckyHitChance(player));
       snapshot.putGearAttribute(ModGearAttributes.DAMAGE_INCREASE, VaultGearAttributeTypeMerger.floatSum(), attributeSnapshot);
       snapshot.putGearAttribute(ModGearAttributes.DAMAGE_ILLAGERS, VaultGearAttributeTypeMerger.floatSum(), attributeSnapshot);

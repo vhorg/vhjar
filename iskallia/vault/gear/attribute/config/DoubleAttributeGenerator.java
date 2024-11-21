@@ -2,6 +2,7 @@ package iskallia.vault.gear.attribute.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import iskallia.vault.util.MiscUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -43,6 +44,10 @@ public class DoubleAttributeGenerator extends NumberRangeGenerator<Double, Doubl
    @Override
    public Optional<Double> getMaximumValue(List<DoubleAttributeGenerator.Range> configurations) {
       return configurations.stream().map(DoubleAttributeGenerator.Range::generateMaximumNumber).min(Double::compare);
+   }
+
+   public Optional<Float> getRollPercentage(Double value, List<DoubleAttributeGenerator.Range> configurations) {
+      return MiscUtils.getFloatValueRange(value.floatValue(), this.getMinimumValue(configurations), this.getMaximumValue(configurations), Double::floatValue);
    }
 
    public static class Range extends NumberRangeGenerator.NumberRange<Double> {

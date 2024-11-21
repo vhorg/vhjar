@@ -2,6 +2,8 @@ package iskallia.vault.core.data.adapter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import iskallia.vault.block.entity.challenge.ChallengeManager;
+import iskallia.vault.block.entity.challenge.raid.action.ChallengeAction;
 import iskallia.vault.config.VaultAltarConfig;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.data.adapter.array.BooleanArrayAdapter;
@@ -16,6 +18,7 @@ import iskallia.vault.core.data.adapter.basic.StringAdapter;
 import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
 import iskallia.vault.core.data.adapter.basic.UuidAdapter;
 import iskallia.vault.core.data.adapter.basic.VoidAdapter;
+import iskallia.vault.core.data.adapter.list.ListAdapter;
 import iskallia.vault.core.data.adapter.nbt.ByteArrayNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.ByteNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.CollectionNbtAdapter;
@@ -65,11 +68,14 @@ import iskallia.vault.core.vault.enhancement.EnhancementTask;
 import iskallia.vault.core.vault.enhancement.KillMobsEnhancementTask;
 import iskallia.vault.core.vault.enhancement.LootChestsEnhancementTask;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.core.vault.modifier.spi.predicate.ModifierPredicate;
 import iskallia.vault.core.vault.objective.bingo.BingoItem;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.core.world.data.item.PartialItem;
+import iskallia.vault.core.world.data.item.PartialStack;
 import iskallia.vault.core.world.data.tile.PartialBlock;
 import iskallia.vault.core.world.data.tile.PartialBlockProperties;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
@@ -80,7 +86,12 @@ import iskallia.vault.core.world.loot.LootTable;
 import iskallia.vault.core.world.loot.entry.ItemLootEntry;
 import iskallia.vault.core.world.loot.entry.LootEntry;
 import iskallia.vault.core.world.loot.entry.ReferenceLootEntry;
+import iskallia.vault.core.world.roll.DoubleRoll;
+import iskallia.vault.core.world.roll.FloatRoll;
 import iskallia.vault.core.world.roll.IntRoll;
+import iskallia.vault.core.world.storage.BlockCuboid;
+import iskallia.vault.core.world.storage.WorldZone;
+import iskallia.vault.core.world.storage.WorldZones;
 import iskallia.vault.core.world.template.data.DirectTemplateEntry;
 import iskallia.vault.core.world.template.data.IndirectTemplateEntry;
 import iskallia.vault.core.world.template.data.TemplateEntry;
@@ -95,10 +106,13 @@ import iskallia.vault.item.crystal.layout.preset.StructurePreset;
 import iskallia.vault.item.crystal.layout.preset.TemplatePreset;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.task.Task;
+import iskallia.vault.task.condition.TaskCondition;
 import iskallia.vault.task.renderer.TaskRenderer;
 import iskallia.vault.task.renderer.Vec2d;
 import iskallia.vault.task.source.TaskSource;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -130,6 +144,7 @@ public class Adapters {
    public static final SegmentedIntAdapter INT_SEGMENTED_7 = new SegmentedIntAdapter(7, false);
    public static final IntRoll.Adapter INT_ROLL = new IntRoll.Adapter();
    public static final FloatAdapter FLOAT = new FloatAdapter(false);
+   public static final FloatRoll.Adapter FLOAT_ROLL = new FloatRoll.Adapter();
    public static final LongAdapter LONG = new LongAdapter(false);
    public static final SegmentedLongAdapter LONG_SEGMENTED_3 = new SegmentedLongAdapter(3, false);
    public static final SegmentedLongAdapter LONG_SEGMENTED_7 = new SegmentedLongAdapter(7, false);
@@ -137,6 +152,7 @@ public class Adapters {
    public static final LongArrayAdapter LONG_ARRAY = new LongArrayAdapter(LONG, false);
    public static final DoubleAdapter DOUBLE = new DoubleAdapter(false);
    public static final DoubleArrayAdapter DOUBLE_ARRAY = new DoubleArrayAdapter(DOUBLE, false);
+   public static final DoubleRoll.Adapter DOUBLE_ROLL = new DoubleRoll.Adapter();
    public static final SerializableAdapter<Vec2d, Tag, JsonElement> VEC_2D = new SerializableAdapter<>(Vec2d::new, false);
    public static final BigIntegerAdapter BIG_INTEGER = new BigIntegerAdapter(false);
    public static final BigDecimalAdapter BIG_DECIMAL = new BigDecimalAdapter(false);
@@ -169,11 +185,13 @@ public class Adapters {
    public static final PartialBlockState.Adapter PARTIAL_BLOCK_STATE = new PartialBlockState.Adapter();
    public static final PartialCompoundNbt.Adapter PARTIAL_BLOCK_ENTITY = new PartialCompoundNbt.Adapter();
    public static final PartialTile.Adapter PARTIAL_TILE = new PartialTile.Adapter();
+   public static final PartialEntity.Adapter PARTIAL_ENTITY = new PartialEntity.Adapter();
    public static final PartialItem.Adapter PARTIAL_ITEM = new PartialItem.Adapter();
-   public static final ItemPredicate.Adapter PARTIAL_STACK = new ItemPredicate.Adapter();
+   public static final PartialStack.Adapter PARTIAL_STACK = new PartialStack.Adapter();
    public static final TilePredicate.Adapter TILE_PREDICATE = new TilePredicate.Adapter();
    public static final EntityPredicate.Adapter ENTITY_PREDICATE = new EntityPredicate.Adapter();
    public static final ItemPredicate.Adapter ITEM_PREDICATE = new ItemPredicate.Adapter();
+   public static final ModifierPredicate.Adapter MODIFIER_PREDICATE = new ModifierPredicate.Adapter();
    public static final ForgeRegistryAdapter<Block> BLOCK = new ForgeRegistryAdapter(() -> ForgeRegistries.BLOCKS, false);
    public static final ForgeRegistryAdapter<Item> ITEM = new ForgeRegistryAdapter(() -> ForgeRegistries.ITEMS, false);
    public static final ForgeRegistryAdapter<Enchantment> ENCHANTMENT = new ForgeRegistryAdapter(() -> ForgeRegistries.ENCHANTMENTS, false);
@@ -218,11 +236,17 @@ public class Adapters {
    public static TaskRenderer.Adapter TASK_RENDERER = new TaskRenderer.Adapter();
    public static TaskSource.Adapter TASK_SOURCE = new TaskSource.Adapter();
    public static TaskSource.NbtAdapter TASK_SOURCE_NBT = new TaskSource.NbtAdapter();
+   public static TaskCondition.Adapter TASK_CONDITION = new TaskCondition.Adapter();
+   public static ChallengeManager.Adapter CHALLENGE_MANAGER = new ChallengeManager.Adapter();
+   public static TypeSupplierAdapter<ChallengeAction<?>> RAID_ACTION = new ChallengeAction.Adapter();
    public static Lcg.Adapter LCG = new Lcg.Adapter(false);
    public static TypeSupplierAdapter<RandomSource> RANDOM = new TypeSupplierAdapter<RandomSource>("type", false)
       .<TypeSupplierAdapter<RandomSource>>register("lcg", LCGRandom.class, () -> LCGRandom.of(Lcg.JAVA, 0L))
       .<TypeSupplierAdapter<RandomSource>>register("java", JavaRandom.class, () -> JavaRandom.ofInternal(0L))
       .register("chunk", ChunkRandom.class, ChunkRandom::any);
+   public static BlockCuboid.Adapter BLOCK_CUBOID = new BlockCuboid.Adapter();
+   public static SerializableAdapter<WorldZone, CompoundTag, JsonObject> WORLD_ZONE = of(WorldZone::new, true);
+   public static SerializableAdapter<WorldZones, Tag, JsonElement> WORLD_ZONES = of(WorldZones::new, true);
    public static SerializableAdapter<VaultAltarConfig.Interface, ?, ?> ALTAR_INTERFACE = of(VaultAltarConfig.Interface::new, false);
 
    public static BoundedIntAdapter ofBoundedInt(int bound) {
@@ -243,6 +267,14 @@ public class Adapters {
 
    public static <T> ArrayAdapter<T> ofArray(IntFunction<T[]> constructor, Object elementAdapter) {
       return new ArrayAdapter<>(constructor, elementAdapter, () -> null, false);
+   }
+
+   public static <T> ListAdapter<T> ofArrayList(Object elementAdapter) {
+      return ofList(ArrayList::new, elementAdapter);
+   }
+
+   public static <T> ListAdapter<T> ofList(IntFunction<List<T>> constructor, Object elementAdapter) {
+      return new ListAdapter<>(constructor, elementAdapter, () -> null, false);
    }
 
    public static <T> VoidAdapter<T> ofVoid() {

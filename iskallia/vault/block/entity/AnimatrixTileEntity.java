@@ -23,11 +23,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class AnimatrixTileEntity extends BlockEntity {
    private Entity entityToRender;
+   private boolean displayOnly;
    private final ItemStackHandler itemHandler = this.createHandler();
    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
 
    public AnimatrixTileEntity(BlockPos pPos, BlockState pState) {
       super(ModBlocks.ANIMATRIX_TILE_ENTITY, pPos, pState);
+   }
+
+   public boolean isDisplayOnly() {
+      return this.displayOnly;
    }
 
    private ItemStackHandler createHandler() {
@@ -56,11 +61,13 @@ public class AnimatrixTileEntity extends BlockEntity {
 
    public void load(CompoundTag pTag) {
       this.itemHandler.deserializeNBT(pTag.getCompound("inventory"));
+      this.displayOnly = pTag.getBoolean("displayOnly");
       this.setEntityToRender(this.itemHandler.getStackInSlot(0));
    }
 
    protected void saveAdditional(CompoundTag pTag) {
       pTag.put("inventory", this.itemHandler.serializeNBT());
+      pTag.putBoolean("displayOnly", this.displayOnly);
    }
 
    public Packet<ClientGamePacketListener> getUpdatePacket() {

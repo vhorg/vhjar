@@ -16,6 +16,7 @@ import iskallia.vault.core.util.RegionPos;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.generator.layout.GridLayout;
+import iskallia.vault.core.world.generator.layout.VaultLayout;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.core.world.template.EmptyTemplate;
@@ -71,6 +72,11 @@ public class GridGenerator extends VaultGenerator {
       this.cache = null;
       this.get(LAYOUT).releaseServer();
       super.releaseServer();
+   }
+
+   @Override
+   public VaultLayout getLayout() {
+      return this.get(LAYOUT);
    }
 
    @Override

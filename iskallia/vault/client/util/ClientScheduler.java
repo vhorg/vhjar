@@ -1,22 +1,25 @@
 package iskallia.vault.client.util;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 
 public class ClientScheduler {
    public static final ClientScheduler INSTANCE = new ClientScheduler();
-   private long tickCount = 0L;
+   private long tick = 0L;
 
    private ClientScheduler() {
    }
 
    public void onClientTick(ClientTickEvent event) {
       if (event.phase != Phase.START) {
-         this.tickCount++;
+         if (!Minecraft.getInstance().isPaused()) {
+            this.tick++;
+         }
       }
    }
 
-   public long getTickCount() {
-      return this.tickCount;
+   public long getTick() {
+      return this.tick;
    }
 }

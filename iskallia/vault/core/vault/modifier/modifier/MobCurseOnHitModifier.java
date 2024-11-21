@@ -5,6 +5,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.predicate.IModifierImmunity;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.util.calc.GrantedEffectHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -23,15 +24,17 @@ public class MobCurseOnHitModifier extends VaultModifier<MobCurseOnHitModifier.P
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.ENTITY_DAMAGE.register(context.getUUID(), event -> {
          if (event.getEntityLiving() instanceof ServerPlayer player) {
-            if (event.getSource().getEntity() instanceof LivingEntity) {
-               if (vault.get(Vault.LISTENERS).contains(player.getUUID())) {
-                  if (!context.hasTarget() || context.getTarget().equals(player.getUUID())) {
-                     if (!(world.random.nextFloat() >= this.properties.onHitApplyChance)) {
-                        MobEffect effect = this.properties.getEffect();
-                        if (!GrantedEffectHelper.hasImmunity(player, effect)) {
-                           int grantedAmplifier = GrantedEffectHelper.getEffectData(player, player.getLevel(), effect);
-                           int amplifier = grantedAmplifier + this.properties.effectAmplifier + 1;
-                           player.addEffect(new MobEffectInstance(effect, this.properties.effectDurationTicks, amplifier, true, false));
+            if (event.getSource().getEntity() instanceof LivingEntity source) {
+               if (!IModifierImmunity.of(source).test(this)) {
+                  if (vault.get(Vault.LISTENERS).contains(player.getUUID())) {
+                     if (!context.hasTarget() || context.getTarget().equals(player.getUUID())) {
+                        if (!(world.random.nextFloat() >= this.properties.onHitApplyChance)) {
+                           MobEffect effect = this.properties.getEffect();
+                           if (!GrantedEffectHelper.canAvoidEffect(effect, player, world.random)) {
+                              int grantedAmplifier = GrantedEffectHelper.getEffectData(player, player.getLevel(), effect);
+                              int amplifier = grantedAmplifier + this.properties.effectAmplifier + 1;
+                              player.addEffect(new MobEffectInstance(effect, this.properties.effectDurationTicks, amplifier, true, false));
+                           }
                         }
                      }
                   }

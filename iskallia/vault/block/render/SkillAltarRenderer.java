@@ -11,6 +11,7 @@ import iskallia.vault.block.entity.SkillAltarTileEntity;
 import iskallia.vault.client.ClientSkillAltarData;
 import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.helper.Easing;
+import iskallia.vault.config.entry.SkillStyle;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
 import iskallia.vault.world.data.SkillAltarData;
@@ -94,10 +95,20 @@ public class SkillAltarRenderer implements BlockEntityRenderer<SkillAltarTileEnt
          icon = ScreenTextures.TAB_ICON_ABILITIES.getSprite();
       } else if (skillAltarIconKeys.get(iconKeyIndex).isTalent()) {
          atlasResourceLocation = ModTextureAtlases.SKILLS.get().getAtlasResourceLocation();
-         icon = ModTextureAtlases.SKILLS.get().getSprite(ModConfigs.TALENTS_GUI.getStyles().get(skillAltarIconKeys.get(iconKeyIndex).key()).icon);
+         SkillStyle style = ModConfigs.TALENTS_GUI.getStyles().get(skillAltarIconKeys.get(iconKeyIndex).key());
+         if (style != null) {
+            icon = ModTextureAtlases.SKILLS.get().getSprite(style.icon);
+         } else {
+            icon = ScreenTextures.TAB_ICON_ABILITIES.getSprite();
+         }
       } else {
          atlasResourceLocation = ModTextureAtlases.ABILITIES.get().getAtlasResourceLocation();
-         icon = ModTextureAtlases.ABILITIES.get().getSprite(ModConfigs.ABILITIES_GUI.getIcon(skillAltarIconKeys.get(iconKeyIndex).key()));
+         ResourceLocation style = ModConfigs.ABILITIES_GUI.getIcon(skillAltarIconKeys.get(iconKeyIndex).key());
+         if (style != null) {
+            icon = ModTextureAtlases.ABILITIES.get().getSprite(style);
+         } else {
+            icon = ScreenTextures.TAB_ICON_ABILITIES.getSprite();
+         }
       }
 
       poseStack.pushPose();

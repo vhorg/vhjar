@@ -7,6 +7,7 @@ import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,11 +41,6 @@ public abstract class AbstractStormArrowAbility extends InstantManaAbility {
    protected AbstractStormArrowAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Storm Arrow: Thunderstorm";
-   }
-
    public float getPercentAbilityPowerDealt() {
       return this.percentAbilityPowerDealt;
    }
@@ -56,14 +52,19 @@ public abstract class AbstractStormArrowAbility extends InstantManaAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
    }
 
-   public int getDuration() {
+   public int getUnmodifiedDuration() {
       return this.cloudDuration;
+   }
+
+   public int getDuration(LivingEntity entity) {
+      int duration = this.getUnmodifiedDuration();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    public int getIntervalTicks() {

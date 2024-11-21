@@ -225,7 +225,7 @@ public class VaultRecyclerRecipeJEI {
       data.write(itemStack);
       ResourceLocation modelKey = item.getRandomModel(itemStack, random);
       if (modelKey != null) {
-         data.updateAttribute(ModGearAttributes.GEAR_MODEL, modelKey);
+         data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, modelKey);
       }
 
       data.write(itemStack);

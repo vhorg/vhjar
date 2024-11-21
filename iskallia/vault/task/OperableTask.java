@@ -21,7 +21,7 @@ public abstract class OperableTask extends NodeTask {
    }
 
    public boolean shouldBeOperating(TaskContext context) {
-      return !this.isCompleted() && (this.parent == null || this.parent.isCompleted());
+      return !this.isCompleted() && (this.parent == null || this.parent.hasActiveChildren());
    }
 
    @Override

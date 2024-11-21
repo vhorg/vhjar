@@ -3,11 +3,14 @@ package iskallia.vault.block;
 import com.google.common.base.Functions;
 import iskallia.vault.block.entity.TreasureDoorTileEntity;
 import iskallia.vault.block.item.TreasureDoorBlockItem;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.ItemVaultKeyring;
 import iskallia.vault.util.BlockHelper;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,15 +93,45 @@ public class TreasureDoorBlock extends DoorBlock implements EntityBlock {
    }
 
    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-      ItemStack heldStack = player.getItemInHand(hand);
       Boolean isOpen = (Boolean)state.getValue(OPEN);
-      if (!isOpen && heldStack.getItem() == ((TreasureDoorBlock.Type)state.getValue(TYPE)).getKey()) {
-         heldStack.shrink(1);
+      if (!isOpen && this.consumeKey(player, hand, (TreasureDoorBlock.Type)state.getValue(TYPE))) {
          this.setOpen(player, world, state, pos, true);
          CommonEvents.TREASURE_ROOM_OPEN.invoke(world, player, pos);
          return InteractionResult.SUCCESS;
       } else {
          return InteractionResult.SUCCESS;
+      }
+   }
+
+   public boolean consumeKey(Player player, InteractionHand hand, TreasureDoorBlock.Type doorType) {
+      ItemStack heldStack = player.getItemInHand(hand);
+      Item requiredKey = doorType.getKey();
+      if (heldStack.is(requiredKey)) {
+         if (!player.isCreative()) {
+            heldStack.shrink(1);
+         }
+
+         return true;
+      } else {
+         if (heldStack.is(ModItems.TREAUSURE_KEYRING)) {
+            List<OverSizedItemStack> stored = ItemVaultKeyring.getStoredStacks(heldStack);
+            OverSizedItemStack keyStack = stored.stream().filter(stack -> stack.stack().is(requiredKey)).findFirst().orElse(OverSizedItemStack.EMPTY);
+            if (!keyStack.isEmpty()) {
+               if (!player.isCreative()) {
+                  int newAmount = keyStack.amount() - 1;
+                  stored.remove(keyStack);
+                  if (newAmount > 0) {
+                     stored.add(OverSizedItemStack.of(new ItemStack(requiredKey, newAmount)));
+                  }
+
+                  ItemVaultKeyring.setStoredStacks(heldStack, stored);
+               }
+
+               return true;
+            }
+         }
+
+         return false;
       }
    }
 

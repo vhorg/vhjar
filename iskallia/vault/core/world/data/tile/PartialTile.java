@@ -1,9 +1,12 @@
 package iskallia.vault.core.world.data.tile;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
@@ -17,6 +20,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.CommonLevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class PartialTile implements TilePlacement<PartialTile> {
@@ -29,6 +33,10 @@ public class PartialTile implements TilePlacement<PartialTile> {
       this.state = state;
       this.entity = entity;
       this.pos = pos;
+   }
+
+   public static PartialTile of(BlockEntity entity) {
+      return new PartialTile(PartialBlockState.of(entity.getBlockState()), PartialCompoundNbt.of(entity), entity.getBlockPos());
    }
 
    public static PartialTile of(PartialBlockState state, PartialCompoundNbt entity, BlockPos pos) {
@@ -137,6 +145,27 @@ public class PartialTile implements TilePlacement<PartialTile> {
    }
 
    public static class Adapter implements ISimpleAdapter<PartialTile, Tag, JsonElement> {
+      public void writeBits(@Nullable PartialTile value, BitBuffer buffer) {
+         buffer.writeBoolean(value == null);
+         if (value != null) {
+            Adapters.BLOCK_POS.asNullable().writeBits(value.pos, buffer);
+            Adapters.PARTIAL_BLOCK_STATE.writeBits(value.state, buffer);
+            Adapters.PARTIAL_BLOCK_ENTITY.writeBits(value.entity, buffer);
+         }
+      }
+
+      @Override
+      public Optional<PartialTile> readBits(BitBuffer buffer) {
+         if (!buffer.readBoolean()) {
+            BlockPos pos = Adapters.BLOCK_POS.asNullable().readBits(buffer).orElse(null);
+            return Optional.of(
+               new PartialTile(Adapters.PARTIAL_BLOCK_STATE.readBits(buffer).orElse(null), Adapters.PARTIAL_BLOCK_ENTITY.readBits(buffer).orElse(null), pos)
+            );
+         } else {
+            return Optional.empty();
+         }
+      }
+
       public Optional<Tag> writeNbt(@Nullable PartialTile value) {
          if (value == null) {
             return Optional.empty();
@@ -170,6 +199,30 @@ public class PartialTile implements TilePlacement<PartialTile> {
             return Optional.of(PartialTile.of(state, entity, pos));
          } else {
             return Optional.empty();
+         }
+      }
+
+      public Optional<JsonElement> writeJson(@Nullable PartialTile value) {
+         if (value == null) {
+            return Optional.empty();
+         } else {
+            JsonObject json = new JsonObject();
+            Adapters.PARTIAL_BLOCK_STATE.writeJson(value.state).ifPresent(tag -> json.add("state", tag));
+            Adapters.PARTIAL_BLOCK_ENTITY.writeJson(value.entity).ifPresent(tag -> json.add("nbt", tag));
+            Adapters.BLOCK_POS.writeJson(value.pos).ifPresent(tag -> json.add("pos", tag));
+            return Optional.of(json);
+         }
+      }
+
+      @Override
+      public Optional<PartialTile> readJson(@Nullable JsonElement json) {
+         if (json instanceof JsonObject object) {
+            PartialBlockState state = Adapters.PARTIAL_BLOCK_STATE.readJson(object.get("state")).orElseThrow();
+            PartialCompoundNbt entity = Adapters.PARTIAL_BLOCK_ENTITY.readJson(object.get("nbt")).orElseGet(PartialCompoundNbt::empty);
+            BlockPos pos = Adapters.BLOCK_POS.readJson(object.get("pos")).orElse(null);
+            return Optional.of(PartialTile.of(state, entity, pos));
+         } else {
+            return json instanceof JsonPrimitive primitive && primitive.isString() ? PartialTile.parse(primitive.getAsString(), true) : Optional.empty();
          }
       }
    }

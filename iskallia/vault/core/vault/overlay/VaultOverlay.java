@@ -15,6 +15,7 @@ import iskallia.vault.core.vault.influence.Influences;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.world.data.ChallengeData;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
@@ -56,7 +57,7 @@ public class VaultOverlay extends DataObject<VaultOverlay> {
       LocalPlayer player = Minecraft.getInstance().player;
       if (player != null) {
          Listener listener = vault.getOptional(Vault.LISTENERS).map(listeners -> listeners.get(player.getUUID())).orElse(null);
-         if (listener != null) {
+         if (listener != null && ChallengeData.shouldRenderObjectives()) {
             matrixStack.pushPose();
             Minecraft mc = Minecraft.getInstance();
             if (mc.gui.getTabList().visible) {

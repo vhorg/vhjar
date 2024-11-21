@@ -1,6 +1,5 @@
 package iskallia.vault.block;
 
-import iskallia.vault.VaultMod;
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.block.entity.IdentificationStandTileEntity;
 import iskallia.vault.block.entity.base.BookAnimatingTileEntity;
@@ -106,13 +105,15 @@ public class IdentificationStandBlock extends FacedBlock implements EntityBlock 
          Item identifiableItem = itemStack.getItem();
          if (identifiableItem instanceof IdentifiableItem) {
             IdentifiableItem identifiableItemx = (IdentifiableItem)identifiableItem;
-            VaultGearState state = identifiableItemx.getState(itemStack);
-            if (state == VaultGearState.UNIDENTIFIED) {
-               if (player instanceof ServerPlayer serverPlayer) {
-                  identifiableItemx.instantIdentify(serverPlayer, itemStack);
-               }
+            if (identifiableItemx.canIdentify(player, itemStack)) {
+               VaultGearState state = identifiableItemx.getState(itemStack);
+               if (state == VaultGearState.UNIDENTIFIED) {
+                  if (player instanceof ServerPlayer serverPlayer) {
+                     identifiableItemx.instantIdentify(serverPlayer, itemStack);
+                  }
 
-               identified = true;
+                  identified = true;
+               }
             }
          }
       }
@@ -122,9 +123,7 @@ public class IdentificationStandBlock extends FacedBlock implements EntityBlock 
          Item var19 = itemStackx.getItem();
          if (var19 instanceof IdentifiableItem) {
             IdentifiableItem identifiableItem = (IdentifiableItem)var19;
-            if (itemStackx.getCount() > 1) {
-               VaultMod.LOGGER.debug("Skipping overstacked item: {}", itemStackx.getItem());
-            } else {
+            if (identifiableItem.canIdentify(player, itemStackx)) {
                VaultGearState state = identifiableItem.getState(itemStackx);
                if (state == VaultGearState.UNIDENTIFIED) {
                   if (player instanceof ServerPlayer serverPlayer) {

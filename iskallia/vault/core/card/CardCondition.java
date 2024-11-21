@@ -131,6 +131,11 @@ public class CardCondition extends CardProperty<CardCondition.Config> {
       }
    }
 
+   @Override
+   public boolean voidConfigIfPopulated() {
+      return true;
+   }
+
    public boolean test(int tier, CardPos origin, CardDeck deck) {
       for (CardCondition.Filter filter : CardEntry.getForTier(this.filters, tier).orElse(new ArrayList<>())) {
          Set<CardPos> filteredCards = new HashSet<>();

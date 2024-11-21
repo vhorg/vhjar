@@ -55,17 +55,18 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
 
    public void removeFromEntity(LivingEntity entity) {
       EntityAttributeModifier.ModifierType modifierType = this.properties.getType();
-
-      for (ResourceLocation attributeResourceLocation : modifierType.getAttributeResourceLocations()) {
-         Attribute attribute = (Attribute)ForgeRegistries.ATTRIBUTES.getValue(attributeResourceLocation);
-         if (attribute == null) {
-            VaultMod.LOGGER.error("Invalid entity attribute '%s' configured for vault modifier '%s'".formatted(attributeResourceLocation, this.getId()));
-         } else {
-            AttributeInstance attributeInstance = entity.getAttribute(attribute);
-            if (attributeInstance != null) {
-               for (AttributeModifier modifier : new HashSet(attributeInstance.getModifiers())) {
-                  if (this.isId(modifier.getId())) {
-                     attributeInstance.removeModifier(modifier.getId());
+      if (modifierType != null) {
+         for (ResourceLocation attributeResourceLocation : modifierType.getAttributeResourceLocations()) {
+            Attribute attribute = (Attribute)ForgeRegistries.ATTRIBUTES.getValue(attributeResourceLocation);
+            if (attribute == null) {
+               VaultMod.LOGGER.error("Invalid entity attribute '%s' configured for vault modifier '%s'".formatted(attributeResourceLocation, this.getId()));
+            } else {
+               AttributeInstance attributeInstance = entity.getAttribute(attribute);
+               if (attributeInstance != null) {
+                  for (AttributeModifier modifier : new HashSet(attributeInstance.getModifiers())) {
+                     if (this.isId(modifier.getId())) {
+                        attributeInstance.removeModifier(modifier.getId());
+                     }
                   }
                }
             }
@@ -133,6 +134,18 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
       @SerializedName("crit_chance_additive")
       CRIT_CHANCE_ADDITIVE(
          List.of(VaultMod.id("generic.crit_chance")), Operation.ADDITION, EntityAttributeModifier.ModifierType.Constants.DESCRIPTION_FORMATTER_ADDITIVE
+      ),
+      @SerializedName("knockback_resistance_additive")
+      KNOCKBACK_RESISTANCE_ADDITIVE(
+         List.of(new ResourceLocation("generic.knockback_resistance")),
+         Operation.ADDITION,
+         EntityAttributeModifier.ModifierType.Constants.DESCRIPTION_FORMATTER_ADDITIVE
+      ),
+      @SerializedName("durability_wear_reduction_cap_additive")
+      DURABILITY_WEAR_REDUCTION_CAP_ADDITIVE(
+         List.of(new ResourceLocation("generic.durability_wear_reduction_cap")),
+         Operation.ADDITION,
+         EntityAttributeModifier.ModifierType.Constants.DESCRIPTION_FORMATTER_ADDITIVE
       );
 
       private final List<ResourceLocation> attributeResourceLocations;

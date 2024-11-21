@@ -78,7 +78,7 @@ public class AugmentItem extends Item implements VaultLevelItem, DataTransferIte
       Optional.ofNullable(vault)
          .flatMap(v -> v.getOptional(Vault.WORLD))
          .map(world -> world.get(WorldManager.THEME))
-         .ifPresent(theme -> stack.getOrCreateTag().putString("theme", theme.toString()));
+         .ifPresent(theme -> stack.getOrCreateTag().putString("pool", theme.toString()));
    }
 
    @Override

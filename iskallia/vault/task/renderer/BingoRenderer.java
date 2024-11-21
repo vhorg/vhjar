@@ -45,7 +45,7 @@ public class BingoRenderer {
             context.push();
             if (context.isExpandedView()) {
                context.scale(0.9F, 0.9F, 0.9F);
-               addInProgressBackground(task, context);
+               this.addInProgressBackground(task, context);
             } else {
                context.scale(0.8F, 0.8F, 0.8F);
             }
@@ -56,12 +56,12 @@ public class BingoRenderer {
             context.scale(textScale, textScale, textScale);
             if (task instanceof IProgressTask progressTask) {
                TaskProgress progress = progressTask.getProgress();
-               MutableComponent current = new TextComponent(String.valueOf(progress.getCurrent()));
-               if (!task.isCompleted() && progress.getCurrent().longValue() > 0L) {
+               MutableComponent current = new TextComponent(String.valueOf(progress.getCurrent().intValue()));
+               if (!task.isCompleted() && progress.getProgress() > 0.0) {
                   current.withStyle(Style.EMPTY.withColor(65280).withBold(true));
                }
 
-               MutableComponent text = new TextComponent("").append(current).append("/" + progress.getTarget());
+               MutableComponent text = new TextComponent("").append(current).append("/" + progress.getTarget().intValue());
                context.renderText(
                   text, 8.5F / textScale, 18.0F / textScale, true, true, context.isCompleted() && !context.isExpandedView() ? '\uff00' : 16777215, false
                );
@@ -95,19 +95,25 @@ public class BingoRenderer {
          }
       }
 
-      private static void addInProgressBackground(Task task, BingoRendererContext context) {
-         if (!task.isCompleted() && task instanceof IProgressTask progressTask && progressTask.getProgress().getCurrent().longValue() > 0L) {
-            float percentage = (float)progressTask.getProgress().getCurrent().longValue() / (float)progressTask.getProgress().getTarget().longValue();
-            int noProgressColor = 13434828;
-            int doneColor = 65280;
-            int red = (noProgressColor >> 16 & 0xFF) + (int)(((doneColor >> 16 & 0xFF) - (noProgressColor >> 16 & 0xFF)) * percentage);
-            int green = (noProgressColor >> 8 & 0xFF) + (int)(((doneColor >> 8 & 0xFF) - (noProgressColor >> 8 & 0xFF)) * percentage);
-            int blue = (noProgressColor & 0xFF) + (int)(((doneColor & 0xFF) - (noProgressColor & 0xFF)) * percentage);
-            int color = red << 16 | green << 8 | blue;
-            float cellSize = 42.0F;
-            int padding = (int)(12.0F - percentage * 10.0F);
-            context.drawColoredRect(-cellSize / 2.0F + padding, -9.0F, cellSize - padding * 2 + 1.0F, cellSize - 19.0F, color | 1140850688);
+      private void addInProgressBackground(Task task, BingoRendererContext context) {
+         if (!task.isCompleted() && task instanceof IProgressTask progressTask) {
+            double percentage = progressTask.getProgress().getProgress();
+            if (percentage != 0.0) {
+               int color = this.getColor(percentage);
+               float cellSize = 42.0F;
+               int padding = (int)(12.0 - percentage * 10.0);
+               context.drawColoredRect(-cellSize / 2.0F + padding, -9.0F, cellSize - padding * 2 + 1.0F, cellSize - 19.0F, color | 1140850688);
+            }
          }
+      }
+
+      private int getColor(double percentage) {
+         int noProgressColor = 13434828;
+         int doneColor = 65280;
+         int red = (noProgressColor >> 16 & 0xFF) + (int)(((doneColor >> 16 & 0xFF) - (noProgressColor >> 16 & 0xFF)) * percentage);
+         int green = (noProgressColor >> 8 & 0xFF) + (int)(((doneColor >> 8 & 0xFF) - (noProgressColor >> 8 & 0xFF)) * percentage);
+         int blue = (noProgressColor & 0xFF) + (int)(((doneColor & 0xFF) - (noProgressColor & 0xFF)) * percentage);
+         return red << 16 | green << 8 | blue;
       }
 
       @Override

@@ -5,6 +5,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.predicate.IModifierImmunity;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.mana.FullManaPlayer;
@@ -37,15 +38,17 @@ public class CastOnKillModifier extends VaultModifier<CastOnKillModifier.Propert
             event -> {
                if (event.getSource().getEntity() instanceof ServerPlayer attacker && !attacker.getLevel().isClientSide()) {
                   if (attacker.level == world) {
-                     if (this.properties.filter.test(event.getEntity())) {
-                        if (!(attacker.getLevel().getRandom().nextFloat() >= this.properties.probability)) {
-                           AbilityTree tree = PlayerAbilitiesData.get((ServerLevel)attacker.level).getAbilities(attacker);
-                           this.resolve(tree)
-                              .ifPresent(
-                                 ability -> ability.onAction(
-                                    SkillContext.of(attacker, SkillSource.of(attacker).setPos(event.getEntity().position()).setMana(FullManaPlayer.INSTANCE))
-                                 )
-                              );
+                     if (!IModifierImmunity.of(event.getEntity()).test(this)) {
+                        if (this.properties.filter.test(event.getEntity())) {
+                           if (!(attacker.getLevel().getRandom().nextFloat() >= this.properties.probability)) {
+                              AbilityTree tree = PlayerAbilitiesData.get((ServerLevel)attacker.level).getAbilities(attacker);
+                              this.resolve(tree)
+                                 .ifPresent(
+                                    ability -> ability.onAction(
+                                       SkillContext.of(attacker, SkillSource.of(attacker).setPos(event.getEntity().position()).setMana(FullManaPlayer.INSTANCE))
+                                    )
+                                 );
+                           }
                         }
                      }
                   }

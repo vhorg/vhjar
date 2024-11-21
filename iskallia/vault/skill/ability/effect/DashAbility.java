@@ -4,10 +4,6 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.easteregg.GrasshopperNinja;
-import iskallia.vault.gear.attribute.ability.special.DashVelocityModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
@@ -38,47 +34,30 @@ public class DashAbility extends InstantManaAbility {
    }
 
    @Override
-   public String getAbilityGroupName() {
-      return "Dash";
-   }
-
-   @Override
    protected Ability.ActionResult doAction(SkillContext context) {
-      return context.getSource()
-         .as(Player.class)
-         .map(
-            player -> {
-               Vec3 lookVector = player.getLookAngle();
-               float magnitude = (10 + this.extraDistance) * 0.15F;
-               double extraPitch = 10.0;
+      return context.getSource().as(Player.class).map(player -> {
+         Vec3 lookVector = player.getLookAngle();
+         float magnitude = (10 + this.extraDistance) * 0.15F;
+         double extraPitch = 10.0;
+         Vec3 dashVector = new Vec3(lookVector.x(), lookVector.y(), lookVector.z());
+         float initialYaw = (float)MathUtilities.extractYaw(dashVector);
+         dashVector = MathUtilities.rotateYaw(dashVector, initialYaw);
+         double dashPitch = Math.toDegrees(MathUtilities.extractPitch(dashVector));
+         if (dashPitch + extraPitch > 90.0) {
+            dashVector = new Vec3(0.0, 1.0, 0.0);
+            dashPitch = 90.0;
+         } else {
+            dashVector = MathUtilities.rotateRoll(dashVector, (float)Math.toRadians(-extraPitch));
+            dashVector = MathUtilities.rotateYaw(dashVector, -initialYaw);
+            dashVector = dashVector.normalize();
+         }
 
-               for (ConfiguredModification<FloatValueConfig, DashVelocityModification> mod : SpecialAbilityModification.getModifications(
-                  player, DashVelocityModification.class
-               )) {
-                  magnitude = mod.modification().adjustVelocity(mod.config(), magnitude);
-               }
-
-               Vec3 dashVector = new Vec3(lookVector.x(), lookVector.y(), lookVector.z());
-               float initialYaw = (float)MathUtilities.extractYaw(dashVector);
-               dashVector = MathUtilities.rotateYaw(dashVector, initialYaw);
-               double dashPitch = Math.toDegrees(MathUtilities.extractPitch(dashVector));
-               if (dashPitch + extraPitch > 90.0) {
-                  dashVector = new Vec3(0.0, 1.0, 0.0);
-                  dashPitch = 90.0;
-               } else {
-                  dashVector = MathUtilities.rotateRoll(dashVector, (float)Math.toRadians(-extraPitch));
-                  dashVector = MathUtilities.rotateYaw(dashVector, -initialYaw);
-                  dashVector = dashVector.normalize();
-               }
-
-               double coeff = 1.6 - MathUtilities.map(Math.abs(dashPitch), 0.0, 90.0, 0.6, 1.0);
-               dashVector = dashVector.scale(magnitude * coeff);
-               player.push(dashVector.x(), dashVector.y(), dashVector.z());
-               player.hurtMarked = true;
-               return Ability.ActionResult.successCooldownImmediate();
-            }
-         )
-         .orElse(Ability.ActionResult.fail());
+         double coeff = 1.6 - MathUtilities.map(Math.abs(dashPitch), 0.0, 90.0, 0.6, 1.0);
+         dashVector = dashVector.scale(magnitude * coeff);
+         player.push(dashVector.x(), dashVector.y(), dashVector.z());
+         player.hurtMarked = true;
+         return Ability.ActionResult.successCooldownImmediate();
+      }).orElse(Ability.ActionResult.fail());
    }
 
    @Override

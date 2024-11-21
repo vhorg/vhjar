@@ -3,10 +3,6 @@ package iskallia.vault.skill.ability.effect.spi;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.NovaRadiusModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
@@ -51,27 +47,14 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    protected AbstractNovaAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Nova";
-   }
-
    public float getUnmodifiedRadius() {
       return this.radius;
    }
 
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
-      if (attacker instanceof Player player) {
-         for (ConfiguredModification<FloatValueConfig, NovaRadiusModification> mod : SpecialAbilityModification.getModifications(
-            player, NovaRadiusModification.class
-         )) {
-            realRadius = mod.modification().adjustRadius(mod.config(), realRadius);
-         }
-      }
-
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;

@@ -75,7 +75,7 @@ public class TauntRepelAbility extends AbstractTauntAbility {
          .map(
             player -> {
                player.removeEffect(ModEffects.TAUNT_REPEL_PLAYER);
-               player.addEffect(new MobEffectInstance(ModEffects.TAUNT_REPEL_PLAYER, this.durationTicks, 0, false, false, true));
+               player.addEffect(new MobEffectInstance(ModEffects.TAUNT_REPEL_PLAYER, this.getDurationTicks(player), 0, false, false, true));
                float radius = this.getRadius(player);
 
                for (Mob mob : player.level
@@ -85,7 +85,7 @@ public class TauntRepelAbility extends AbstractTauntAbility {
                   if (player.hasLineOfSight(mob)) {
                      mob.setTarget(null);
                      mob.removeEffect(ModEffects.TAUNT_REPEL_MOB);
-                     mob.addEffect(new MobEffectInstance(ModEffects.TAUNT_REPEL_MOB, this.durationTicks, 0, false, true, false));
+                     mob.addEffect(new MobEffectInstance(ModEffects.TAUNT_REPEL_MOB, this.getDurationTicks(player), 0, false, true, false));
                      Vec3 force = mob.position().subtract(player.position()).normalize().scale(this.repelForce);
                      mob.push(force.x, force.y, force.z);
                      mob.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);

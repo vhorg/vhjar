@@ -12,6 +12,7 @@ import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.talent.type.JavelinFrugalTalent;
 import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -20,7 +21,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 
 public class JavelinSightAbility extends AbstractJavelinAbility {
@@ -53,14 +53,19 @@ public class JavelinSightAbility extends AbstractJavelinAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
    }
 
-   public int getEffectDuration() {
+   public int getEffectDurationUnmodified() {
       return this.effectDuration;
+   }
+
+   public int getEffectDuration(LivingEntity entity) {
+      int duration = this.getEffectDurationUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    @Override
@@ -69,7 +74,7 @@ public class JavelinSightAbility extends AbstractJavelinAbility {
          VaultThrownJavelin thrownJavelin = new VaultThrownJavelin(player.level, player);
          thrownJavelin.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, this.getThrowPower(player), 1.0F);
          thrownJavelin.pickup = Pickup.DISALLOWED;
-         thrownJavelin.setType("sight");
+         thrownJavelin.setType(VaultThrownJavelin.JavelinType.SIGHT);
          TalentTree talents = PlayerTalentsData.get(player.getLevel()).getTalents(player);
 
          for (JavelinFrugalTalent talent : talents.getAll(JavelinFrugalTalent.class, Skill::isUnlocked)) {
@@ -80,7 +85,7 @@ public class JavelinSightAbility extends AbstractJavelinAbility {
          }
 
          player.level.addFreshEntity(thrownJavelin);
-         player.level.playSound((Player)null, thrownJavelin, SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 1.0F, 1.0F);
+         player.level.playSound(null, thrownJavelin, SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 1.0F, 1.0F);
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
    }

@@ -9,7 +9,9 @@ import iskallia.vault.network.message.PlayerSnapshotMessage;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.world.data.EternalsData;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
@@ -27,6 +29,7 @@ import org.apache.commons.lang3.ObjectUtils;
 public class AttributeSnapshotHelper {
    private static final AttributeSnapshotHelper instance = new AttributeSnapshotHelper();
    private final Map<UUID, AttributeSnapshot> playerSnapshots = new HashMap<>();
+   private final Set<UUID> scheduledSnapshotRefreshes = new HashSet<>();
    private AttributeSnapshot clientPlayerSnapshot = null;
 
    private AttributeSnapshotHelper() {
@@ -74,7 +77,13 @@ public class AttributeSnapshotHelper {
    }
 
    public void refreshSnapshotDelayed(ServerPlayer player) {
-      ServerScheduler.INSTANCE.schedule(1, () -> this.refreshSnapshot(player));
+      if (this.scheduledSnapshotRefreshes.add(player.getUUID())) {
+         ServerScheduler.INSTANCE.schedule(1, () -> {
+            if (this.scheduledSnapshotRefreshes.remove(player.getUUID())) {
+               this.refreshSnapshot(player);
+            }
+         });
+      }
    }
 
    public void refreshSnapshot(ServerPlayer player) {

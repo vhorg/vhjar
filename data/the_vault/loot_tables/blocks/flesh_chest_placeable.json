@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "the_vault:flesh_chest_placeable"
+          "name": "the_vault:flesh_chest"
         }
       ],
       "conditions": [

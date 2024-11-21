@@ -1,5 +1,6 @@
 package iskallia.vault.command;
 
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -117,7 +118,20 @@ public class GiveLootCommand extends Command {
                Commands.argument("crateType", EnumArgument.enumArgument(VaultCrateBlock.Type.class))
                   .then(
                      ((RequiredArgumentBuilder)Commands.argument("level", IntegerArgumentType.integer(0))
-                           .then(Commands.argument("player", EntityArgument.player()).executes(this::giveCrate)))
+                           .then(
+                              ((RequiredArgumentBuilder)Commands.argument("itemQuantity", FloatArgumentType.floatArg(0.0F))
+                                    .then(Commands.argument("player", EntityArgument.player()).executes(ctx -> {
+                                       ServerPlayer player;
+                                       try {
+                                          player = EntityArgument.getPlayer(ctx, "player");
+                                       } catch (CommandSyntaxException | IllegalArgumentException var4) {
+                                          player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+                                       }
+
+                                       return this.giveCrate(ctx, FloatArgumentType.getFloat(ctx, "itemQuantity"), player);
+                                    })))
+                                 .executes(ctx -> this.giveCrate(ctx, FloatArgumentType.getFloat(ctx, "itemQuantity")))
+                           ))
                         .executes(this::giveCrate)
                   )
             )
@@ -125,37 +139,37 @@ public class GiveLootCommand extends Command {
    }
 
    private int giveCrate(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      return this.giveCrate(ctx, 0.0F);
+   }
+
+   private int giveCrate(CommandContext<CommandSourceStack> ctx, float itemQuantity) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      return this.giveCrate(ctx, itemQuantity, player);
+   }
+
+   private int giveCrate(CommandContext<CommandSourceStack> ctx, float itemQuantity, ServerPlayer player) throws CommandSyntaxException {
       VaultCrateBlock.Type type = (VaultCrateBlock.Type)ctx.getArgument("crateType", VaultCrateBlock.Type.class);
       ItemStack crate = ItemStack.EMPTY;
-
-      ServerPlayer player;
-      try {
-         player = EntityArgument.getPlayer(ctx, "player");
-      } catch (CommandSyntaxException var8) {
-         player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
-      }
-
       int level = IntegerArgumentType.getInteger(ctx, "level");
-      switch (type) {
-         case BOUNTY:
-            crate = ModConfigs.REWARD_CONFIG.generateReward(level, "common").createRewardCrate();
-            break;
-         case CAKE:
-         case MONOLITH:
-         case SCAVENGER:
-         case BOSS:
-            AwardCrateObjective objective = AwardCrateObjective.ofConfig(type, type.toString().toLowerCase(), level, true);
-            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
-               objective.get(AwardCrateObjective.LOOT_TABLE),
-               0.0F,
-               ItemStackList.create(),
-               objective.has(AwardCrateObjective.ADD_ARTIFACT),
-               objective.get(AwardCrateObjective.ARTIFACT_CHANCE)
-            );
-            crate = VaultCrateBlock.getCrateWithLoot(type, crateLootGenerator.createLootForCommand(JavaRandom.ofInternal(new Random().nextLong()), level));
-      }
 
-      ItemHandlerHelper.giveItemToPlayer(player, crate);
+      ItemHandlerHelper.giveItemToPlayer(
+         player,
+         switch (type) {
+            case BOUNTY -> ModConfigs.REWARD_CONFIG.generateReward(level, "common").createRewardCrate();
+            default -> {
+               AwardCrateObjective objective = AwardCrateObjective.ofConfig(type, type.toString().toLowerCase(), level, true);
+               CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
+                  objective.get(AwardCrateObjective.LOOT_TABLE),
+                  itemQuantity,
+                  ItemStackList.create(),
+                  objective.has(AwardCrateObjective.ADD_ARTIFACT),
+                  objective.get(AwardCrateObjective.ARTIFACT_CHANCE)
+               );
+               NonNullList<ItemStack> loot = crateLootGenerator.createLootForCommand(JavaRandom.ofInternal(new Random().nextLong()), level);
+               yield VaultCrateBlock.getCrateWithLoot(type, loot);
+            }
+         }
+      );
       return 0;
    }
 

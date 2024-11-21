@@ -30,7 +30,8 @@ public class EvokerFangsGoal extends Goal implements ITrait {
    private float inaccuracy = 1.3F;
    private int radius = 3;
    private int fangCount = 5;
-   private float meleeDamageMultiplier = 0.7F;
+   private float damageMultiplier = 0.7F;
+   private int stackSize = 1;
 
    public EvokerFangsGoal(VaultBossBaseEntity boss) {
       this.boss = boss;
@@ -42,7 +43,7 @@ public class EvokerFangsGoal extends Goal implements ITrait {
       this.inaccuracy = inaccuracy;
       this.radius = radius;
       this.fangCount = fangCount;
-      this.meleeDamageMultiplier = meleeDamageMultiplier;
+      this.damageMultiplier = meleeDamageMultiplier;
       return this;
    }
 
@@ -59,9 +60,9 @@ public class EvokerFangsGoal extends Goal implements ITrait {
    @Override
    public void addStack(ITrait trait) {
       if (trait instanceof EvokerFangsGoal evokerFangsGoal) {
-         int stackSize = evokerFangsGoal.minAttackInterval / this.minAttackInterval;
-         this.minAttackInterval = evokerFangsGoal.minAttackInterval * ++stackSize;
-         this.maxAttackInterval = evokerFangsGoal.maxAttackInterval * stackSize;
+         this.stackSize++;
+         this.minAttackInterval = evokerFangsGoal.minAttackInterval * this.stackSize;
+         this.maxAttackInterval = evokerFangsGoal.maxAttackInterval * this.stackSize;
       }
    }
 
@@ -73,18 +74,20 @@ public class EvokerFangsGoal extends Goal implements ITrait {
       nbt.putFloat("Inaccuracy", this.inaccuracy);
       nbt.putInt("Radius", this.radius);
       nbt.putInt("FangCount", this.fangCount);
-      nbt.putFloat("MeleeDamageMultiplier", this.meleeDamageMultiplier);
+      nbt.putFloat("DamageMultiplier", this.damageMultiplier);
+      nbt.putInt("StackSize", this.stackSize);
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.minAttackInterval = nbt.getInt("MinAttackInterval");
       this.maxAttackInterval = nbt.getInt("MaxAttackInterval");
       this.inaccuracy = nbt.getFloat("Inaccuracy");
       this.radius = nbt.getInt("Radius");
       this.fangCount = nbt.getInt("FangCount");
-      this.meleeDamageMultiplier = nbt.getFloat("MeleeDamageMultiplier");
+      this.damageMultiplier = nbt.getFloat("DamageMultiplier");
+      this.stackSize = nbt.getInt("StackSize");
    }
 
    public void start() {
@@ -113,9 +116,7 @@ public class EvokerFangsGoal extends Goal implements ITrait {
                   this.boss
                      .level
                      .addFreshEntity(
-                        new EvokerFangsGoal.BossFangs(
-                           this.boss.level, x, y, z, this.boss.getAttributeValue(Attributes.ATTACK_DAMAGE) * this.meleeDamageMultiplier
-                        )
+                        new EvokerFangsGoal.BossFangs(this.boss.level, x, y, z, this.boss.getAttributeValue(Attributes.ATTACK_DAMAGE) * this.damageMultiplier)
                      );
                }
             );

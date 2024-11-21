@@ -238,7 +238,7 @@ public class ModModelDiscoveryGoals {
       VaultMod.id("slowed_mobs_killed"),
       new VaultMobKillGoal(500)
          .withPredicate(e -> e.getEntityLiving() instanceof Mob)
-         .withPredicate(e -> e.getEntityLiving().hasEffect(MobEffects.MOVEMENT_SLOWDOWN))
+         .withPredicate(e -> e.getEntityLiving().hasEffect(MobEffects.MOVEMENT_SLOWDOWN) || e.getEntityLiving().hasEffect(ModEffects.CHILLED))
          .setReward(
             (player, goal) -> {
                DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());

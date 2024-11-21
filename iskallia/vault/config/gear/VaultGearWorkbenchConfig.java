@@ -139,7 +139,7 @@ public class VaultGearWorkbenchConfig extends Config {
    }
 
    @Override
-   protected void onLoad(Config oldConfigInstance) {
+   protected void onLoad(@Nullable Config oldConfigInstance) {
       super.onLoad(oldConfigInstance);
       if (oldConfigInstance instanceof VaultGearWorkbenchConfig cfg) {
          this.gearItem = cfg.gearItem;

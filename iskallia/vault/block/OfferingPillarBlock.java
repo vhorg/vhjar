@@ -28,7 +28,6 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 
 public class OfferingPillarBlock extends Block implements EntityBlock {
    private static VoxelShape SHAPE = Stream.of(
@@ -49,14 +48,10 @@ public class OfferingPillarBlock extends Block implements EntityBlock {
       this.registerDefaultState((BlockState)this.stateDefinition.any());
    }
 
-   @Nullable
    public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level level, BlockState state, BlockEntityType<A> blockEntityType) {
-      return level.isClientSide()
-         ? BlockHelper.getTicker(blockEntityType, ModBlocks.OFFERING_PILLAR_TILE_ENTITY, OfferingPillarTileEntity::tickClient)
-         : BlockHelper.getTicker(blockEntityType, ModBlocks.OFFERING_PILLAR_TILE_ENTITY, OfferingPillarTileEntity::tickServer);
+      return BlockHelper.getTicker(blockEntityType, ModBlocks.OFFERING_PILLAR_TILE_ENTITY, OfferingPillarTileEntity::tick);
    }
 
-   @Nullable
    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
       return ModBlocks.OFFERING_PILLAR_TILE_ENTITY.create(pPos, pState);
    }

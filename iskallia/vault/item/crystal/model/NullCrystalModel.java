@@ -26,8 +26,7 @@ public class NullCrystalModel extends CrystalModel {
       int light,
       int overlay
    ) {
-      this.resolve(crystal, (float)ClientScheduler.INSTANCE.getTickCount())
-         .renderItem(renderer, crystal, stack, transformType, matrices, buffer, light, overlay);
+      this.resolve(crystal, (float)ClientScheduler.INSTANCE.getTick()).renderItem(renderer, crystal, stack, transformType, matrices, buffer, light, overlay);
    }
 
    @Override

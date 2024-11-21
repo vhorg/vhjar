@@ -74,7 +74,8 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
       this.getPlayer()
          .ifPresent(
             player -> {
-               if (vault.get(Vault.CLOCK).has(TickClock.PAUSED)) {
+               TickClock tickClock = vault.get(Vault.CLOCK);
+               if (tickClock.has(TickClock.PAUSED) && tickClock.has(TickClock.VISIBLE)) {
                   vault.ifPresent(
                      Vault.WORLD,
                      manager -> {

@@ -23,11 +23,6 @@ public abstract class AbstractIceBoltAbility extends InstantManaAbility {
    }
 
    @Override
-   public String getAbilityGroupName() {
-      return "Ice_Bolt";
-   }
-
-   @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.throwPower), buffer);

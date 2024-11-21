@@ -45,15 +45,17 @@ public class AnvilRecipesJEI {
       data.write(itemStack);
       ResourceLocation modelKey = item.getRandomModel(itemStack, random);
       if (modelKey != null) {
-         data.updateAttribute(ModGearAttributes.GEAR_MODEL, modelKey);
+         data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, modelKey);
       }
 
       data.write(itemStack);
       data.setState(VaultGearState.IDENTIFIED);
       data.write(itemStack);
-      VaultGearModifierHelper.reRollRepairSlots(itemStack, random);
-      VaultGearCraftingHelper.reRollCraftingPotential(itemStack);
+      VaultGearModifierHelper.generateRepairSlots(itemStack, random);
+      VaultGearCraftingHelper.generateCraftingPotential(itemStack);
+      VaultGearCraftingHelper.refreshCraftingPotential(itemStack);
       VaultGearModifierHelper.generateAffixSlots(itemStack, random);
+      VaultGearModifierHelper.generateBaseAttributes(itemStack, random);
       VaultGearModifierHelper.generateImplicits(itemStack, random);
       VaultGearModifierHelper.generateModifiers(itemStack, random);
       returnList.add(itemStack);

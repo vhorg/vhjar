@@ -31,8 +31,8 @@ public class ConvertedSparkRenderer implements BlockEntityRenderer<ConvertedSpar
    ) {
       Level world = tile.getLevel();
       if (world != null) {
-         float t = 1.0F - (float)(ClientScheduler.INSTANCE.getTickCount() % 2400L) / 2400.0F;
-         float t2 = 1.0F - (float)((ClientScheduler.INSTANCE.getTickCount() + 1L) % 2400L) / 2400.0F;
+         float t = 1.0F - (float)(ClientScheduler.INSTANCE.getTick() % 2400L) / 2400.0F;
+         float t2 = 1.0F - (float)((ClientScheduler.INSTANCE.getTick() + 1L) % 2400L) / 2400.0F;
          float t3 = Mth.lerp(partialTicks, t, t2);
          matrixStack.pushPose();
          matrixStack.translate(0.5, 0.5, 0.5);

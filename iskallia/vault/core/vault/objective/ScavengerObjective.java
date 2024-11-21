@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.block.DivineAltarBlock;
 import iskallia.vault.block.PlaceholderBlock;
+import iskallia.vault.block.entity.ScavengerAltarTileEntity;
 import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
@@ -103,8 +104,11 @@ public class ScavengerObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.OBJECTIVE_PIECE_GENERATION
-         .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
+      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> {
+         if (data.getVault() == vault) {
+            this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue()));
+         }
+      });
       CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).in(world).register(this, data -> {
          PartialTile target = PartialTile.of(PartialBlockState.of(ModBlocks.PLACEHOLDER), PartialCompoundNbt.empty());
          target.getState().set(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
@@ -113,31 +117,33 @@ public class ScavengerObjective extends Objective {
          }
       });
       CommonEvents.SCAVENGER_ALTAR_CONSUME.register(this, data -> {
-         if (data.getLevel() == world && data.getTile().getItemPlacedBy() != null) {
-            Listener listener = vault.get(Vault.LISTENERS).get(data.getTile().getItemPlacedBy());
-            if (listener instanceof Runner) {
-               BlockState state = data.getTile().getBlockState();
-               if (state.getBlock() == ModBlocks.DIVINE_ALTAR) {
-                  if (data.getTile().getHeldItem().getItem() instanceof KeystoneItem keystone) {
-                     if (keystone.getGod() != state.getValue(DivineAltarBlock.GOD)) {
-                        return;
-                     }
-                  } else {
-                     if (!(data.getTile().getHeldItem().getItem() instanceof GodBlessingItem)) {
-                        return;
-                     }
+         if (data.getTile() instanceof ScavengerAltarTileEntity entity) {
+            if (data.getLevel() == world && entity.getItemPlacedBy() != null) {
+               Listener listener = vault.get(Vault.LISTENERS).get(entity.getItemPlacedBy());
+               if (listener instanceof Runner) {
+                  BlockState state = data.getTile().getBlockState();
+                  if (state.getBlock() == ModBlocks.DIVINE_ALTAR) {
+                     if (entity.getHeldItem().getItem() instanceof KeystoneItem keystone) {
+                        if (keystone.getGod() != state.getValue(DivineAltarBlock.GOD)) {
+                           return;
+                        }
+                     } else {
+                        if (!(entity.getHeldItem().getItem() instanceof GodBlessingItem)) {
+                           return;
+                        }
 
-                     if (GodBlessingItem.getGod(data.getTile().getHeldItem()) != state.getValue(DivineAltarBlock.GOD)) {
-                        return;
+                        if (GodBlessingItem.getGod(entity.getHeldItem()) != state.getValue(DivineAltarBlock.GOD)) {
+                           return;
+                        }
                      }
                   }
-               }
 
-               boolean creative = listener.getPlayer().<Boolean>map(ServerPlayer::isCreative).orElse(false);
-               CompoundTag nbt = data.getTile().getHeldItem().getTag();
-               if (creative || nbt != null && nbt.getString("VaultId").equals(vault.get(Vault.ID).toString())) {
-                  for (ScavengerGoal goal : this.get(GOALS).get(listener.get(Listener.ID))) {
-                     goal.consume(data.getTile().getHeldItem());
+                  boolean creative = listener.getPlayer().<Boolean>map(ServerPlayer::isCreative).orElse(false);
+                  CompoundTag nbt = entity.getHeldItem().getTag();
+                  if (creative || nbt != null && nbt.getString("VaultId").equals(vault.get(Vault.ID).toString())) {
+                     for (ScavengerGoal goal : this.get(GOALS).get(listener.get(Listener.ID))) {
+                        goal.consume(entity.getHeldItem());
+                     }
                   }
                }
             }
@@ -238,7 +244,7 @@ public class ScavengerObjective extends Objective {
    private static int renderItemRequirement(PoseStack matrixStack, ScavengerGoal goal, int itemBoxWidth, int totalX, int totalY, float partialTicks) {
       List<ScavengerGoal.Entry> entries = new ArrayList<>();
       goal.getEntries().forEachRemaining(entries::add);
-      float time = (float)ClientScheduler.INSTANCE.getTickCount() + partialTicks;
+      float time = (float)ClientScheduler.INSTANCE.getTick() + partialTicks;
       ScavengerGoal.Entry entry = entries.get((int)(time / 20.0F) % entries.size());
       ItemStack requiredStack = entry.getStack();
       ResourceLocation iconPath = entry.getIcon();
@@ -295,7 +301,7 @@ public class ScavengerObjective extends Objective {
          filteredGoals.forEach(goal -> {
             List<ScavengerGoal.Entry> entries = new ArrayList<>();
             goal.getEntries().forEachRemaining(entries::add);
-            float time = (float)ClientScheduler.INSTANCE.getTickCount();
+            float time = (float)ClientScheduler.INSTANCE.getTick();
             ScavengerGoal.Entry entry = entries.get((int)(time / 20.0F) % entries.size());
             scavItems.add(entry.getStack(goal.get(ScavengerGoal.TOTAL) - goal.get(ScavengerGoal.CURRENT)));
          });

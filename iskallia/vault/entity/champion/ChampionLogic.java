@@ -8,10 +8,8 @@ import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.network.message.ClientboundChampionMessage;
+import iskallia.vault.util.LootInitialization;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +40,7 @@ public class ChampionLogic {
    private static final String AFFIXES_TAG = "affixes";
    private final List<IChampionAffix> affixes = new ArrayList<>();
    public static final String CHAMPION_TAG = "vault_champion";
+   public static final String NO_DROPS = "no_drops";
    public static final String CHAMPION_TEMPLATE_TAG = "ENTITY_CHAMPION";
    private boolean pacified = false;
 
@@ -51,6 +50,10 @@ public class ChampionLogic {
 
    public static boolean isChampion(LivingEntity entity) {
       return entity.getTags().contains("vault_champion");
+   }
+
+   private static boolean shouldDropLoot(LivingEntity entity) {
+      return !entity.getTags().contains("no_drops");
    }
 
    public boolean isPacified() {
@@ -84,7 +87,7 @@ public class ChampionLogic {
 
    @SubscribeEvent
    public static void onEntityDrops(LivingDropsEvent event) {
-      if (isChampion(event.getEntityLiving()) && event.getSource().getEntity() instanceof ServerPlayer player) {
+      if (isChampion(event.getEntityLiving()) && shouldDropLoot(event.getEntityLiving()) && event.getSource().getEntity() instanceof ServerPlayer player) {
          ServerVaults.get(player.getLevel()).ifPresent(vault -> {
             int level = vault.get(Vault.LEVEL).get();
             LegacyLootTablesConfig.Level levelLootTables = ModConfigs.LOOT_TABLES.getForLevel(level);
@@ -94,9 +97,7 @@ public class ChampionLogic {
                generator.generate(JavaRandom.ofNanoTime());
                LivingEntity champion = event.getEntityLiving();
                generator.getItems().forEachRemaining(item -> {
-                  VaultLevelItem.doInitializeVaultLoot(item, vault, event.getEntityLiving().blockPosition());
-                  item = DataTransferItem.doConvertStack(item);
-                  DataInitializationItem.doInitialize(item);
+                  item = LootInitialization.initializeVaultLoot(item, vault, event.getEntityLiving().blockPosition());
                   event.getDrops().add(new ItemEntity(champion.level, champion.getX(), champion.getY(), champion.getZ(), item));
                });
             }

@@ -10,7 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 
 public abstract class DecimalModifierReader<T extends Number> extends VaultGearModifierReader<T> {
-   private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
+   protected static final DecimalFormat FORMAT = new DecimalFormat("0.##");
 
    public DecimalModifierReader(String modifierName, int rgbColor) {
       super(modifierName, rgbColor);
@@ -47,7 +47,7 @@ public abstract class DecimalModifierReader<T extends Number> extends VaultGearM
 
       @Nullable
       public MutableComponent getValueDisplay(T value) {
-         return new TextComponent(DecimalModifierReader.FORMAT.format(value));
+         return new TextComponent(FORMAT.format(value));
       }
    }
 
@@ -58,7 +58,7 @@ public abstract class DecimalModifierReader<T extends Number> extends VaultGearM
 
       @Nullable
       public MutableComponent getValueDisplay(T value) {
-         return new TextComponent(DecimalModifierReader.FORMAT.format(value.doubleValue() * 100.0) + "%");
+         return new TextComponent(FORMAT.format(value.doubleValue() * 100.0) + "%");
       }
    }
 

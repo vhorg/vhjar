@@ -5,6 +5,8 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.EffectMessage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,8 +27,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.network.NetworkDirection;
 
 public abstract class BlockBreakHandler {
    private static final List<BlockBreakHandler.IItemDamageHandler> DAMAGE_HANDLER_LIST = new ArrayList<BlockBreakHandler.IItemDamageHandler>() {};
@@ -115,7 +119,7 @@ public abstract class BlockBreakHandler {
       BlockBreakHandler.IItemDamageHandler damageHandler,
       BlockPos pos,
       boolean shouldVoid,
-      boolean triggerLevelEvent
+      boolean playBreakParticles
    ) {
       GameType gameModeForPlayer = player.gameMode.getGameModeForPlayer();
       BlockState blockstate = level.getBlockState(pos);
@@ -151,8 +155,10 @@ public abstract class BlockBreakHandler {
                   block.popExperience(level, pos, experience);
                }
 
-               if (triggerLevelEvent) {
-                  level.levelEvent(2001, pos, Block.getId(blockstate));
+               if (playBreakParticles) {
+                  EffectMessage msg = new EffectMessage(EffectMessage.Type.BLOCK_BREAK_EFFECT, Vec3.atLowerCornerOf(pos));
+                  msg.addData(buf -> buf.writeInt(Block.getId(blockstate)));
+                  ModNetwork.CHANNEL.sendTo(msg, player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
                }
             }
          }

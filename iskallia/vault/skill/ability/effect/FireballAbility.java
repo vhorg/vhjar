@@ -30,7 +30,7 @@ public class FireballAbility extends AbstractFireballAbility {
          VaultFireball fireball = new VaultFireball(player.level, player);
          fireball.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.0F, 0.0F);
          fireball.pickup = Pickup.DISALLOWED;
-         fireball.setType("base");
+         fireball.setType(VaultFireball.FireballType.BASE);
          player.level.addFreshEntity(fireball);
          player.level.playSound((Player)null, player, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
          return Ability.ActionResult.successCooldownImmediate();

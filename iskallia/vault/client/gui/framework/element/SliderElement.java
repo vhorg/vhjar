@@ -18,26 +18,21 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 public class SliderElement extends AbstractSpatialElement<SliderElement> implements IRenderedElement, IGuiEventElement {
+   protected boolean visible = true;
    protected Supplier<Component> message;
    protected LabelTextStyle textStyle;
    protected Supplier<Float> value;
-   protected float min;
-   protected float max;
    protected boolean clickHeld;
    protected Consumer<Float> onValueChanged;
 
    public SliderElement(ISpatial spatial, Supplier<Component> message, Supplier<Float> value, Consumer<Float> onValueChanged) {
-      this(spatial, message, LabelTextStyle.shadow().center(), 0.0F, 1.0F, value, onValueChanged);
+      this(spatial, message, LabelTextStyle.shadow().center(), value, onValueChanged);
    }
 
-   public SliderElement(
-      ISpatial spatial, Supplier<Component> message, LabelTextStyle.Builder style, float min, float max, Supplier<Float> value, Consumer<Float> onValueChanged
-   ) {
+   public SliderElement(ISpatial spatial, Supplier<Component> message, LabelTextStyle.Builder style, Supplier<Float> value, Consumer<Float> onValueChanged) {
       super(spatial);
       this.message = message;
       this.textStyle = style.build();
-      this.min = min;
-      this.max = max;
       this.value = value;
       this.onValueChanged = onValueChanged;
    }
@@ -93,11 +88,12 @@ public class SliderElement extends AbstractSpatialElement<SliderElement> impleme
 
    @Override
    public void setVisible(boolean visible) {
+      this.visible = visible;
    }
 
    @Override
    public boolean isVisible() {
-      return true;
+      return this.visible;
    }
 
    public Component getComponent() {

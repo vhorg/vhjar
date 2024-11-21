@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "###",
+      "#a#",
+      "###"
+    ],
+    "key": {
+      "#": {
+        "item": "the_vault:driftwood_planks"
+      },
+      "a": {
+          "item": "the_vault:gilded_chest_scroll"
+      }
+    },
+    "result": {
+      "item": "the_vault:gilded_chest",
+      "count": 1
+    }
+  }

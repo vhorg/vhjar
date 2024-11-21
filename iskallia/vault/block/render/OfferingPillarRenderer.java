@@ -6,7 +6,6 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import iskallia.vault.block.entity.OfferingPillarTileEntity;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.util.StringUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,6 +20,10 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Con
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -64,8 +67,11 @@ public class OfferingPillarRenderer implements BlockEntityRenderer<OfferingPilla
       int i = 0;
 
       for (Entry<String, Integer> modifier : modifiers.entrySet()) {
-         String modifierName = StringUtils.convertToTitleCase(modifier.getKey());
-         String text = modifier.getValue() > 1 ? modifier.getValue() + "x " + modifierName : modifierName;
+         Component text = getModifierName(modifier.getKey());
+         if (modifier.getValue() > 1) {
+            text = new TextComponent(modifier.getValue() + "x ").append(text);
+         }
+
          this.renderText(poseStack, buffer, combinedLight, text, 0.0F, 3.0F + i * 0.2F, 0.0F, 16777215);
          i++;
       }
@@ -73,7 +79,11 @@ public class OfferingPillarRenderer implements BlockEntityRenderer<OfferingPilla
       poseStack.popPose();
    }
 
-   private void renderText(PoseStack poseStack, MultiBufferSource buffer, int lightLevel, String text, float x, float y, float z, int color) {
+   public static MutableComponent getModifierName(String modifierId) {
+      return new TranslatableComponent("the_vault.offering_effect." + modifierId);
+   }
+
+   private void renderText(PoseStack poseStack, MultiBufferSource buffer, int lightLevel, Component text, float x, float y, float z, int color) {
       poseStack.pushPose();
       float scale = 0.02F;
       Font fontRenderer = mc.font;
@@ -90,7 +100,7 @@ public class OfferingPillarRenderer implements BlockEntityRenderer<OfferingPilla
    private void renderLootItems(
       OfferingPillarTileEntity tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay
    ) {
-      List<ItemStack> items = tile.getItems();
+      List<ItemStack> items = tile.getLoot();
       matrixStack.pushPose();
       matrixStack.translate(0.5, 1.5, 0.5);
       matrixStack.scale(0.5F, 0.5F, 0.5F);
@@ -109,8 +119,8 @@ public class OfferingPillarRenderer implements BlockEntityRenderer<OfferingPilla
    private void renderOfferings(
       OfferingPillarTileEntity tile, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay
    ) {
-      int required = tile.getNumberOfOfferingsRequired();
-      int provided = tile.getNumberOfOfferingsProvided();
+      int required = tile.getOfferingTarget();
+      int provided = tile.getOfferingCount();
       poseStack.pushPose();
       poseStack.translate(0.5, 1.0, 0.5);
       poseStack.scale(1.0F, 1.0F, 1.0F);
@@ -154,17 +164,19 @@ public class OfferingPillarRenderer implements BlockEntityRenderer<OfferingPilla
    private void renderBoss(
       OfferingPillarTileEntity tile, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay
    ) {
-      ResourceLocation bossId = tile.getBossId();
-      EntityType<?> bossType = (EntityType<?>)ForgeRegistries.ENTITIES.getValue(bossId);
-      Entity boss = bossType.create(tile.getLevel());
-      if (boss != null) {
-         EntityRenderer<? super Entity> entityRenderer = this.entityRendererDispatcher.getRenderer(boss);
-         poseStack.pushPose();
-         poseStack.translate(0.5, 1.5, 0.5);
-         poseStack.mulPose(Vector3f.YP.rotation((float)(Math.PI * (System.currentTimeMillis() / 10000.0) % (Math.PI * 2))));
-         poseStack.scale(0.25F, 0.25F, 0.25F);
-         entityRenderer.render(boss, 0.0F, 0.0F, poseStack, buffer, combinedLight);
-         poseStack.popPose();
+      if (tile.getBoss() != null) {
+         ResourceLocation bossId = tile.getBoss().getId();
+         EntityType<?> bossType = (EntityType<?>)ForgeRegistries.ENTITIES.getValue(bossId);
+         Entity boss = bossType.create(tile.getLevel());
+         if (boss != null) {
+            EntityRenderer<? super Entity> entityRenderer = this.entityRendererDispatcher.getRenderer(boss);
+            poseStack.pushPose();
+            poseStack.translate(0.5, 1.5, 0.5);
+            poseStack.mulPose(Vector3f.YP.rotation((float)(Math.PI * (System.currentTimeMillis() / 10000.0) % (Math.PI * 2))));
+            poseStack.scale(0.25F, 0.25F, 0.25F);
+            entityRenderer.render(boss, 0.0F, 0.0F, poseStack, buffer, combinedLight);
+            poseStack.popPose();
+         }
       }
    }
 

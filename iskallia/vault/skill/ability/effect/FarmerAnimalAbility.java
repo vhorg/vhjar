@@ -46,8 +46,8 @@ public class FarmerAnimalAbility extends FarmerAbility {
       super.doGrow(player, world);
       int horizontalRange = this.getHorizontalRange();
       int verticalRange = this.getVerticalRange();
-      horizontalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, horizontalRange));
-      verticalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, verticalRange));
+      horizontalRange = AreaOfEffectHelper.adjustAreaOfEffectRound(player, this, horizontalRange);
+      verticalRange = AreaOfEffectHelper.adjustAreaOfEffectRound(player, this, verticalRange);
       AABB searchBox = AABBHelper.create(player.position(), horizontalRange, verticalRange, horizontalRange);
 
       for (AgeableMob entity : world.getEntitiesOfClass(AgeableMob.class, searchBox, AGEABLE_MOB_PREDICATE)) {

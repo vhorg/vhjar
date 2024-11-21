@@ -118,7 +118,12 @@ public abstract class MixinItemStack {
             }
 
             int wearReduction = 0;
-            if (damager != null) {
+            boolean isDmgReducible = true;
+            if (this.getItem() instanceof IConditionalDamageable cd) {
+               isDmgReducible = cd.doesDurabilityReductionApply((ItemStack)this, damager);
+            }
+
+            if (damager != null && isDmgReducible) {
                float wearReductionChance = DurabilityWearReductionHelper.getDurabilityWearReduction(damager);
 
                for (int kx = 0; kx < damage; kx++) {

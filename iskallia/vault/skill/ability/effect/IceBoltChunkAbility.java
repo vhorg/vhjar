@@ -6,10 +6,6 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.EntityStunnedEvent;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.entity.entity.IceBoltEntity;
-import iskallia.vault.gear.attribute.ability.special.NovaRadiusModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
@@ -19,6 +15,7 @@ import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,23 +41,20 @@ public class IceBoltChunkAbility extends AbstractIceBoltAbility {
 
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
-      if (attacker instanceof Player player) {
-         for (ConfiguredModification<FloatValueConfig, NovaRadiusModification> mod : SpecialAbilityModification.getModifications(
-            player, NovaRadiusModification.class
-         )) {
-            realRadius = mod.modification().adjustRadius(mod.config(), realRadius);
-         }
-      }
-
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
    }
 
-   public int getDurationTicks() {
+   public int getDurationTicksUnmodified() {
       return this.durationTicks;
+   }
+
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getDurationTicksUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    public int getAmplifier() {
@@ -93,11 +87,13 @@ public class IceBoltChunkAbility extends AbstractIceBoltAbility {
                            player,
                            AABBHelper.create(pos, radius)
                         )) {
-                        nearbyEntity.addEffect(new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(), this.getAmplifier(), false, false, false));
+                        nearbyEntity.addEffect(
+                           new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(player), this.getAmplifier(), false, false, false)
+                        );
                         CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, nearbyEntity));
                         if (player.level.random.nextFloat() <= this.glacialChance) {
                            nearbyEntity.removeEffect(ModEffects.GLACIAL_SHATTER);
-                           nearbyEntity.addEffect(new MobEffectInstance(ModEffects.GLACIAL_SHATTER, this.getDurationTicks(), this.getAmplifier()));
+                           nearbyEntity.addEffect(new MobEffectInstance(ModEffects.GLACIAL_SHATTER, this.getDurationTicks(player), this.getAmplifier()));
                            player.level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, 0.25F, 0.65F);
                         }
                      }

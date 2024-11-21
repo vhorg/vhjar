@@ -24,7 +24,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.Rotation;
 
-public class DIYVaultLayout extends VaultLayout {
+public class DIYVaultLayout extends VaultGridLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("diy_vault", GridLayout.class).with(Version.v1_0, DIYVaultLayout::new);
    public static final FieldRegistry FIELDS = ClassicVaultLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<TemplatePoolKey> START_POOL = FieldKey.of("start_pool", TemplatePoolKey.class)

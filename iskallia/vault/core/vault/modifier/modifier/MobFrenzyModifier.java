@@ -8,6 +8,7 @@ import iskallia.vault.core.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.core.vault.modifier.spi.EntityAttributeModifier;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.predicate.IModifierImmunity;
 import iskallia.vault.core.vault.objective.KillBossObjective;
 import iskallia.vault.core.vault.objective.ObeliskObjective;
 import iskallia.vault.core.world.storage.VirtualWorld;
@@ -42,33 +43,37 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.ENTITY_SPAWN.register(context.getUUID(), event -> {
          if (event.getEntity() instanceof LivingEntity entity) {
-            if (entity.level == world && !(entity instanceof Player)) {
-               long upperBits = context.getUUID().getMostSignificantBits();
-               long lowerBits = context.getUUID().getLeastSignificantBits();
-               this.attackDamageAttributeModifier.applyToEntity(entity, new UUID(upperBits++, lowerBits), context);
-               this.movementSpeedAttributeModifier.applyToEntity(entity, new UUID(upperBits, lowerBits), context);
+            if (!IModifierImmunity.of(entity).test(this)) {
+               if (entity.level == world && !(entity instanceof Player)) {
+                  long upperBits = context.getUUID().getMostSignificantBits();
+                  long lowerBits = context.getUUID().getLeastSignificantBits();
+                  this.attackDamageAttributeModifier.applyToEntity(entity, new UUID(upperBits++, lowerBits), context);
+                  this.movementSpeedAttributeModifier.applyToEntity(entity, new UUID(upperBits, lowerBits), context);
+               }
             }
          }
       });
       CommonEvents.ENTITY_TICK.register(context.getUUID(), event -> {
          LivingEntity entity = event.getEntityLiving();
          if (entity.level == world && !(entity instanceof Player)) {
-            boolean isBoss = vault.map(Vault.OBJECTIVES, objectives -> objectives.forEach(KillBossObjective.class, objective -> {
-               UUID bossId = objective.get(KillBossObjective.BOSS_ID);
-               return event.getEntity().getUUID().equals(bossId);
-            }) || objectives.forEach(ObeliskObjective.class, objective -> {
-               ObeliskObjective.Wave[] waves = objective.get(ObeliskObjective.WAVES);
+            if (!IModifierImmunity.of(entity).test(this)) {
+               boolean isBoss = vault.map(Vault.OBJECTIVES, objectives -> objectives.forEach(KillBossObjective.class, objective -> {
+                  UUID bossId = objective.get(KillBossObjective.BOSS_ID);
+                  return event.getEntity().getUUID().equals(bossId);
+               }) || objectives.forEach(ObeliskObjective.class, objective -> {
+                  ObeliskObjective.Wave[] waves = objective.get(ObeliskObjective.WAVES);
 
-               for (ObeliskObjective.Wave wave : waves) {
-                  if (wave.get(ObeliskObjective.Wave.MOBS).contains(entity.getUUID())) {
-                     return true;
+                  for (ObeliskObjective.Wave wave : waves) {
+                     if (wave.get(ObeliskObjective.Wave.MOBS).contains(entity.getUUID())) {
+                        return true;
+                     }
                   }
-               }
 
-               return false;
-            }), Boolean.valueOf(false));
-            if (!isBoss && entity.getHealth() > this.properties.maxHealth) {
-               entity.setHealth(this.properties.maxHealth);
+                  return false;
+               }), Boolean.valueOf(false));
+               if (!isBoss && entity.getHealth() > this.properties.maxHealth) {
+                  entity.setHealth(this.properties.maxHealth);
+               }
             }
          }
       });

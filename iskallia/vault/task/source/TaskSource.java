@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
+import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
@@ -38,6 +39,13 @@ public abstract class TaskSource implements ISerializable<CompoundTag, JsonObjec
    }
 
    public void readJson(JsonObject json) {
+   }
+
+   public <T extends TaskSource> T copy() {
+      ArrayBitBuffer buffer = ArrayBitBuffer.empty();
+      Adapters.TASK_SOURCE.writeBits(this, buffer);
+      buffer.setPosition(0);
+      return (T)Adapters.TASK_SOURCE.readBits(buffer).orElseThrow();
    }
 
    public static class Adapter extends TypeSupplierAdapter<TaskSource> {

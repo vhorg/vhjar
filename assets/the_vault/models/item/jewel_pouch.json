@@ -1,0 +1,9 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/jewel_pouch"
+  },
+  "overrides": [
+    { "predicate": { "open": 1.00 }, "model": "the_vault:item/jewel_pouch_open" }
+  ]
+}

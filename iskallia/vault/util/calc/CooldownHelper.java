@@ -6,28 +6,34 @@ import iskallia.vault.gear.attribute.ability.AbilityCooldownPercentAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModEtchings;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.skill.base.Skill;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
 public class CooldownHelper {
-   public static int adjustCooldown(ServerPlayer player, String ability, int cooldownTicks) {
+   public static int adjustCooldown(ServerPlayer player, @Nullable Skill ability, int cooldownTicks) {
       float cooldownMultiplier = getCooldownMultiplier(player);
       float cooldown = cooldownTicks;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(player);
-
-      for (AbilityCooldownFlatAttribute attribute : snapshot.getAttributeValue(ModGearAttributes.ABILITY_COOLDOWN_FLAT, VaultGearAttributeTypeMerger.asList())) {
-         cooldown = attribute.adjustCooldown(ability, cooldown);
+      if (ability != null) {
+         for (AbilityCooldownFlatAttribute attribute : snapshot.getAttributeValue(
+            ModGearAttributes.ABILITY_COOLDOWN_FLAT, VaultGearAttributeTypeMerger.asList()
+         )) {
+            cooldown = ability.up((skill, rangeIt) -> attribute.adjustCooldown(skill.getId(), rangeIt), cooldown);
+         }
       }
 
       cooldown -= cooldownTicks * cooldownMultiplier;
-
-      for (AbilityCooldownPercentAttribute attribute : snapshot.getAttributeValue(
-         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, VaultGearAttributeTypeMerger.asList()
-      )) {
-         cooldown = attribute.adjustCooldown(ability, cooldown);
+      if (ability != null) {
+         for (AbilityCooldownPercentAttribute attribute : snapshot.getAttributeValue(
+            ModGearAttributes.ABILITY_COOLDOWN_PERCENT, VaultGearAttributeTypeMerger.asList()
+         )) {
+            cooldown = ability.up((skill, rangeIt) -> attribute.adjustCooldown(skill.getId(), rangeIt), cooldown);
+         }
       }
 
       if (snapshot.hasEtching(ModEtchings.RIFT)) {

@@ -27,8 +27,8 @@ import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.entity.entity.VaultGuardianEntity;
-import iskallia.vault.entity.entity.guardian.GuardianType;
+import iskallia.vault.entity.entity.guardian.AbstractGuardianEntity;
+import iskallia.vault.entity.entity.guardian.helper.GuardianType;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
@@ -119,8 +119,11 @@ public class ObeliskObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.OBJECTIVE_PIECE_GENERATION
-         .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
+      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> {
+         if (data.getVault() == vault) {
+            this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue()));
+         }
+      });
       CommonEvents.BLOCK_USE
          .in(world)
          .at(BlockUseEvent.Phase.HEAD)
@@ -211,14 +214,14 @@ public class ObeliskObjective extends Objective {
    @Nullable
    public static LivingEntity spawnMob(VirtualWorld world, Vault vault, int x, int y, int z, RandomSource random) {
       GuardianType type = ModConfigs.VAULT_GUARDIAN.getType(vault.get(Vault.LEVEL).get(), random);
-      VaultGuardianEntity entity = null;
+      AbstractGuardianEntity entity = null;
       if (type == GuardianType.BRUISER) {
-         entity = (VaultGuardianEntity)ModEntities.BRUISER_GUARDIAN.create(world);
+         entity = (AbstractGuardianEntity)ModEntities.BASIC_BRUISER_GUARDIAN.create(world);
       } else if (type == GuardianType.ARBALIST) {
-         entity = (VaultGuardianEntity)ModEntities.ARBALIST_GUARDIAN.create(world);
+         entity = (AbstractGuardianEntity)ModEntities.BASIC_ARBALIST_GUARDIAN.create(world);
       }
 
-      entity.setType(type);
+      entity.setGuardianType(type);
       entity.setGlowingTag(true);
       BlockState state = world.getBlockState(new BlockPos(x, y - 1, z));
       if (!state.isValidSpawn(world, new BlockPos(x, y - 1, z), entity.getType())) {

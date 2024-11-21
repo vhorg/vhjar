@@ -1,5 +1,6 @@
 package iskallia.vault.entity.boss.trait;
 
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import iskallia.vault.entity.boss.VaultBossEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -43,7 +44,7 @@ public class LifeLeechOnHitEffect implements IOnHitEffect, ITrait {
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.leechPercentage = nbt.getFloat("LeechPercentage");
    }
 }

@@ -1,6 +1,5 @@
 package iskallia.vault.block;
 
-import iskallia.vault.VaultMod;
 import iskallia.vault.antique.Antique;
 import iskallia.vault.antique.AntiqueRegistry;
 import iskallia.vault.antique.condition.DropConditionContext;
@@ -74,11 +73,6 @@ public class VaultCrateBlock extends Block implements EntityBlock {
 
    public static ItemStack getCrateWithLoot(VaultCrateBlock.Type type, NonNullList<ItemStack> items) {
       Block block = getCrateBlock(type);
-      if (items.size() > 54) {
-         VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
-         items = NonNullList.of(ItemStack.EMPTY, items.stream().limit(54L).toArray(ItemStack[]::new));
-      }
-
       ItemStack crate = new ItemStack(block);
       CompoundTag nbt = new CompoundTag();
       ContainerHelper.saveAllItems(nbt, items);
@@ -107,11 +101,6 @@ public class VaultCrateBlock extends Block implements EntityBlock {
 
    public static ItemStack getCrateWithLootOversized(VaultCrateBlock.Type type, NonNullList<OverSizedItemStack> items) {
       Block block = getCrateBlock(type);
-      if (items.size() > 54) {
-         VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
-         items = NonNullList.of(OverSizedItemStack.EMPTY, items.stream().limit(54L).toArray(OverSizedItemStack[]::new));
-      }
-
       ItemStack crate = new ItemStack(block);
       CompoundTag nbt = new CompoundTag();
       NBTHelper.writeCollection(nbt, "items", items, CompoundTag.class, OverSizedItemStack::serialize);

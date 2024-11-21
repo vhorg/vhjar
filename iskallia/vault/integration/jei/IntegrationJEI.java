@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -38,6 +39,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
@@ -149,6 +151,21 @@ public class IntegrationJEI implements IModPlugin {
       registration.addRecipes(RecipeTypes.ANVIL, AnvilRecipesJEI.getAnvilRecipes(vanillaRecipeFactory));
       Pulverizing.register(registration);
       Smelting.register(registration);
+      IIngredientManager ingredientManager = registration.getIngredientManager();
+      List<ItemStack> itemsToHide = Stream.of(
+            ModBlocks.ALTAR_CHEST_ITEM_PLACEABLE,
+            ModBlocks.ENIGMA_CHEST_ITEM_PLACEABLE,
+            ModBlocks.FLESH_CHEST_ITEM_PLACEABLE,
+            ModBlocks.GILDED_CHEST_ITEM_PLACEABLE,
+            ModBlocks.HARDENED_CHEST_ITEM_PLACEABLE,
+            ModBlocks.LIVING_CHEST_ITEM_PLACEABLE,
+            ModBlocks.ORNATE_CHEST_ITEM_PLACEABLE,
+            ModBlocks.TREASURE_CHEST_ITEM_PLACEABLE,
+            ModBlocks.WOODEN_CHEST_ITEM_PLACEABLE
+         )
+         .<ItemStack>map(ItemStack::new)
+         .toList();
+      ingredientManager.removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, itemsToHide);
    }
 
    public void registerGuiHandlers(IGuiHandlerRegistration registration) {

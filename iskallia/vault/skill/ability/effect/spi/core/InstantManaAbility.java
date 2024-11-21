@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.calc.ManaCostHelper;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public abstract class InstantManaAbility extends InstantAbility implements IInst
                return true;
             }
 
-            cost = ManaCostHelper.adjustManaCost(player, this.getAbilityGroupName(), cost);
+            cost = ManaCostHelper.adjustManaCost(player, this, cost);
             if (mana.getMana() < cost) {
                player.level.playSound(null, player, ModSounds.ABILITY_OUT_OF_MANA, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
@@ -55,10 +56,10 @@ public abstract class InstantManaAbility extends InstantAbility implements IInst
                return;
             }
 
-            cost = ManaCostHelper.adjustManaCost(player, this.getAbilityGroupName(), cost);
+            cost = ManaCostHelper.adjustManaCost(player, this, cost);
          }
 
-         mana.decreaseMana(cost);
+         mana.decreaseMana(ManaAction.PLAYER_ACTION, cost);
       });
    }
 

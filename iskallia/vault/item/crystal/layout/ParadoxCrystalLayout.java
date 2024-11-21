@@ -10,6 +10,7 @@ import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.layout.ClassicPresetLayout;
+import iskallia.vault.core.world.generator.layout.VaultLayout;
 import iskallia.vault.core.world.template.data.DirectTemplateEntry;
 import iskallia.vault.core.world.template.data.TemplatePool;
 import iskallia.vault.item.crystal.layout.preset.ParadoxTemplatePreset;
@@ -54,6 +55,7 @@ public class ParadoxCrystalLayout extends ClassicInfiniteCrystalLayout {
             .put(
                RegionPos.ORIGIN,
                new PoolTemplatePreset(
+                  VaultLayout.PieceType.ROOM,
                   new TemplatePool()
                      .addLeaf(
                         new DirectTemplateEntry(

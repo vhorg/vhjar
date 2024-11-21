@@ -1,5 +1,6 @@
 package iskallia.vault.util.calc;
 
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.snapshot.AttributeSnapshot;
@@ -12,6 +13,7 @@ public class AbilityPowerHelper {
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(player);
       multiplier += snapshot.getAttributeValue(ModGearAttributes.ABILITY_POWER, VaultGearAttributeTypeMerger.floatSum());
       multiplier += snapshot.getAttributeValue(ModGearAttributes.ABILITY_POWER_PERCENT, VaultGearAttributeTypeMerger.floatSum()) * multiplier;
-      return multiplier + snapshot.getAttributeValue(ModGearAttributes.ABILITY_POWER_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()) * multiplier;
+      multiplier += snapshot.getAttributeValue(ModGearAttributes.ABILITY_POWER_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()) * multiplier;
+      return multiplier * CommonEvents.PLAYER_STAT.invoke(PlayerStat.ABILITY_POWER_MULTIPLIER, player, 1.0F).getValue();
    }
 }

@@ -1,6 +1,6 @@
 package iskallia.vault.effect;
 
-import iskallia.vault.entity.entity.VaultGuardianEntity;
+import iskallia.vault.entity.entity.guardian.AbstractGuardianEntity;
 import iskallia.vault.init.ModEffects;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -48,7 +48,7 @@ public class ImmortalityEffect extends MobEffect {
    )
    public static void onAdded(PotionApplicableEvent event) {
       LivingEntity entity = event.getEntityLiving();
-      if (event.getPotionEffect().getEffect() == ModEffects.IMMORTALITY && (entity instanceof Creeper || entity instanceof VaultGuardianEntity)) {
+      if (event.getPotionEffect().getEffect() == ModEffects.IMMORTALITY && (entity instanceof Creeper || entity instanceof AbstractGuardianEntity)) {
          event.setResult(Result.DENY);
       }
    }

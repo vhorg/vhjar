@@ -2,8 +2,6 @@ package iskallia.vault.gear.modification.operation;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.gear.VaultGearModifierHelper;
-import iskallia.vault.gear.VaultGearRarity;
-import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.init.ModItems;
 import java.util.Random;
@@ -22,12 +20,11 @@ public class LockModifierModification extends GearModification {
 
    @Override
    public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      VaultGearRarity rarity = GearDataCache.of(stack).getRarity();
-      if (rarity == null || rarity.ordinal() < VaultGearRarity.RARE.ordinal()) {
+      if (VaultGearModifierHelper.hasAnyOpenAffix(stack)) {
          return GearModification.Result.makeActionError("min_modifiers");
       } else {
-         return VaultGearModifierHelper.hasAnyOpenAffix(stack)
-            ? GearModification.Result.makeActionError("min_modifiers")
+         return VaultGearModifierHelper.getAffixCount(stack) < 2
+            ? GearModification.Result.makeActionError("two_minimum")
             : VaultGearModifierHelper.lockRandomAffix(stack, rand);
       }
    }

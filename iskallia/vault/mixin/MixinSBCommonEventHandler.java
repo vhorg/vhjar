@@ -19,7 +19,7 @@ public class MixinSBCommonEventHandler {
       cancellable = true
    )
    private void cancelIfInDebagnetizerRange(EntityItemPickupEvent event, CallbackInfo ci) {
-      if (event.getEntity() != null && ModBlocks.DEBAGNETIZER.isInRange(event.getEntity().level.dimension(), event.getEntity().blockPosition())) {
+      if (event.getEntity() != null && ModBlocks.DEBAGNETIZER.isInRange(event.getEntity().level, event.getEntity().position())) {
          ci.cancel();
       }
    }

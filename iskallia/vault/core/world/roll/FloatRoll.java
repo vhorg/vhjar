@@ -1,27 +1,30 @@
 package iskallia.vault.core.world.roll;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.JsonPrimitive;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.random.RandomSource;
-import java.lang.reflect.Type;
+import iskallia.vault.item.crystal.data.serializable.ISerializable;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
-public interface FloatRoll extends INBTSerializable<CompoundTag> {
-   float get(RandomSource var1);
-
+public interface FloatRoll extends ISerializable<CompoundTag, JsonObject> {
    float getMin();
 
    float getMax();
 
-   JsonObject serializeJson();
+   float get(RandomSource var1);
 
-   void deserializeJson(JsonObject var1);
+   default boolean contains(float value) {
+      return value >= this.getMin() && value <= this.getMax();
+   }
 
    static FloatRoll.Constant ofConstant(float count) {
       return new FloatRoll.Constant(count);
@@ -31,75 +34,35 @@ public interface FloatRoll extends INBTSerializable<CompoundTag> {
       return new FloatRoll.Uniform(min, max);
    }
 
-   static FloatRoll fromNBT(CompoundTag nbt) {
-      String var2 = nbt.getString("type");
-
-      FloatRoll roll = (FloatRoll)(switch (var2) {
-         case "constant" -> new FloatRoll.Constant();
-         case "uniform" -> new FloatRoll.Uniform();
-         default -> null;
-      });
-      if (roll != null) {
-         roll.deserializeNBT(nbt);
+   public static class Adapter extends TypeSupplierAdapter<FloatRoll> {
+      public Adapter() {
+         super("type", true);
+         this.register("constant", FloatRoll.Constant.class, FloatRoll.Constant::new);
+         this.register("uniform", FloatRoll.Uniform.class, FloatRoll.Uniform::new);
       }
 
-      return roll;
-   }
-
-   static FloatRoll fromJson(JsonObject object) {
-      Object var10000;
-      if (!object.has("type")) {
-         var10000 = null;
-      } else {
-         String var2 = object.get("type").getAsString();
-         switch (var2) {
-            case "constant":
-               var10000 = new FloatRoll.Constant();
-               break;
-            case "uniform":
-               var10000 = new FloatRoll.Uniform();
-               break;
-            default:
-               var10000 = null;
-         }
-      }
-
-      FloatRoll roll = (FloatRoll)var10000;
-      if (roll != null) {
-         roll.deserializeJson(object);
-      }
-
-      return roll;
-   }
-
-   public static class Adapter implements JsonSerializer<FloatRoll>, JsonDeserializer<FloatRoll> {
-      public static final FloatRoll.Adapter INSTANCE = new FloatRoll.Adapter();
-
-      public FloatRoll deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-         JsonObject object = json.getAsJsonObject();
-         String type = object.get("type").getAsString();
-         switch (type) {
-            case "constant":
-               return FloatRoll.ofConstant(object.get("count").getAsFloat());
-            case "uniform":
-               return FloatRoll.ofUniform(object.get("min").getAsFloat(), object.get("max").getAsFloat());
-            default:
-               return null;
-         }
-      }
-
-      public JsonElement serialize(FloatRoll value, Type typeOfSrc, JsonSerializationContext context) {
-         JsonObject object = new JsonObject();
-         if (value instanceof FloatRoll.Constant constant) {
-            object.addProperty("type", "constant");
-            object.addProperty("count", constant.getCount());
-         } else if (value instanceof FloatRoll.Uniform uniform) {
-            object.addProperty("type", "uniform");
-            object.addProperty("min", uniform.getMin());
-            object.addProperty("max", uniform.getMax());
+      @Nullable
+      protected FloatRoll readSuppliedNbt(Tag nbt) {
+         if (nbt instanceof NumericTag || nbt instanceof StringTag) {
+            Optional<Float> result = Adapters.FLOAT.readNbt(nbt);
+            if (result.isPresent()) {
+               return FloatRoll.ofConstant(result.get());
+            }
          }
 
-         return object;
+         return (FloatRoll)super.readSuppliedNbt(nbt);
+      }
+
+      @Nullable
+      protected FloatRoll readSuppliedJson(JsonElement json) {
+         if (json instanceof JsonPrimitive primitive && (primitive.isNumber() || primitive.isString())) {
+            Optional<Float> result = Adapters.FLOAT.readJson(json);
+            if (result.isPresent()) {
+               return FloatRoll.ofConstant(result.get());
+            }
+         }
+
+         return (FloatRoll)super.readSuppliedJson(json);
       }
    }
 
@@ -118,42 +81,50 @@ public interface FloatRoll extends INBTSerializable<CompoundTag> {
       }
 
       @Override
+      public float getMin() {
+         return this.getCount();
+      }
+
+      @Override
+      public float getMax() {
+         return this.getCount();
+      }
+
+      @Override
       public float get(RandomSource random) {
          return this.count;
       }
 
       @Override
-      public float getMin() {
-         return this.count;
+      public void writeBits(BitBuffer buffer) {
+         Adapters.FLOAT.writeBits(Float.valueOf(this.count), buffer);
       }
 
       @Override
-      public float getMax() {
-         return this.count;
+      public void readBits(BitBuffer buffer) {
+         Adapters.FLOAT.readBits(buffer).ifPresent(value -> this.count = value);
       }
 
-      public CompoundTag serializeNBT() {
+      @Override
+      public Optional<CompoundTag> writeNbt() {
          CompoundTag nbt = new CompoundTag();
-         nbt.putString("type", "constant");
-         nbt.putFloat("count", this.count);
-         return nbt;
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.count)).ifPresent(tag -> nbt.put("count", tag));
+         return Optional.of(nbt);
       }
 
-      public void deserializeNBT(CompoundTag nbt) {
-         this.count = nbt.getFloat("count");
-      }
-
-      @Override
-      public JsonObject serializeJson() {
-         JsonObject object = new JsonObject();
-         object.addProperty("type", "constant");
-         object.addProperty("count", this.count);
-         return object;
+      public void readNbt(CompoundTag nbt) {
+         Adapters.FLOAT.readNbt(nbt.get("count")).ifPresent(value -> this.count = value);
       }
 
       @Override
-      public void deserializeJson(JsonObject object) {
-         this.count = object.get("count").getAsFloat();
+      public Optional<JsonObject> writeJson() {
+         JsonObject json = new JsonObject();
+         Adapters.FLOAT.writeJson(Float.valueOf(this.count)).ifPresent(tag -> json.add("count", tag));
+         return Optional.of(json);
+      }
+
+      public void readJson(JsonObject json) {
+         Adapters.FLOAT.readJson(json.get("count")).ifPresent(value -> this.count = value);
       }
    }
 
@@ -176,40 +147,50 @@ public interface FloatRoll extends INBTSerializable<CompoundTag> {
 
       @Override
       public float getMax() {
-         return this.max;
+         return this.min + (this.max - this.min);
       }
 
       @Override
       public float get(RandomSource random) {
-         return random.nextFloat(this.min, this.max);
+         return random.nextFloat() * (this.max - this.min) + this.min;
       }
 
-      public CompoundTag serializeNBT() {
+      @Override
+      public void writeBits(BitBuffer buffer) {
+         Adapters.FLOAT.writeBits(Float.valueOf(this.min), buffer);
+         Adapters.FLOAT.writeBits(Float.valueOf(this.max), buffer);
+      }
+
+      @Override
+      public void readBits(BitBuffer buffer) {
+         Adapters.FLOAT.readBits(buffer).ifPresent(value -> this.min = value);
+         Adapters.FLOAT.readBits(buffer).ifPresent(value -> this.max = value);
+      }
+
+      @Override
+      public Optional<CompoundTag> writeNbt() {
          CompoundTag nbt = new CompoundTag();
-         nbt.putString("type", "uniform");
-         nbt.putFloat("min", this.min);
-         nbt.putFloat("max", this.max);
-         return nbt;
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.min)).ifPresent(tag -> nbt.put("min", tag));
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.max)).ifPresent(tag -> nbt.put("max", tag));
+         return Optional.of(nbt);
       }
 
-      public void deserializeNBT(CompoundTag nbt) {
-         this.min = nbt.getFloat("min");
-         this.max = nbt.getFloat("max");
-      }
-
-      @Override
-      public JsonObject serializeJson() {
-         JsonObject object = new JsonObject();
-         object.addProperty("type", "uniform");
-         object.addProperty("min", this.min);
-         object.addProperty("max", this.max);
-         return object;
+      public void readNbt(CompoundTag nbt) {
+         Adapters.FLOAT.readNbt(nbt.get("min")).ifPresent(value -> this.min = value);
+         Adapters.FLOAT.readNbt(nbt.get("max")).ifPresent(value -> this.max = value);
       }
 
       @Override
-      public void deserializeJson(JsonObject object) {
-         this.min = object.get("min").getAsFloat();
-         this.max = object.get("max").getAsFloat();
+      public Optional<JsonObject> writeJson() {
+         JsonObject json = new JsonObject();
+         Adapters.FLOAT.writeJson(Float.valueOf(this.min)).ifPresent(tag -> json.add("min", tag));
+         Adapters.FLOAT.writeJson(Float.valueOf(this.max)).ifPresent(tag -> json.add("max", tag));
+         return Optional.of(json);
+      }
+
+      public void readJson(JsonObject json) {
+         Adapters.FLOAT.readJson(json.get("min")).ifPresent(value -> this.min = value);
+         Adapters.FLOAT.readJson(json.get("max")).ifPresent(value -> this.max = value);
       }
    }
 }

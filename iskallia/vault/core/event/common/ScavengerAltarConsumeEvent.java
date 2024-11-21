@@ -1,8 +1,8 @@
 package iskallia.vault.core.event.common;
 
-import iskallia.vault.block.entity.ScavengerAltarTileEntity;
 import iskallia.vault.core.event.Event;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ScavengerAltarConsumeEvent extends Event<ScavengerAltarConsumeEvent, ScavengerAltarConsumeEvent.Data> {
    public ScavengerAltarConsumeEvent() {
@@ -16,15 +16,15 @@ public class ScavengerAltarConsumeEvent extends Event<ScavengerAltarConsumeEvent
       return new ScavengerAltarConsumeEvent(this);
    }
 
-   public ScavengerAltarConsumeEvent.Data invoke(Level level, ScavengerAltarTileEntity tile) {
+   public ScavengerAltarConsumeEvent.Data invoke(Level level, BlockEntity tile) {
       return this.invoke(new ScavengerAltarConsumeEvent.Data(level, tile));
    }
 
    public static class Data {
       private final Level level;
-      private final ScavengerAltarTileEntity tile;
+      private final BlockEntity tile;
 
-      public Data(Level level, ScavengerAltarTileEntity tile) {
+      public Data(Level level, BlockEntity tile) {
          this.level = level;
          this.tile = tile;
       }
@@ -33,7 +33,7 @@ public class ScavengerAltarConsumeEvent extends Event<ScavengerAltarConsumeEvent
          return this.level;
       }
 
-      public ScavengerAltarTileEntity getTile() {
+      public BlockEntity getTile() {
          return this.tile;
       }
    }

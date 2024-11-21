@@ -35,10 +35,8 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.network.message.MonolithIgniteMessage;
+import iskallia.vault.util.LootInitialization;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -128,8 +126,11 @@ public class MonolithObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.OBJECTIVE_PIECE_GENERATION
-         .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
+      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> {
+         if (data.getVault() == vault) {
+            this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue()));
+         }
+      });
       CommonEvents.BLOCK_USE
          .in(world)
          .at(BlockUseEvent.Phase.HEAD)
@@ -175,9 +176,7 @@ public class MonolithObjective extends Objective {
 
                            for (int i = 0; i < loot.size(); i++) {
                               ItemStack stack = loot.get(i);
-                              VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
-                              stack = DataTransferItem.doConvertStack(stack);
-                              DataInitializationItem.doInitialize(stack);
+                              stack = LootInitialization.initializeVaultLoot(stack, vault, null);
                               loot.set(i, stack);
                            }
 

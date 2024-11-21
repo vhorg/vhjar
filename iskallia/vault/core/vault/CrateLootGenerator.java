@@ -6,12 +6,9 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
-import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,9 +37,7 @@ public class CrateLootGenerator {
 
       for (int i = 0; i < loot.size(); i++) {
          ItemStack stack = (ItemStack)loot.get(i);
-         VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
-         stack = DataTransferItem.doConvertStack(stack);
-         DataInitializationItem.doInitialize(stack);
+         stack = LootInitialization.initializeVaultLoot(stack, vault, null);
          loot.set(i, stack);
       }
 
@@ -61,11 +56,6 @@ public class CrateLootGenerator {
       this.mergeLoot(loot);
       loot.removeIf(ItemStack::isEmpty);
       NonNullList<ItemStack> specialLoot = this.createSpecialLoot(listener, random);
-
-      for (int i = 0; i < loot.size() - 54 + specialLoot.size(); i++) {
-         loot.remove(random.nextInt(loot.size()));
-      }
-
       loot.addAll(specialLoot);
       Collections.shuffle(loot);
       return loot;
@@ -118,7 +108,7 @@ public class CrateLootGenerator {
    public NonNullList<ItemStack> createLootForCommand(RandomSource random, int vaultLevel) {
       NonNullList<ItemStack> loot = NonNullList.create();
       if (this.lootTable != null) {
-         LootTableGenerator generator = new LootTableGenerator(Version.v1_0, this.lootTable, 0.0F);
+         LootTableGenerator generator = new LootTableGenerator(Version.v1_0, this.lootTable, this.itemQuantity);
          generator.generate(random);
          generator.getItems().forEachRemaining(loot::add);
       }
@@ -132,17 +122,11 @@ public class CrateLootGenerator {
 
       loot.addAll(specialLoot);
       Collections.shuffle(loot);
-      loot.forEach(stackx -> {
-         if (stackx.getItem() instanceof VaultGearItem lootItemx) {
-            lootItemx.setItemLevel(stackx, vaultLevel);
-         }
-      });
 
       for (int i = 0; i < loot.size(); i++) {
          ItemStack stack = (ItemStack)loot.get(i);
-         if (stack.getItem() instanceof DataTransferItem lootItem) {
-            loot.set(i, lootItem.convertStack(stack, random));
-         }
+         stack = LootInitialization.initializeVaultLoot(stack, vaultLevel);
+         loot.set(i, stack);
       }
 
       return loot;

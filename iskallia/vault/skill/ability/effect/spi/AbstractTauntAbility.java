@@ -3,19 +3,17 @@ package iskallia.vault.skill.ability.effect.spi;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.TauntRadiusModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 public abstract class AbstractTauntAbility extends InstantManaAbility {
-   protected float radius;
-   protected int durationTicks;
+   private float radius;
+   private int durationTicks;
 
    public AbstractTauntAbility(int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks, float manaCost, float radius, int durationTicks) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost);
@@ -30,25 +28,18 @@ public abstract class AbstractTauntAbility extends InstantManaAbility {
       return this.radius;
    }
 
-   public int getDurationTicks() {
+   public int getUnmodifiedDurationTicks() {
       return this.durationTicks;
-   }
-
-   @Override
-   public String getAbilityGroupName() {
-      return "Taunt";
    }
 
    public float getRadius(Player player) {
       float realRadius = this.radius;
+      return AreaOfEffectHelper.adjustAreaOfEffect(player, this, realRadius);
+   }
 
-      for (ConfiguredModification<FloatValueConfig, TauntRadiusModification> mod : SpecialAbilityModification.getModifications(
-         player, TauntRadiusModification.class
-      )) {
-         realRadius = mod.modification().adjustRadius(mod.config(), realRadius);
-      }
-
-      return AreaOfEffectHelper.adjustAreaOfEffect(player, realRadius);
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getUnmodifiedDurationTicks();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    @Override

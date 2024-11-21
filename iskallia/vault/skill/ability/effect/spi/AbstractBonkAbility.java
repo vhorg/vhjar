@@ -7,6 +7,7 @@ import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -52,12 +53,17 @@ public abstract class AbstractBonkAbility extends InstantManaAbility {
       return this.maxStacksUsedPerHit;
    }
 
-   public int getStackDuration() {
+   public int getMaxStacksTotal() {
+      return this.maxStacksTotal;
+   }
+
+   public int getUnmodifiedStackDuration() {
       return this.stackDuration;
    }
 
-   public int getMaxStacksTotal() {
-      return this.maxStacksTotal;
+   public int getStackDuration(LivingEntity attacker) {
+      int realDuration = this.getUnmodifiedStackDuration();
+      return EffectDurationHelper.adjustEffectDurationFloor(attacker, realDuration);
    }
 
    public float getUnmodifiedRadius() {
@@ -67,15 +73,10 @@ public abstract class AbstractBonkAbility extends InstantManaAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
-   }
-
-   @Override
-   public String getAbilityGroupName() {
-      return "Battle_Cry";
    }
 
    @Override

@@ -1,7 +1,7 @@
 package iskallia.vault.entity.boss.stage;
 
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import net.minecraft.nbt.CompoundTag;
 
 public class BerserkStageAttributes extends MeleeStageAttributes {
@@ -16,8 +16,8 @@ public class BerserkStageAttributes extends MeleeStageAttributes {
       double baseSpeed,
       double maxSpeedMultiplier,
       double maxBaseDamageMultiplier,
-      WeightedList<MeleeAttacks.AttackData> meleeAttacks,
-      WeightedList<MeleeAttacks.AttackData> rageAttacks,
+      WeightedList<VaultBossBaseEntity.AttackData> meleeAttacks,
+      WeightedList<VaultBossBaseEntity.AttackData> rageAttacks,
       int bloodOrbSpawnCooldown,
       int maxBloodOrbs
    ) {

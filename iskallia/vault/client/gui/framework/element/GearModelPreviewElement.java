@@ -91,7 +91,7 @@ public class GearModelPreviewElement<E extends GearModelPreviewElement<E>> exten
             String overlayTexture = vaultArmorItem.getArmorTexture(armorStack, null, armorPiece.getEquipmentSlot(), "overlay");
             poseStack2.translate(0.0, -2.0, 0.0);
             poseStack2.scale(1.5F, 1.5F, 1.5F);
-            EquipmentSlot intendedSlot = vaultArmorItem.getIntendedSlot(armorStack);
+            EquipmentSlot intendedSlot = vaultArmorItem.getGearType(armorStack).getEquipmentSlot();
             if (intendedSlot == EquipmentSlot.HEAD) {
                poseStack2.translate(0.0, 0.65, 0.0);
             } else if (intendedSlot == EquipmentSlot.LEGS) {

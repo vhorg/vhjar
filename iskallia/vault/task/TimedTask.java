@@ -36,7 +36,7 @@ public class TimedTask extends NodeTask implements ResettingTask {
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.SERVER_TICK.at(Phase.END).register(this, event -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             this.elapsed = Math.min(this.elapsed + 1L, this.duration);
          }
       });

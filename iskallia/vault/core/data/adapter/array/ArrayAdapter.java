@@ -215,7 +215,9 @@ public class ArrayAdapter<T> implements IComplexAdapter<T[], Tag, JsonElement, O
       } else if (json == null) {
          return Optional.empty();
       } else if (!(json instanceof JsonArray array)) {
-         return Optional.empty();
+         T[] value = (T[])((Object[])this.constructor.apply(1));
+         value[0] = adapter.readJson(json, context).orElseGet(this.defaultValue);
+         return Optional.of((T)value);
       } else {
          T[] value = (T[])((Object[])this.constructor.apply(array.size()));
 

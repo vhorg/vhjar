@@ -80,8 +80,11 @@ public class LegacyObeliskObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.OBJECTIVE_PIECE_GENERATION
-         .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
+      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> {
+         if (data.getVault() == vault) {
+            this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue()));
+         }
+      });
       CommonEvents.BLOCK_USE
          .in(world)
          .at(BlockUseEvent.Phase.HEAD)

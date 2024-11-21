@@ -13,7 +13,7 @@ public class DealNoDamageTask extends NodeTask {
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.ENTITY_DAMAGE.register(this, event -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             if (context.getSource() instanceof EntityTaskSource entitySource) {
                Entity attacker = event.getSource().getEntity();
                if (attacker != null && entitySource.matches(attacker)) {

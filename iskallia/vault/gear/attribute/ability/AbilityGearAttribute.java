@@ -1,6 +1,7 @@
 package iskallia.vault.gear.attribute.ability;
 
 import com.google.gson.annotations.Expose;
+import javax.annotation.Nullable;
 
 public abstract class AbilityGearAttribute {
    protected final String abilityKey;
@@ -13,8 +14,8 @@ public abstract class AbilityGearAttribute {
       return this.abilityKey;
    }
 
-   public boolean affectsAbility(String playerAbility) {
-      return this.abilityKey.equals(playerAbility);
+   public boolean affectsAbility(@Nullable String abilityKey) {
+      return this.abilityKey.equals(abilityKey);
    }
 
    public abstract static class AbilityAttributeConfig {

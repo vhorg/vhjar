@@ -16,7 +16,7 @@ public class ToolGearData extends VaultGearData {
    protected void read(BitBuffer buf) {
       super.read(buf);
       if (GearDataVersion.V0_4.isLaterThan(this.version)) {
-         if (!this.has(ModGearAttributes.TOOL_MATERIAL) || !this.has(ModGearAttributes.TOOL_CAPACITY)) {
+         if (!this.hasAttribute(ModGearAttributes.TOOL_MATERIAL) || !this.hasAttribute(ModGearAttributes.TOOL_CAPACITY)) {
             return;
          }
 
@@ -29,7 +29,7 @@ public class ToolGearData extends VaultGearData {
             additional = 200;
          }
 
-         this.updateAttribute(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity + additional));
+         this.createOrReplaceAttributeValue(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity + additional));
       }
    }
 }

@@ -1,7 +1,7 @@
 package iskallia.vault.task.renderer;
 
 import iskallia.vault.VaultMod;
-import iskallia.vault.task.InVaultTask;
+import iskallia.vault.task.MultiVaultTask;
 import iskallia.vault.task.renderer.context.AchievementRendererContext;
 import iskallia.vault.task.util.ITaskModifier;
 import java.util.List;
@@ -12,9 +12,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class InVaultTaskRenderer {
-   public static class Achievement extends TaskRenderer<InVaultTask, AchievementRendererContext> implements ITaskModifier {
+   public static class Achievement extends TaskRenderer<MultiVaultTask, AchievementRendererContext> implements ITaskModifier {
       @OnlyIn(Dist.CLIENT)
-      public void onRender(InVaultTask task, AchievementRendererContext context) {
+      public void onRender(MultiVaultTask task, AchievementRendererContext context) {
          context.addModifier(this);
          super.onRender(task, context);
       }

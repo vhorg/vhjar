@@ -4,7 +4,7 @@
 		"1": "the_vault:block/loot_crate_frame",
 		"2": "the_vault:block/loot_crate_top",
 		"3": "the_vault:block/bingo_loot_crate",
-		"particle": "the_vault:block/cake_loot_crate"
+		"particle": "the_vault:block/bingo_loot_crate"
 	},
 	"elements": [
 		{

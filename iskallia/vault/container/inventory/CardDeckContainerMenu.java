@@ -154,9 +154,6 @@ public class CardDeckContainerMenu extends AbstractContainerMenu {
       return copy;
    }
 
-   public record DeckContext(String inventoryName, int slotIndex) {
-   }
-
    public static class DeckSlot extends Slot {
       private boolean isActive = true;
 

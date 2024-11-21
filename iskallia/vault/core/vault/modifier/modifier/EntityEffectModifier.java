@@ -5,6 +5,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.predicate.IModifierImmunity;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.Map;
@@ -27,16 +28,18 @@ public class EntityEffectModifier extends VaultModifier<EntityEffectModifier.Pro
       CommonEvents.ENTITY_SPAWN.register(context.getUUID(), EventPriority.HIGHEST, event -> {
          if (event.getEntity().level == world) {
             if (event.getEntity() instanceof LivingEntity entity) {
-               Map var7 = ((EntityEffectModifier.ILivingEntityAccessor)entity).getEffects();
-               if (this.properties.filter.test(entity)) {
-                  for (Entry<MobEffectInstance, Double> entry : var7.entrySet()) {
-                     if (entry.getKey().getEffect() == this.properties.effect) {
-                        var7.put(entry.getKey(), entry.getValue() + this.properties.chance);
-                        return;
+               if (!IModifierImmunity.of(entity).test(this)) {
+                  Map<MobEffectInstance, Double> effects = ((EntityEffectModifier.ILivingEntityAccessor)entity).getEffects();
+                  if (this.properties.filter.test(entity)) {
+                     for (Entry<MobEffectInstance, Double> entry : effects.entrySet()) {
+                        if (entry.getKey().getEffect() == this.properties.effect) {
+                           effects.put(entry.getKey(), entry.getValue() + this.properties.chance);
+                           return;
+                        }
                      }
-                  }
 
-                  var7.put(new MobEffectInstance(this.properties.effect, 999999, this.properties.getAmplifier()), this.properties.chance);
+                     effects.put(new MobEffectInstance(this.properties.effect, 999999, this.properties.getAmplifier()), this.properties.chance);
+                  }
                }
             }
          }
@@ -44,13 +47,15 @@ public class EntityEffectModifier extends VaultModifier<EntityEffectModifier.Pro
       CommonEvents.ENTITY_SPAWN.register(context.getUUID(), EventPriority.LOWEST, event -> {
          if (event.getEntity().level == world) {
             if (event.getEntity() instanceof LivingEntity entity) {
-               Map var5 = ((EntityEffectModifier.ILivingEntityAccessor)entity).getEffects();
-               Random random = entity.level.getRandom();
-               var5.forEach((instance, chance) -> {
-                  if (random.nextDouble() < chance) {
-                     entity.addEffect(instance);
-                  }
-               });
+               if (!IModifierImmunity.of(entity).test(this)) {
+                  Map<MobEffectInstance, Double> effects = ((EntityEffectModifier.ILivingEntityAccessor)entity).getEffects();
+                  Random random = entity.level.getRandom();
+                  effects.forEach((instance, chance) -> {
+                     if (random.nextDouble() < chance) {
+                        entity.addEffect(instance);
+                     }
+                  });
+               }
             }
          }
       });

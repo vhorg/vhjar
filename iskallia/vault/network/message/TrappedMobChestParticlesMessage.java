@@ -3,9 +3,8 @@ package iskallia.vault.network.message;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ExplodeParticle;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,7 +50,7 @@ public class TrappedMobChestParticlesMessage {
             Vec3 offset = new Vec3(
                random.nextDouble() / 3.0 * (random.nextBoolean() ? 1 : -1), 0.0, random.nextDouble() / 3.0 * (random.nextBoolean() ? 1 : -1)
             );
-            ExplodeParticle p = (ExplodeParticle)mgr.createParticle(
+            Particle p = mgr.createParticle(
                ParticleTypes.POOF,
                pos.getX() + 0.5 + offset.x,
                pos.getY() + random.nextDouble() * 0.15F + 0.25,
@@ -83,7 +82,7 @@ public class TrappedMobChestParticlesMessage {
             Vec3 offset = new Vec3(
                random.nextDouble() / 3.0 * (random.nextBoolean() ? 1 : -1), 0.0, random.nextDouble() / 3.0 * (random.nextBoolean() ? 1 : -1)
             );
-            SmokeParticle p = (SmokeParticle)mgr.createParticle(
+            Particle p = mgr.createParticle(
                ParticleTypes.SMOKE,
                pos.getX() + 0.5 + offset.x,
                pos.above().getY() + random.nextDouble() * 0.15F,

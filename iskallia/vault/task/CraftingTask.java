@@ -23,7 +23,7 @@ public class CraftingTask extends ProgressConfiguredTask<Integer, CraftingTask.C
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.PLAYER_CRAFT.register(this, EventPriority.NORMAL, event -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             if (context.getSource() instanceof EntityTaskSource entitySource) {
                if (entitySource.matches(event.getPlayer())) {
                   if (this.getConfig().filter.test(event.getCrafting())) {

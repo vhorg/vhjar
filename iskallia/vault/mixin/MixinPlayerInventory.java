@@ -1,9 +1,8 @@
 package iskallia.vault.mixin;
 
-import iskallia.vault.container.inventory.ShardPouchContainer;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.init.ModItems;
+import iskallia.vault.item.AntiqueStampCollectorBook;
 import iskallia.vault.item.ItemShardPouch;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.PlayerStat;
@@ -18,7 +17,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.CapabilityItemHandler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -68,28 +66,12 @@ public abstract class MixinPlayerInventory implements InventorySnapshotData.Inve
       cancellable = true
    )
    public void interceptItemAddition(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-      if (stack.getItem() == ModItems.SOUL_SHARD) {
-         if (!(this.player.containerMenu instanceof ShardPouchContainer)) {
-            Inventory thisInventory = (Inventory)this;
-            ItemStack pouchStack = ItemStack.EMPTY;
-
-            for (int slot = 0; slot < thisInventory.getContainerSize(); slot++) {
-               ItemStack invStack = thisInventory.getItem(slot);
-               if (invStack.getItem() instanceof ItemShardPouch) {
-                  pouchStack = invStack;
-                  break;
-               }
-            }
-
-            if (!pouchStack.isEmpty()) {
-               pouchStack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-                  ItemStack remainder = handler.insertItem(0, stack, false);
-                  stack.setCount(remainder.getCount());
-                  if (stack.isEmpty()) {
-                     cir.setReturnValue(true);
-                  }
-               });
-            }
+      Inventory thisInventory = (Inventory)this;
+      if (ItemShardPouch.interceptPlayerInventoryItemAddition(thisInventory, stack)) {
+         cir.setReturnValue(true);
+      } else {
+         if (AntiqueStampCollectorBook.interceptPlayerInventoryItemAddition(thisInventory, stack)) {
+            cir.setReturnValue(true);
          }
       }
    }

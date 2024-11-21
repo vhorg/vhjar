@@ -15,7 +15,7 @@ public class AbilityManaCostPercentAttribute extends AbilityFloatValueAttribute 
       super(abilityKey, amount);
    }
 
-   public float adjustManaCost(String ability, float manaCost) {
+   public float adjustManaCost(@Nullable String ability, float manaCost) {
       return this.affectsAbility(ability) ? manaCost * Math.max(1.0F + this.getAmount(), 0.0F) : manaCost;
    }
 
@@ -46,18 +46,18 @@ public class AbilityManaCostPercentAttribute extends AbilityFloatValueAttribute 
          MutableComponent manaCostCmp = new TextComponent("Mana Cost").withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("manaCost")));
          String cdInfo;
          if (positive) {
-            cdInfo = " increased ";
+            cdInfo = " more ";
          } else {
-            cdInfo = " reduced ";
+            cdInfo = " less ";
          }
 
          return new TextComponent("")
-            .append(type.getAffixPrefixComponent(positive).withStyle(this.getValueStyle()))
+            .append(type.getAffixPrefixComponent(true).withStyle(this.getValueStyle()))
             .append(valueDisplay.withStyle(this.getValueStyle()))
             .append(cdInfo)
             .append(manaCostCmp)
             .append(" of ")
-            .append(new TextComponent(attribute.getAbilityKey()).withStyle(this.getAbilityStyle()))
+            .append(this.formatAbilityName(attribute.getAbilityKey()))
             .setStyle(this.getColoredTextStyle());
       }
 
@@ -75,15 +75,15 @@ public class AbilityManaCostPercentAttribute extends AbilityFloatValueAttribute 
          boolean positive = attribute.getAmount() >= 0.0F;
          String cdInfo;
          if (positive) {
-            cdInfo = " increased Mana Cost of ";
+            cdInfo = " more Mana Cost of ";
          } else {
-            cdInfo = " reduced Mana Cost of ";
+            cdInfo = " less Mana Cost of ";
          }
 
-         out.add(type.getAffixPrefix(positive));
+         out.add(type.getAffixPrefix(true));
          out.add(valueDisplay.getString());
          out.add(cdInfo);
-         out.add(attribute.getAbilityKey());
+         out.add(this.formatAbilityName(attribute.getAbilityKey()).getString());
       }
 
       private TextComponent getValueComponent(float value) {

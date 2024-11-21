@@ -1,6 +1,8 @@
 package iskallia.vault.container.provider;
 
+import iskallia.vault.antique.AntiqueRegistry;
 import iskallia.vault.container.inventory.AntiqueCollectorBookContainer;
+import iskallia.vault.item.AntiqueStampCollectorBook;
 import iskallia.vault.world.data.PlayerStoredAntiquesData;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -29,19 +31,26 @@ public class AntiqueCollectorBookProvider implements MenuProvider {
    }
 
    public Consumer<FriendlyByteBuf> extraDataWriter() {
-      PlayerStoredAntiquesData.StoredAntiques storedAntiques = this.getStoredAntiques();
-      return buffer -> {
-         buffer.writeInt(this.bookSlot);
-         storedAntiques.write(buffer);
-      };
+      return buffer -> buffer.writeInt(this.bookSlot);
    }
 
-   private PlayerStoredAntiquesData.StoredAntiques getStoredAntiques() {
-      return PlayerStoredAntiquesData.get(this.player.getLevel()).getStoredAntiques(this.player);
+   private void migrateStoredAntiques() {
+      AntiqueStampCollectorBook.StoredAntiques antiques = AntiqueStampCollectorBook.getStoredAntiques(this.bookStack);
+      PlayerStoredAntiquesData data = PlayerStoredAntiquesData.get(this.player.getLevel());
+      AntiqueStampCollectorBook.StoredAntiques legacyAntiquesData = data.getStoredAntiques(this.player);
+      if (legacyAntiquesData != null) {
+         AntiqueRegistry.getRegistry().forEach(antique -> {
+            int existingCount = legacyAntiquesData.getInfo(antique).getCount();
+            antiques.getInfo(antique).addCount(existingCount);
+         });
+         data.removeStoredAntiques(this.player);
+         AntiqueStampCollectorBook.setStoredAntiques(this.bookStack, antiques);
+      }
    }
 
    @Nullable
    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-      return new AntiqueCollectorBookContainer(id, this.player.getInventory(), this.bookSlot, this.getStoredAntiques());
+      this.migrateStoredAntiques();
+      return new AntiqueCollectorBookContainer(id, this.player.getInventory(), this.bookSlot);
    }
 }

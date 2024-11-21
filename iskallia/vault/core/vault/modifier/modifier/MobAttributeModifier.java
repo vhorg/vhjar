@@ -5,6 +5,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.EntityAttributeModifier;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.predicate.IModifierImmunity;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.entity.entity.EternalEntity;
 import net.minecraft.resources.ResourceLocation;
@@ -21,9 +22,11 @@ public class MobAttributeModifier extends EntityAttributeModifier<EntityAttribut
       CommonEvents.ENTITY_SPAWN.register(context.getUUID(), event -> {
          if (event.getEntity() instanceof LivingEntity entity && !(event.getEntity() instanceof EternalEntity var5)) {
             if (entity.level == world) {
-               if (!context.hasTarget() || context.getTarget().equals(entity.getUUID())) {
-                  this.applyToEntity(entity, context.getUUID(), context);
-                  entity.setHealth(entity.getMaxHealth());
+               if (!IModifierImmunity.of(entity).test(this)) {
+                  if (!context.hasTarget() || context.getTarget().equals(entity.getUUID())) {
+                     this.applyToEntity(entity, context.getUUID(), context);
+                     entity.setHealth(entity.getMaxHealth());
+                  }
                }
             }
          }

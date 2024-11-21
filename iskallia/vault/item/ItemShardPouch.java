@@ -136,8 +136,35 @@ public class ItemShardPouch extends Item {
       return InteractionResultHolder.pass(stack);
    }
 
+   public static boolean interceptPlayerInventoryItemAddition(Inventory playerInventory, ItemStack toAdd) {
+      if (toAdd.getItem() != ModItems.SOUL_SHARD) {
+         return false;
+      } else {
+         Player player = playerInventory.player;
+         if (player.containerMenu instanceof ShardPouchContainer) {
+            return false;
+         } else {
+            ItemStack pouchStack = ItemStack.EMPTY;
+
+            for (int slot = 0; slot < playerInventory.getContainerSize(); slot++) {
+               ItemStack invStack = playerInventory.getItem(slot);
+               if (invStack.getItem() instanceof ItemShardPouch) {
+                  pouchStack = invStack;
+                  break;
+               }
+            }
+
+            return pouchStack.isEmpty() ? false : pouchStack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(handler -> {
+               ItemStack remainder = handler.insertItem(0, toAdd, false);
+               toAdd.setCount(remainder.getCount());
+               return toAdd.isEmpty();
+            }).orElse(false);
+         }
+      }
+   }
+
    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-      return oldStack.getItem() != newStack.getItem();
+      return slotChanged || oldStack.getItem() != newStack.getItem();
    }
 
    public static NonNullSupplier<IItemHandler> getInventorySupplier(final ItemStack stack) {

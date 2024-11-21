@@ -10,6 +10,7 @@ import iskallia.vault.core.util.RegionPos;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.generator.GridGenerator;
+import iskallia.vault.core.world.generator.layout.VaultGridLayout;
 import iskallia.vault.core.world.generator.layout.VaultLayout;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.template.JigsawTemplate;
@@ -45,13 +46,13 @@ public class FindVaultRoomTask extends ProgressConfiguredTask<Integer, FindVault
          .register(
             this,
             data -> {
-               if (this.parent == null || this.parent.isCompleted()) {
+               if (this.parent == null || this.parent.hasActiveChildren()) {
                   if (context.getSource() instanceof EntityTaskSource entitySource) {
                      if (entitySource.matches(data.getListener().getId())) {
                         ServerPlayer player = data.getListener().getPlayer().orElse(null);
-                        if (player != null) {
+                        if (player != null && player.getLevel() == data.getWorld()) {
                            if (data.getVault().get(Vault.WORLD).get(WorldManager.GENERATOR) instanceof GridGenerator generator) {
-                              if (generator.get(GridGenerator.LAYOUT) instanceof VaultLayout layout) {
+                              if (generator.get(GridGenerator.LAYOUT) instanceof VaultGridLayout layout) {
                                  RegionPos var18 = RegionPos.ofBlockPos(
                                     player.blockPosition(), generator.get(GridGenerator.CELL_X), generator.get(GridGenerator.CELL_Z)
                                  );
@@ -66,11 +67,11 @@ public class FindVaultRoomTask extends ProgressConfiguredTask<Integer, FindVault
                                           template = jigsaw.getRoot();
                                        }
 
-                                       if (this.getConfig().filter == null) {
+                                       if (this.getConfig().getFilter() == null) {
                                           this.found.add(new BlockPos(var18.getX(), 0, var18.getZ()));
                                           this.getCounter().onAdd(1, context);
                                        } else {
-                                          for (ResourceLocation id : this.getConfig().filter) {
+                                          for (ResourceLocation id : this.getConfig().getFilter()) {
                                              if (template != null && id.equals(template.getKey().getId())) {
                                                 this.found.add(new BlockPos(var18.getX(), 0, var18.getZ()));
                                                 this.getCounter().onAdd(1, context);

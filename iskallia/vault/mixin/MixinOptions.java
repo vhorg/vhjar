@@ -6,12 +6,13 @@ import iskallia.vault.util.CooldownGuiOption;
 import net.minecraft.client.Options;
 import net.minecraft.client.Options.FieldAccess;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin({Options.class})
-public class MixinOptions implements IVaultOptions {
+public abstract class MixinOptions implements IVaultOptions {
    public CooldownGuiOption cooldownGuiOption = CooldownGuiOption.OFF;
    public boolean doVanillaPotionDamageEffects = false;
    public boolean hunterCustomColorsEnabled = false;
@@ -24,6 +25,9 @@ public class MixinOptions implements IVaultOptions {
    public ColorOption livingHunterSpec = new ColorOption(ColorOption.HunterSpec.LIVING, 0.0F, 1.0F, 0.0F);
    public ColorOption ornateHunterSpec = new ColorOption(ColorOption.HunterSpec.ORNATE, 0.93333334F, 0.0F, 0.0F);
    public ColorOption coinsHunterSpec = new ColorOption(ColorOption.HunterSpec.COINS, 0.8039216F, 0.44705883F, 0.15294118F);
+
+   @Shadow
+   public abstract void save();
 
    @Inject(
       method = {"processOptions"},
@@ -75,6 +79,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void cycleCooldownGuiOption() {
       this.cooldownGuiOption = this.cooldownGuiOption.cycle();
+      this.save();
    }
 
    @Override
@@ -85,6 +90,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setVanillaPotionDamageEffects(boolean vanillaPotionDamageEffects) {
       this.doVanillaPotionDamageEffects = vanillaPotionDamageEffects;
+      this.save();
    }
 
    @Override
@@ -95,6 +101,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setHunterCustomColorsEnabled(boolean hunterCustomColorsEnabled) {
       this.hunterCustomColorsEnabled = hunterCustomColorsEnabled;
+      this.save();
    }
 
    @Override
@@ -105,6 +112,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setAbilityScrollingEnabled(boolean abilityScrollingEnabled) {
       this.abilityScrollingEnabled = abilityScrollingEnabled;
+      this.save();
    }
 
    @Override
@@ -115,6 +123,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setShowPointMessages(boolean showPointMessages) {
       this.showPointMessages = showPointMessages;
+      this.save();
    }
 
    @Override
@@ -125,6 +134,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setShowRarityNames(boolean showRarityNames) {
       this.showRarityNames = showRarityNames;
+      this.save();
    }
 
    @Override
@@ -135,6 +145,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setChestHunterSpec(ColorOption option) {
       this.chestHunterSpec = option;
+      this.save();
    }
 
    @Override
@@ -145,6 +156,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setBlockHunterSpec(ColorOption option) {
       this.blockHunterSpec = option;
+      this.save();
    }
 
    @Override
@@ -155,6 +167,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setGildedHunterSpec(ColorOption option) {
       this.gildedHunterSpec = option;
+      this.save();
    }
 
    @Override
@@ -165,6 +178,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setLivingHunterSpec(ColorOption option) {
       this.livingHunterSpec = option;
+      this.save();
    }
 
    @Override
@@ -175,6 +189,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setOrnateHunterSpec(ColorOption option) {
       this.ornateHunterSpec = option;
+      this.save();
    }
 
    @Override
@@ -185,6 +200,7 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setCoinsHunterSpec(ColorOption option) {
       this.coinsHunterSpec = option;
+      this.save();
    }
 
    @Override
@@ -229,6 +245,7 @@ public class MixinOptions implements IVaultOptions {
             this.coinsHunterSpec = new ColorOption(ColorOption.HunterSpec.COINS, 0.8039216F, 0.44705883F, 0.15294118F);
             return this.coinsHunterSpec;
          default:
+            this.save();
             return null;
       }
    }
@@ -254,5 +271,7 @@ public class MixinOptions implements IVaultOptions {
          case COINS:
             this.coinsHunterSpec = option;
       }
+
+      this.save();
    }
 }

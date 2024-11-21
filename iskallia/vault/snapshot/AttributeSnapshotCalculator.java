@@ -5,7 +5,7 @@ import iskallia.vault.etching.set.EffectSet;
 import iskallia.vault.etching.set.GearAttributeSet;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
-import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
+import iskallia.vault.gear.attribute.custom.effect.EffectGearAttribute;
 import iskallia.vault.gear.attribute.type.EffectAvoidanceCombinedMerger;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.charm.CharmHelper;
@@ -156,12 +156,14 @@ public class AttributeSnapshotCalculator {
             }
          }
       );
-      computeAvoidances(snapshot);
+      computeAvoidancesAsImmunities(snapshot);
    }
 
-   private static void computeAvoidances(AttributeSnapshot snapshot) {
-      snapshot.getAttributeValue(ModGearAttributes.EFFECT_AVOIDANCE, EffectAvoidanceCombinedMerger.getInstance())
-         .getAvoidanceChances()
+   private static void computeAvoidancesAsImmunities(AttributeSnapshot snapshot) {
+      EffectAvoidanceCombinedMerger.Avoidances avoidances = EffectAvoidanceCombinedMerger.Avoidances.empty();
+      avoidances.merge(snapshot.getAttributeValue(ModGearAttributes.EFFECT_AVOIDANCE, EffectAvoidanceCombinedMerger.of()));
+      avoidances.merge(snapshot.getAttributeValue(ModGearAttributes.EFFECT_LIST_AVOIDANCE, EffectAvoidanceCombinedMerger.of()));
+      avoidances.getAvoidanceChances()
          .entrySet()
          .stream()
          .filter(entry -> entry.getValue() >= 1.0F)

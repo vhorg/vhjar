@@ -113,15 +113,21 @@ public class BingoObjective extends Objective {
          }
       }
 
-      if (this.get(TASK) instanceof BingoTask root) {
+      if (world.getTickCount() % 20 == 0 && this.get(TASK) instanceof BingoTask root) {
          for (int index = 0; index < root.getWidth() * root.getHeight(); index++) {
             if (!root.isCompleted(index)) {
                root.getChild(index).streamSelfAndDescendants(ProgressConfiguredTask.class).forEach(task -> {
                   if (task.getCounter() instanceof TargetTaskCounter<?, ?> counter && counter.isPopulated()) {
                      counter.get("targetPlayerContribution", Adapters.DOUBLE).ifPresent(contribution -> {
+                        int additional = Math.max(this.getOr(JOINED, Integer.valueOf(0)) - 1, 0);
                         if (counter.getBaseTarget() instanceof Integer base) {
-                           int additional = Math.max(this.getOr(JOINED, Integer.valueOf(0)) - 1, 0);
                            counter.setTarget((int)(base.intValue() + additional * contribution * base.intValue()));
+                        } else {
+                           if (!(counter.getBaseTarget() instanceof Float base)) {
+                              throw new UnsupportedOperationException();
+                           }
+
+                           counter.setTarget((float)(base.floatValue() + additional * contribution * base.floatValue()));
                         }
                      });
                   }

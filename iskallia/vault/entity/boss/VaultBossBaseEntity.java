@@ -3,49 +3,34 @@ package iskallia.vault.entity.boss;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.entity.VaultBoss;
-import iskallia.vault.entity.boss.attack.BossAttackMove;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.attack.IMeleeAttack;
 import iskallia.vault.world.data.ServerVaults;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class VaultBossBaseEntity extends Monster implements VaultBoss {
-   public static final EntityDataSerializer<Optional<BossAttackMove>> OPTIONAL_ATTACK_MOVE = new EntityDataSerializer<Optional<BossAttackMove>>() {
-      public void write(FriendlyByteBuf buf, Optional<BossAttackMove> value) {
-         if (value.isPresent()) {
-            buf.writeBoolean(true);
-            buf.writeEnum(value.get());
-         } else {
-            buf.writeBoolean(false);
-         }
-      }
-
-      public Optional<BossAttackMove> read(FriendlyByteBuf buf) {
-         return buf.readBoolean() ? Optional.of((BossAttackMove)buf.readEnum(BossAttackMove.class)) : Optional.empty();
-      }
-
-      public Optional<BossAttackMove> copy(Optional<BossAttackMove> value) {
-         return value;
-      }
-   };
-   protected static final EntityDataAccessor<Optional<BossAttackMove>> ACTIVE_ATTACK_MOVE = SynchedEntityData.defineId(
-      VaultBossBaseEntity.class, OPTIONAL_ATTACK_MOVE
-   );
+   protected static final EntityDataAccessor<String> ACTIVE_ATTACK_MOVE = SynchedEntityData.defineId(VaultBossBaseEntity.class, EntityDataSerializers.STRING);
    protected Vec3 spawnPosition;
+
+   public abstract Map<String, BiFunction<VaultBossBaseEntity, Double, IMeleeAttack>> getMeleeAttackFactories();
 
    public VaultBossBaseEntity(EntityType<? extends Monster> type, Level level) {
       super(type, level);
@@ -56,24 +41,22 @@ public abstract class VaultBossBaseEntity extends Monster implements VaultBoss {
    }
 
    public int getPlayerCount() {
-      return this.level instanceof ServerLevel ? ServerVaults.get(this.level).map(vault -> vault.get(Vault.LISTENERS).getAll().size()).orElse(0) : 1;
+      return this.level instanceof ServerLevel ? ServerVaults.get(this.level).map(vault -> vault.get(Vault.LISTENERS).getAll().size()).orElse(1) : 1;
    }
 
    public int getPlayerAdjustedRandomCount(int minCount, int maxCount, float additionalPlayersRatio) {
       int playerCount = this.getPlayerCount();
-      return playerCount == 0
-         ? 0
-         : this.getLevel()
-            .getRandom()
-            .nextInt(
-               (int)(minCount + (playerCount - 1) * minCount * additionalPlayersRatio),
-               (int)(maxCount + (playerCount - 1) * maxCount * additionalPlayersRatio) + 1
-            );
+      return this.getLevel()
+         .getRandom()
+         .nextInt(
+            (int)(minCount + (playerCount - 1) * minCount * additionalPlayersRatio),
+            (int)(maxCount + (playerCount - 1) * maxCount * additionalPlayersRatio) + 1
+         );
    }
 
    protected void defineSynchedData() {
       super.defineSynchedData();
-      this.entityData.define(ACTIVE_ATTACK_MOVE, Optional.empty());
+      this.entityData.define(ACTIVE_ATTACK_MOVE, "");
    }
 
    @Nullable
@@ -84,8 +67,8 @@ public abstract class VaultBossBaseEntity extends Monster implements VaultBoss {
       return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
    }
 
-   public void setActiveAttackMove(@Nullable BossAttackMove attackMove) {
-      this.entityData.set(ACTIVE_ATTACK_MOVE, Optional.ofNullable(attackMove));
+   public void setActiveAttackMove(String attackMove) {
+      this.entityData.set(ACTIVE_ATTACK_MOVE, attackMove);
    }
 
    public void addAdditionalSaveData(CompoundTag compound) {
@@ -114,13 +97,18 @@ public abstract class VaultBossBaseEntity extends Monster implements VaultBoss {
       }
    }
 
-   protected Optional<BossAttackMove> getActiveAttackMove() {
-      return (Optional<BossAttackMove>)this.entityData.get(ACTIVE_ATTACK_MOVE);
+   public Optional<String> getActiveAttackMove() {
+      String attackMove = (String)this.entityData.get(ACTIVE_ATTACK_MOVE);
+      return attackMove.isBlank() ? Optional.empty() : Optional.of(attackMove);
    }
 
-   public abstract WeightedList<MeleeAttacks.AttackData> getMeleeAttacks();
+   public boolean canAttack(LivingEntity target) {
+      return (target instanceof Player || target instanceof AbstractVillager) && super.canAttack(target);
+   }
 
-   public abstract WeightedList<MeleeAttacks.AttackData> getRageAttacks();
+   public abstract WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks();
+
+   public abstract WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks();
 
    public final Vec3 calculateViewVector(float adjustedYaw) {
       return this.calculateViewVector(this.getViewXRot(1.0F), adjustedYaw);
@@ -131,4 +119,18 @@ public abstract class VaultBossBaseEntity extends Monster implements VaultBoss {
    }
 
    public abstract double getAttackReach();
+
+   public void playAttackSound() {
+   }
+
+   public record AttackData(String name, double multiplier) {
+      public static VaultBossBaseEntity.AttackData from(CompoundTag tag) {
+         return new VaultBossBaseEntity.AttackData(tag.getString("Name"), tag.getDouble("Multiplier"));
+      }
+
+      public void serializeTo(CompoundTag tag) {
+         tag.putString("Name", this.name);
+         tag.putDouble("Multiplier", this.multiplier);
+      }
+   }
 }

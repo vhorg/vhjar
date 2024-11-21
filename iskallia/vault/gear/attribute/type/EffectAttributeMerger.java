@@ -1,6 +1,6 @@
 package iskallia.vault.gear.attribute.type;
 
-import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
+import iskallia.vault.gear.attribute.custom.effect.EffectGearAttribute;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

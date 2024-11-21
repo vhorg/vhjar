@@ -19,6 +19,7 @@ import iskallia.vault.block.BountyBlock;
 import iskallia.vault.block.CakeBlock;
 import iskallia.vault.block.CardEssenceExtractorBlock;
 import iskallia.vault.block.CatalystInfusionBlock;
+import iskallia.vault.block.ChallengeControllerBlock;
 import iskallia.vault.block.CoinPileBlock;
 import iskallia.vault.block.CoinPileDecorBlock;
 import iskallia.vault.block.ConnectingCarpet;
@@ -52,6 +53,7 @@ import iskallia.vault.block.HologramBlock;
 import iskallia.vault.block.HourglassBlock;
 import iskallia.vault.block.IdentificationStandBlock;
 import iskallia.vault.block.InscriptionTableBlock;
+import iskallia.vault.block.JewelCraftingTableBlock;
 import iskallia.vault.block.JunkGemBlock;
 import iskallia.vault.block.LodestoneBlock;
 import iskallia.vault.block.LootStatueBlock;
@@ -82,6 +84,8 @@ import iskallia.vault.block.SoulPlaqueBlock;
 import iskallia.vault.block.SparkBlock;
 import iskallia.vault.block.SpiritExtractorBlock;
 import iskallia.vault.block.StabilizerBlock;
+import iskallia.vault.block.TaskBuilderBlock;
+import iskallia.vault.block.TaskPillarBlock;
 import iskallia.vault.block.ToolStationBlock;
 import iskallia.vault.block.ToolViseBlock;
 import iskallia.vault.block.TotemManaRegenBlock;
@@ -97,6 +101,7 @@ import iskallia.vault.block.VaultAltarBlock;
 import iskallia.vault.block.VaultAnvilBlock;
 import iskallia.vault.block.VaultArtifactBlock;
 import iskallia.vault.block.VaultArtisanStationBlock;
+import iskallia.vault.block.VaultBarrelBlock;
 import iskallia.vault.block.VaultBars;
 import iskallia.vault.block.VaultBedrockBlock;
 import iskallia.vault.block.VaultCharmControllerBlock;
@@ -123,6 +128,8 @@ import iskallia.vault.block.WardrobeBlock;
 import iskallia.vault.block.WildSpawnerBlock;
 import iskallia.vault.block.base.GodAltarBlock;
 import iskallia.vault.block.base.GodAltarTileEntity;
+import iskallia.vault.block.challenge.EliteControllerProxyBlock;
+import iskallia.vault.block.challenge.RaidControllerProxyBlock;
 import iskallia.vault.block.discoverable.DiscoverTriggeringBlock;
 import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
 import iskallia.vault.block.entity.AlchemyTableTileEntity;
@@ -163,6 +170,7 @@ import iskallia.vault.block.entity.HologramTileEntity;
 import iskallia.vault.block.entity.HourglassTileEntity;
 import iskallia.vault.block.entity.IdentificationStandTileEntity;
 import iskallia.vault.block.entity.InscriptionTableTileEntity;
+import iskallia.vault.block.entity.JewelCraftingTableTileEntity;
 import iskallia.vault.block.entity.LodestoneTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
 import iskallia.vault.block.entity.MagnetTableTile;
@@ -182,6 +190,7 @@ import iskallia.vault.block.entity.SoulPlaqueTileEntity;
 import iskallia.vault.block.entity.SparkTileEntity;
 import iskallia.vault.block.entity.SpiritExtractorTileEntity;
 import iskallia.vault.block.entity.StabilizerTileEntity;
+import iskallia.vault.block.entity.TaskPillarTileEntity;
 import iskallia.vault.block.entity.ToolStationTileEntity;
 import iskallia.vault.block.entity.ToolViseTile;
 import iskallia.vault.block.entity.TotemManaRegenTileEntity;
@@ -212,6 +221,11 @@ import iskallia.vault.block.entity.VelvetBedTileEntity;
 import iskallia.vault.block.entity.VendorDoorTileEntity;
 import iskallia.vault.block.entity.WardrobeTileEntity;
 import iskallia.vault.block.entity.WildSpawnerTileEntity;
+import iskallia.vault.block.entity.challenge.elite.EliteControllerProxyBlockEntity;
+import iskallia.vault.block.entity.challenge.raid.RaidControllerBlockEntity;
+import iskallia.vault.block.entity.challenge.raid.RaidControllerProxyBlockEntity;
+import iskallia.vault.block.entity.challenge.raid.elite.EliteControllerBlockEntity;
+import iskallia.vault.block.entity.challenge.xmark.XMarkControllerBlockEntity;
 import iskallia.vault.block.item.DungeonDoorBlockItem;
 import iskallia.vault.block.item.EasterEggBlockItem;
 import iskallia.vault.block.item.FinalVaultFrameBlockItem;
@@ -233,11 +247,13 @@ import iskallia.vault.block.render.AnimatrixRenderer;
 import iskallia.vault.block.render.ArtifactProjectorRenderer;
 import iskallia.vault.block.render.BlackMarketRenderer;
 import iskallia.vault.block.render.BountyTableRenderer;
+import iskallia.vault.block.render.ChallengeControllerRenderer;
 import iskallia.vault.block.render.ConvertedSparkRenderer;
 import iskallia.vault.block.render.CrakePedestalRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
 import iskallia.vault.block.render.CrystalWorkbenchRenderer;
 import iskallia.vault.block.render.DivineAltarRenderer;
+import iskallia.vault.block.render.EliteControllerProxyRenderer;
 import iskallia.vault.block.render.EnhancementAltarRenderer;
 import iskallia.vault.block.render.EternalPedestalRenderer;
 import iskallia.vault.block.render.FinalVaultFrameRenderer;
@@ -252,6 +268,7 @@ import iskallia.vault.block.render.HologramRenderer;
 import iskallia.vault.block.render.HourglassRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
 import iskallia.vault.block.render.JewelApplicationStationRenderer;
+import iskallia.vault.block.render.JewelCraftingTableRenderer;
 import iskallia.vault.block.render.JewelCuttingStationRenderer;
 import iskallia.vault.block.render.LootStatueRenderer;
 import iskallia.vault.block.render.MagnetTableRenderer;
@@ -262,6 +279,7 @@ import iskallia.vault.block.render.MonolithRenderer;
 import iskallia.vault.block.render.OfferingPillarRenderer;
 import iskallia.vault.block.render.PotionModifierDiscoveryRenderer;
 import iskallia.vault.block.render.PylonRenderer;
+import iskallia.vault.block.render.RaidControllerProxyRenderer;
 import iskallia.vault.block.render.RelicPedestalRenderer;
 import iskallia.vault.block.render.ScavengerAltarRenderer;
 import iskallia.vault.block.render.ShopPedestalBlockTileRenderer;
@@ -270,6 +288,7 @@ import iskallia.vault.block.render.SoulPlaqueRenderer;
 import iskallia.vault.block.render.SparkRenderer;
 import iskallia.vault.block.render.SpawnerRenderer;
 import iskallia.vault.block.render.SpiritExtractorRenderer;
+import iskallia.vault.block.render.TaskPillarRenderer;
 import iskallia.vault.block.render.ToolStationRenderer;
 import iskallia.vault.block.render.ToolViseRenderer;
 import iskallia.vault.block.render.TotemManaRegenRenderer;
@@ -291,6 +310,7 @@ import iskallia.vault.client.render.AngelBlockISTER;
 import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.fluid.block.VoidFluidBlock;
 import iskallia.vault.item.CoinBlockItem;
+import iskallia.vault.item.IdentifiedArtifactItem;
 import iskallia.vault.item.SconceItem;
 import iskallia.vault.item.VaultChestBlockItem;
 import iskallia.vault.item.VaultSweetsBlockItem;
@@ -360,6 +380,11 @@ public class ModBlocks {
    public static final GateLockBlock GATE_LOCK = new GateLockBlock();
    public static final HologramBlock HOLOGRAM = new HologramBlock();
    public static final HeraldControllerBlock HERALD_CONTROLLER = new HeraldControllerBlock();
+   public static final ChallengeControllerBlock RAID_CONTROLLER = new ChallengeControllerBlock(() -> ModBlocks.RAID_CONTROLLER_TILE_ENTITY);
+   public static final ChallengeControllerBlock X_MARK_CONTROLLER = new ChallengeControllerBlock(() -> ModBlocks.X_MARK_CONTROLLER_TILE_ENTITY);
+   public static final ChallengeControllerBlock ELITE_CONTROLLER = new ChallengeControllerBlock(() -> ModBlocks.ELITE_CONTROLLER_TILE_ENTITY);
+   public static final RaidControllerProxyBlock RAID_CONTROLLER_PROXY = new RaidControllerProxyBlock();
+   public static final EliteControllerProxyBlock ELITE_CONTROLLER_PROXY = new EliteControllerProxyBlock();
    public static final VaultArtifactBlock VAULT_ARTIFACT = new VaultArtifactBlock();
    public static final VaultCrateBlock VAULT_CRATE = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_CAKE = new VaultCrateBlock();
@@ -379,6 +404,8 @@ public class ModBlocks {
    public static final CrakePedestalBlock CRAKE_PEDESTAL = new CrakePedestalBlock();
    public static final CrakeColumnBlock CRAKE_COLUMN = new CrakeColumnBlock();
    public static final GridGatewayBlock GRID_GATEWAY = new GridGatewayBlock();
+   public static final TaskPillarBlock TASK_PILLAR = new TaskPillarBlock();
+   public static final TaskBuilderBlock TASK_BUILDER = new TaskBuilderBlock();
    public static final PylonBlock PYLON = new PylonBlock();
    public static final VaultEnhancementAltar ENHANCEMENT_ALTAR = new VaultEnhancementAltar();
    public static final MVPCrownBlock MVP_CROWN = new MVPCrownBlock();
@@ -423,6 +450,7 @@ public class ModBlocks {
    public static final VaultArtisanStationBlock VAULT_ARTISAN_STATION = new VaultArtisanStationBlock();
    public static final VaultJewelCuttingStationBlock VAULT_JEWEL_CUTTING_STATION = new VaultJewelCuttingStationBlock();
    public static final VaultJewelApplicationStationBlock VAULT_JEWEL_APPLICATION_STATION = new VaultJewelApplicationStationBlock();
+   public static final JewelCraftingTableBlock JEWEL_CRAFTING_TABLE = new JewelCraftingTableBlock();
    public static final CrystalWorkbenchBlock CRYSTAL_WORKBENCH = new CrystalWorkbenchBlock();
    public static final VaultRecyclerBlock VAULT_RECYCLER = new VaultRecyclerBlock();
    public static final VaultDiffuserBlock VAULT_DIFFUSER = new VaultDiffuserBlock();
@@ -463,13 +491,46 @@ public class ModBlocks {
       VaultChestType.ALTAR, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(-1.0F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block ORNATE_STRONGBOX = new VaultChestBlock(
-      VaultChestType.ORNATE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(50.0F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.ORNATE,
+      true,
+      true,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(50.0F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block GILDED_STRONGBOX = new VaultChestBlock(
-      VaultChestType.GILDED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(50.0F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.GILDED,
+      true,
+      true,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(50.0F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block LIVING_STRONGBOX = new VaultChestBlock(
-      VaultChestType.LIVING, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(50.0F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.LIVING,
+      true,
+      true,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(50.0F, 5.0F).sound(SoundType.STONE)
+   );
+   public static final Block ORNATE_BARREL = new VaultBarrelBlock(
+      VaultChestType.ORNATE,
+      true,
+      false,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BARREL).strength(60.0F, 5.0F).sound(SoundType.STONE)
+   );
+   public static final Block GILDED_BARREL = new VaultBarrelBlock(
+      VaultChestType.GILDED,
+      true,
+      false,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BARREL).strength(60.0F, 5.0F).sound(SoundType.STONE)
+   );
+   public static final Block LIVING_BARREL = new VaultBarrelBlock(
+      VaultChestType.LIVING,
+      true,
+      false,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BARREL).strength(60.0F, 5.0F).sound(SoundType.STONE)
+   );
+   public static final Block WOODEN_BARREL = new VaultBarrelBlock(
+      VaultChestType.WOODEN,
+      true,
+      false,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BARREL).strength(60.0F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block WOODEN_CHEST_PLACEABLE = new VaultChestBlock(
       VaultChestType.WOODEN, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.3F)
@@ -885,6 +946,8 @@ public class ModBlocks {
       DyeColor.YELLOW, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.YELLOW_STAINED_GLASS_PANE)
    );
    public static final Block COMPRESSED_SOOT_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SNOW_BLOCK));
+   public static final Block VAULT_ASH = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SAND).sound(SoundType.SAND));
+   public static final Block DRY_VAULT_ASH = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SAND).sound(SoundType.SAND));
    public static final Block FOOLS_GOLD_BLOCK = new Block(
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).noOcclusion()
    );
@@ -926,6 +989,10 @@ public class ModBlocks {
    public static final BlockItem ORNATE_STRONGBOX_ITEM = new VaultChestBlockItem(ORNATE_STRONGBOX, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem GILDED_STRONGBOX_ITEM = new VaultChestBlockItem(GILDED_STRONGBOX, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem LIVING_STRONGBOX_ITEM = new VaultChestBlockItem(LIVING_STRONGBOX, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem ORNATE_BARREL_ITEM = new VaultChestBlockItem(ORNATE_BARREL, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem GILDED_BARREL_ITEM = new VaultChestBlockItem(GILDED_BARREL, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem LIVING_BARREL_ITEM = new VaultChestBlockItem(LIVING_BARREL, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem WOODEN_BARREL_ITEM = new VaultChestBlockItem(WOODEN_BARREL, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem HARDENED_CHEST_ITEM = new VaultChestBlockItem(HARDENED_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem ENIGMA_CHEST_ITEM = new VaultChestBlockItem(ENIGMA_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem FLESH_CHEST_ITEM = new VaultChestBlockItem(FLESH_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
@@ -1073,6 +1140,26 @@ public class ModBlocks {
          HeraldControllerTileEntity::new, new Block[]{HERALD_CONTROLLER}
       )
       .build(null);
+   public static final BlockEntityType<RaidControllerBlockEntity> RAID_CONTROLLER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         RaidControllerBlockEntity::new, new Block[]{RAID_CONTROLLER}
+      )
+      .build(null);
+   public static final BlockEntityType<XMarkControllerBlockEntity> X_MARK_CONTROLLER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         XMarkControllerBlockEntity::new, new Block[]{X_MARK_CONTROLLER}
+      )
+      .build(null);
+   public static final BlockEntityType<EliteControllerBlockEntity> ELITE_CONTROLLER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         EliteControllerBlockEntity::new, new Block[]{ELITE_CONTROLLER}
+      )
+      .build(null);
+   public static final BlockEntityType<RaidControllerProxyBlockEntity> RAID_CONTROLLER_PROXY_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         RaidControllerProxyBlockEntity::new, new Block[]{RAID_CONTROLLER_PROXY}
+      )
+      .build(null);
+   public static final BlockEntityType<EliteControllerProxyBlockEntity> ELITE_CONTROLLER_PROXY_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         EliteControllerProxyBlockEntity::new, new Block[]{ELITE_CONTROLLER_PROXY}
+      )
+      .build(null);
    public static final BlockEntityType<VaultChestTileEntity> VAULT_CHEST_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultChestTileEntity::new,
          new Block[]{
@@ -1096,7 +1183,11 @@ public class ModBlocks {
             TREASURE_CHEST_PLACEABLE,
             ORNATE_STRONGBOX,
             GILDED_STRONGBOX,
-            LIVING_STRONGBOX
+            LIVING_STRONGBOX,
+            ORNATE_BARREL,
+            GILDED_BARREL,
+            LIVING_BARREL,
+            WOODEN_BARREL
          }
       )
       .build(null);
@@ -1206,6 +1297,10 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<VaultJewelApplicationStationTileEntity> VAULT_JEWEL_APPLICATION_STATION_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultJewelApplicationStationTileEntity::new, new Block[]{VAULT_JEWEL_APPLICATION_STATION}
+      )
+      .build(null);
+   public static final BlockEntityType<JewelCraftingTableTileEntity> JEWEL_CRAFTING_TABLE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         JewelCraftingTableTileEntity::new, new Block[]{JEWEL_CRAFTING_TABLE}
       )
       .build(null);
    public static final BlockEntityType<CrystalWorkbenchTileEntity> CRYSTAL_WORKBENCH_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
@@ -1368,6 +1463,10 @@ public class ModBlocks {
          GridGatewayTileEntity::new, new Block[]{GRID_GATEWAY}
       )
       .build(null);
+   public static final BlockEntityType<TaskPillarTileEntity> TASK_PILLAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         TaskPillarTileEntity::new, new Block[]{TASK_PILLAR}
+      )
+      .build(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, ERROR_BLOCK, VaultMod.id("error_block"));
@@ -1400,6 +1499,11 @@ public class ModBlocks {
       registerBlock(event, GATE_LOCK, VaultMod.id("gate_lock"));
       registerBlock(event, HOLOGRAM, VaultMod.id("hologram"));
       registerBlock(event, HERALD_CONTROLLER, VaultMod.id("herald_controller"));
+      registerBlock(event, RAID_CONTROLLER, VaultMod.id("raid_controller"));
+      registerBlock(event, X_MARK_CONTROLLER, VaultMod.id("x_mark_controller"));
+      registerBlock(event, ELITE_CONTROLLER, VaultMod.id("elite_controller"));
+      registerBlock(event, RAID_CONTROLLER_PROXY, VaultMod.id("raid_controller_proxy"));
+      registerBlock(event, ELITE_CONTROLLER_PROXY, VaultMod.id("elite_controller_proxy"));
       registerBlock(event, VAULT_ARTIFACT, VaultMod.id("vault_artifact"));
       registerBlock(event, VAULT_CRATE, VaultMod.id("vault_crate"));
       registerBlock(event, VAULT_CRATE_CAKE, VaultMod.id("vault_crate_cake"));
@@ -1419,6 +1523,8 @@ public class ModBlocks {
       registerBlock(event, CRAKE_PEDESTAL, VaultMod.id("crake_pedestal"));
       registerBlock(event, CRAKE_COLUMN, VaultMod.id("crake_column"));
       registerBlock(event, GRID_GATEWAY, VaultMod.id("grid_gateway"));
+      registerBlock(event, TASK_PILLAR, VaultMod.id("task_pillar"));
+      registerBlock(event, TASK_BUILDER, VaultMod.id("task_builder"));
       registerBlock(event, PYLON, VaultMod.id("pylon"));
       registerBlock(event, ENHANCEMENT_ALTAR, VaultMod.id("enhancement_altar"));
       registerBlock(event, MVP_CROWN, VaultMod.id("mvp_crown"));
@@ -1453,6 +1559,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_ARTISAN_STATION, VaultMod.id("vault_artisan_station"));
       registerBlock(event, VAULT_JEWEL_CUTTING_STATION, VaultMod.id("vault_jewel_cutting_station"));
       registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, VaultMod.id("vault_jewel_application_station"));
+      registerBlock(event, JEWEL_CRAFTING_TABLE, VaultMod.id("jewel_crafting_table"));
       registerBlock(event, CRYSTAL_WORKBENCH, VaultMod.id("crystal_workbench"));
       registerBlock(event, VAULT_RECYCLER, VaultMod.id("vault_recycler"));
       registerBlock(event, VAULT_DIFFUSER, VaultMod.id("vault_diffuser"));
@@ -1473,6 +1580,10 @@ public class ModBlocks {
       registerBlock(event, ORNATE_STRONGBOX, VaultMod.id("ornate_strongbox"));
       registerBlock(event, GILDED_STRONGBOX, VaultMod.id("gilded_strongbox"));
       registerBlock(event, LIVING_STRONGBOX, VaultMod.id("living_strongbox"));
+      registerBlock(event, ORNATE_BARREL, VaultMod.id("ornate_barrel"));
+      registerBlock(event, GILDED_BARREL, VaultMod.id("gilded_barrel"));
+      registerBlock(event, LIVING_BARREL, VaultMod.id("living_barrel"));
+      registerBlock(event, WOODEN_BARREL, VaultMod.id("wooden_barrel"));
       registerBlock(event, HARDENED_CHEST, VaultMod.id("hardened_chest"));
       registerBlock(event, ENIGMA_CHEST, VaultMod.id("enigma_chest"));
       registerBlock(event, FLESH_CHEST, VaultMod.id("flesh_chest"));
@@ -1695,6 +1806,8 @@ public class ModBlocks {
       registerBlock(event, DRIFTWOOD_SLAB, VaultMod.id("driftwood_slab"));
       registerBlock(event, DRIFTWOOD_STAIRS, VaultMod.id("driftwood_stairs"));
       registerBlock(event, COMPRESSED_SOOT_BLOCK, VaultMod.id("compressed_soot_block"));
+      registerBlock(event, VAULT_ASH, VaultMod.id("vault_ash"));
+      registerBlock(event, DRY_VAULT_ASH, VaultMod.id("dry_vault_ash"));
       registerBlock(event, FOOLS_GOLD_BLOCK, VaultMod.id("fools_gold"));
       registerBlock(event, TOTEM_PLAYER_HEALTH, VaultMod.id("totem_of_rejuvenation"));
       registerBlock(event, TOTEM_MOB_DAMAGE, VaultMod.id("totem_of_hatred"));
@@ -1727,6 +1840,11 @@ public class ModBlocks {
       registerTileEntity(event, HOLOGRAM_TILE_ENTITY, VaultMod.id("hologram_tile_entity"));
       registerTileEntity(event, SOUL_PLAQUE_TILE_ENTITY, VaultMod.id("soul_plaque_tile_entity"));
       registerTileEntity(event, HERALD_CONTROLLER_TILE_ENTITY, VaultMod.id("herald_controller_tile_entity"));
+      registerTileEntity(event, RAID_CONTROLLER_TILE_ENTITY, VaultMod.id("raid_controller_tile_entity"));
+      registerTileEntity(event, X_MARK_CONTROLLER_TILE_ENTITY, VaultMod.id("x_mark_controller_tile_entity"));
+      registerTileEntity(event, ELITE_CONTROLLER_TILE_ENTITY, VaultMod.id("elite_controller_tile_entity"));
+      registerTileEntity(event, RAID_CONTROLLER_PROXY_TILE_ENTITY, VaultMod.id("raid_controller_proxy_tile_entity"));
+      registerTileEntity(event, ELITE_CONTROLLER_PROXY_TILE_ENTITY, VaultMod.id("elite_controller_proxy_tile_entity"));
       registerTileEntity(event, VAULT_CHEST_TILE_ENTITY, VaultMod.id("vault_chest_tile_entity"));
       registerTileEntity(event, GOD_ALTAR_TILE_ENTITY, VaultMod.id("god_altar_tile_entity"));
       registerTileEntity(event, OBELISK_TILE_ENTITY, VaultMod.id("obelisk_tile_entity"));
@@ -1755,6 +1873,7 @@ public class ModBlocks {
       registerTileEntity(event, VAULT_ARTISAN_STATION_ENTITY, VaultMod.id("vault_artisan_station_tile_entity"));
       registerTileEntity(event, VAULT_JEWEL_CUTTING_STATION_ENTITY, VaultMod.id("vault_jewel_cutting_station_tile_entity"));
       registerTileEntity(event, VAULT_JEWEL_APPLICATION_STATION_ENTITY, VaultMod.id("vault_jewel_application_station_tile_entity"));
+      registerTileEntity(event, JEWEL_CRAFTING_TABLE_ENTITY, VaultMod.id("jewel_crafting_table_tile_entity"));
       registerTileEntity(event, CRYSTAL_WORKBENCH_ENTITY, VaultMod.id("crystal_workbench_tile_entity"));
       registerTileEntity(event, VAULT_RECYCLER_ENTITY, VaultMod.id("vault_recycler_tile_entity"));
       registerTileEntity(event, VAULT_DIFFUSER_ENTITY, VaultMod.id("vault_diffuser_tile_entity"));
@@ -1795,6 +1914,7 @@ public class ModBlocks {
       registerTileEntity(event, ASCENSION_FORGE_TILE_ENTITY, VaultMod.id("ascension_forge_tile_entity"));
       registerTileEntity(event, OFFERING_PILLAR_TILE_ENTITY, VaultMod.id("offering_pillar_tile_entity"));
       registerTileEntity(event, GRID_GATEWAY_TILE_ENTITY, VaultMod.id("grid_gateway_tile_entity"));
+      registerTileEntity(event, TASK_PILLAR_TILE_ENTITY, VaultMod.id("task_pillar_tile_entity"));
    }
 
    public static void registerTileEntityRenderers(RegisterRenderers event) {
@@ -1835,6 +1955,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOOL_STATION_TILE_ENTITY, ToolStationRenderer::new);
       event.registerBlockEntityRenderer(VAULT_JEWEL_CUTTING_STATION_ENTITY, JewelCuttingStationRenderer::new);
       event.registerBlockEntityRenderer(VAULT_JEWEL_APPLICATION_STATION_ENTITY, JewelApplicationStationRenderer::new);
+      event.registerBlockEntityRenderer(JEWEL_CRAFTING_TABLE_ENTITY, JewelCraftingTableRenderer::new);
       event.registerBlockEntityRenderer(CRYSTAL_WORKBENCH_ENTITY, CrystalWorkbenchRenderer::new);
       event.registerBlockEntityRenderer(ENHANCEMENT_ALTAR_TILE_ENTITY, EnhancementAltarRenderer::new);
       event.registerBlockEntityRenderer(MODIFIER_DISCOVERY_ENTITY, ModifierDiscoveryRenderer::new);
@@ -1857,11 +1978,17 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(SOUL_PLAQUE_TILE_ENTITY, SoulPlaqueRenderer::new);
       event.registerBlockEntityRenderer(SPARK_TILE_ENTITY, SparkRenderer::new);
       event.registerBlockEntityRenderer(HERALD_CONTROLLER_TILE_ENTITY, HeraldControllerRenderer::new);
+      event.registerBlockEntityRenderer(RAID_CONTROLLER_TILE_ENTITY, ChallengeControllerRenderer::new);
+      event.registerBlockEntityRenderer(X_MARK_CONTROLLER_TILE_ENTITY, ChallengeControllerRenderer::new);
+      event.registerBlockEntityRenderer(ELITE_CONTROLLER_TILE_ENTITY, ChallengeControllerRenderer::new);
+      event.registerBlockEntityRenderer(RAID_CONTROLLER_PROXY_TILE_ENTITY, RaidControllerProxyRenderer::new);
+      event.registerBlockEntityRenderer(ELITE_CONTROLLER_PROXY_TILE_ENTITY, EliteControllerProxyRenderer::new);
       event.registerBlockEntityRenderer(CONVERTED_SPARK_TILE_ENTITY, ConvertedSparkRenderer::new);
       event.registerBlockEntityRenderer(ANIMATRIX_TILE_ENTITY, AnimatrixRenderer::new);
       event.registerBlockEntityRenderer(MONOLITH_TILE_ENTITY, MonolithRenderer::new);
       event.registerBlockEntityRenderer(OFFERING_PILLAR_TILE_ENTITY, OfferingPillarRenderer::new);
       event.registerBlockEntityRenderer(GRID_GATEWAY_TILE_ENTITY, GridGatewayRenderer::new);
+      event.registerBlockEntityRenderer(TASK_PILLAR_TILE_ENTITY, TaskPillarRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -1889,7 +2016,7 @@ public class ModBlocks {
       registerBlockItem(event, WUTODIE_ORE, new VaultOreBlockItem(WUTODIE_ORE));
       registerBlockItem(event, XENIUM_ORE, new VaultOreBlockItem(XENIUM_ORE));
       registerBlockItem(event, VAULT_ROCK_ORE);
-      registerBlockItem(event, VAULT_ARTIFACT, 1);
+      registerBlockItem(event, VAULT_ARTIFACT, new IdentifiedArtifactItem(VAULT_ARTIFACT, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1)));
       registerBlockItem(event, VAULT_CRATE, 1, Properties::fireResistant);
       registerBlockItem(event, VAULT_CRATE_CAKE, 1, Properties::fireResistant);
       registerBlockItem(event, VAULT_CRATE_ARENA, 1, Properties::fireResistant);
@@ -1908,6 +2035,7 @@ public class ModBlocks {
       registerBlockItem(event, CRAKE_PEDESTAL, 1);
       registerBlockItem(event, CRAKE_COLUMN);
       registerBlockItem(event, GRID_GATEWAY);
+      registerBlockItem(event, TASK_BUILDER);
       registerBlockItem(event, PYLON, 1);
       registerBlockItem(event, ENHANCEMENT_ALTAR, 1);
       registerBlockItem(event, MVP_CROWN, 1);
@@ -1946,6 +2074,10 @@ public class ModBlocks {
       registerBlockItem(event, ORNATE_STRONGBOX, ORNATE_STRONGBOX_ITEM);
       registerBlockItem(event, GILDED_STRONGBOX, GILDED_STRONGBOX_ITEM);
       registerBlockItem(event, LIVING_STRONGBOX, LIVING_STRONGBOX_ITEM);
+      registerBlockItem(event, ORNATE_BARREL, ORNATE_BARREL_ITEM);
+      registerBlockItem(event, GILDED_BARREL, GILDED_BARREL_ITEM);
+      registerBlockItem(event, LIVING_BARREL, LIVING_BARREL_ITEM);
+      registerBlockItem(event, WOODEN_BARREL, WOODEN_BARREL_ITEM);
       registerBlockItem(event, WOODEN_CHEST_PLACEABLE, WOODEN_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, ALTAR_CHEST_PLACEABLE, ALTAR_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, GILDED_CHEST_PLACEABLE, GILDED_CHEST_ITEM_PLACEABLE);
@@ -1969,6 +2101,11 @@ public class ModBlocks {
       registerBlockItem(event, GATE_LOCK);
       registerBlockItem(event, HOLOGRAM);
       registerBlockItem(event, HERALD_CONTROLLER);
+      registerBlockItem(event, RAID_CONTROLLER, 1);
+      registerBlockItem(event, X_MARK_CONTROLLER, 1);
+      registerBlockItem(event, ELITE_CONTROLLER, 1);
+      registerBlockItem(event, RAID_CONTROLLER_PROXY, 1);
+      registerBlockItem(event, ELITE_CONTROLLER_PROXY, 1);
       registerBlockItem(event, DUNGEON_DOOR, new DungeonDoorBlockItem());
       registerBlockItem(event, VENDOR_DOOR, new VendorDoorBlockItem());
       registerBlockItem(event, COIN_PILE);
@@ -1994,6 +2131,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_ARTISAN_STATION);
       registerBlockItem(event, VAULT_JEWEL_CUTTING_STATION);
       registerBlockItem(event, VAULT_JEWEL_APPLICATION_STATION);
+      registerBlockItem(event, JEWEL_CRAFTING_TABLE);
       registerBlockItem(event, CRYSTAL_WORKBENCH);
       registerBlockItem(event, VAULT_RECYCLER);
       registerBlockItem(event, VAULT_DIFFUSER);
@@ -2180,6 +2318,8 @@ public class ModBlocks {
       registerBlockItem(event, DRIFTWOOD_SLAB);
       registerBlockItem(event, DRIFTWOOD_STAIRS);
       registerBlockItem(event, COMPRESSED_SOOT_BLOCK);
+      registerBlockItem(event, VAULT_ASH);
+      registerBlockItem(event, DRY_VAULT_ASH);
       registerBlockItem(event, FOOLS_GOLD_BLOCK);
       registerBlockItem(event, OFFERING_PILLAR);
       registerBlockItem(event, BARRED_DOOR, new DoubleHighBlockItem(BARRED_DOOR, new Properties().tab(ModItems.VAULT_MOD_GROUP)));

@@ -154,13 +154,13 @@ public class EntityDefinitionElement extends ElasticContainerElement<EntityDefin
          dropDetails.add(new TextComponent(" "));
          IntRangeEntry amount = drop.getAmount();
          TranslatableComponent amountComponent = new TranslatableComponent(
-            "screen.the_vault.bestiary.drop_amount", new Object[]{amount.min == -1 ? "?" : amount.min, amount.max == -1 ? "?" : amount.max}
+            "screen.the_vault.bestiary.drop_amount", new Object[]{amount.getMin() == -1 ? "?" : amount.getMin(), amount.getMax() == -1 ? "?" : amount.getMax()}
          );
          dropDetails.add(amountComponent);
          IntRangeEntry probability = drop.getProbability();
          TranslatableComponent probabilityComponent = new TranslatableComponent(
             "screen.the_vault.bestiary.drop_probability",
-            new Object[]{probability.min == -1 ? "?" : probability.min + "%", probability.max == -1 ? "?" : probability.max + "%"}
+            new Object[]{probability.getMin() == -1 ? "?" : probability.getMin() + "%", probability.getMax() == -1 ? "?" : probability.getMax() + "%"}
          );
          dropDetails.add(probabilityComponent);
          FakeItemSlotElement<?> slotElement = new FakeItemSlotElement(Spatials.positionXY(stackX, stackY), drop::getStack, () -> false)

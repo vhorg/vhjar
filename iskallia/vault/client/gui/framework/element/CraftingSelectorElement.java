@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,9 +98,18 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
          this.craftingLevelSupplier = craftingLevelSupplier;
       }
 
+      private boolean canCreativeCraft() {
+         Player player = Minecraft.getInstance().player;
+         return player != null && player.isCreative();
+      }
+
       public boolean canCraft() {
-         List<ItemStack> inputs = this.recipe.getInputs();
-         return this.inputItemCheck.apply(inputs).isEmpty();
+         if (this.canCreativeCraft()) {
+            return true;
+         } else {
+            List<ItemStack> inputs = this.recipe.getInputs();
+            return this.inputItemCheck.apply(inputs).isEmpty();
+         }
       }
 
       @Override
@@ -119,6 +129,10 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
             } else {
                List<ItemStack> inputs = this.recipe.getInputs();
                List<ItemStack> missingInputs = this.inputItemCheck.apply(inputs);
+               if (this.canCreativeCraft()) {
+                  missingInputs.clear();
+               }
+
                List<Component> text = new ArrayList<>();
                ItemStack result = this.recipe.getDisplayOutput(this.craftingLevelSupplier.get());
                text.add(new TextComponent("Craft: ").append(result.getHoverName()));

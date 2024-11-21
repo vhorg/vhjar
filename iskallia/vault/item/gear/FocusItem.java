@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -55,17 +56,17 @@ public class FocusItem extends BasicItem implements VaultGearItem {
       return ProficiencyType.FOCUS;
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return EquipmentSlot.OFFHAND;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.FOCUS;
    }
 
    @Nullable
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       VaultGearData gearData = VaultGearData.read(stack);
-      EquipmentSlot intendedSlot = this.getIntendedSlot(stack);
+      EquipmentSlot intendedSlot = this.getGearType(stack).getEquipmentSlot();
       return ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRandomRoll(stack, gearData, intendedSlot, random);
    }
 

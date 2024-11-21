@@ -53,7 +53,7 @@ public class AnimatrixBlock extends FacedBlock implements EntityBlock {
 
             return InteractionResult.SUCCESS;
          } else {
-            if (itemStack.isEmpty()) {
+            if (itemStack.isEmpty() && !tileEntity.isDisplayOnly()) {
                if (itemHandler.getStackInSlot(0).isEmpty()) {
                   return InteractionResult.FAIL;
                }
@@ -69,7 +69,7 @@ public class AnimatrixBlock extends FacedBlock implements EntityBlock {
 
    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
       AnimatrixTileEntity tileEntity = (AnimatrixTileEntity)level.getBlockEntity(pos);
-      if (tileEntity != null) {
+      if (tileEntity != null && !tileEntity.isDisplayOnly()) {
          InventoryHelper.dropItems(tileEntity.getItemHandler(), level, pos);
       }
 

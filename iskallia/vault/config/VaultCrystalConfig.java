@@ -190,7 +190,7 @@ public class VaultCrystalConfig extends Config {
       );
    }
 
-   private static class LayoutEntry implements LevelEntryList.ILevelEntry {
+   public static class LayoutEntry implements LevelEntryList.ILevelEntry {
       @Expose
       public int level;
       @Expose
@@ -225,7 +225,7 @@ public class VaultCrystalConfig extends Config {
       public int sanctityLevelCost = 4;
    }
 
-   private static class ObjectiveEntry implements LevelEntryList.ILevelEntry {
+   public static class ObjectiveEntry implements LevelEntryList.ILevelEntry {
       @Expose
       public int level;
       @Expose
@@ -242,7 +242,7 @@ public class VaultCrystalConfig extends Config {
       }
    }
 
-   private static class PropertiesEntry implements LevelEntryList.ILevelEntry {
+   public static class PropertiesEntry implements LevelEntryList.ILevelEntry {
       @Expose
       public int level;
       @Expose
@@ -303,7 +303,7 @@ public class VaultCrystalConfig extends Config {
       }
    }
 
-   private static class ThemeEntry implements LevelEntryList.ILevelEntry {
+   public static class ThemeEntry implements LevelEntryList.ILevelEntry {
       @Expose
       public int level;
       @Expose
@@ -320,7 +320,7 @@ public class VaultCrystalConfig extends Config {
       }
    }
 
-   private static class TimeEntry implements LevelEntryList.ILevelEntry {
+   public static class TimeEntry implements LevelEntryList.ILevelEntry {
       @Expose
       public int level;
       @Expose

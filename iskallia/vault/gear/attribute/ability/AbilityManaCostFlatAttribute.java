@@ -15,7 +15,7 @@ public class AbilityManaCostFlatAttribute extends AbilityFloatValueAttribute {
       super(abilityKey, amount);
    }
 
-   public float adjustManaCost(String ability, float manaCost) {
+   public float adjustManaCost(@Nullable String ability, float manaCost) {
       return this.affectsAbility(ability) ? manaCost + this.getAmount() : manaCost;
    }
 
@@ -52,7 +52,7 @@ public class AbilityManaCostFlatAttribute extends AbilityFloatValueAttribute {
                .append(" to ")
                .append(manaCostCmp)
                .append(" of ")
-               .append(new TextComponent(attribute.getAbilityKey()).withStyle(this.getAbilityStyle()))
+               .append(this.formatAbilityName(attribute.getAbilityKey()))
                .setStyle(this.getColoredTextStyle());
          }
       }
@@ -70,7 +70,7 @@ public class AbilityManaCostFlatAttribute extends AbilityFloatValueAttribute {
             out.add(type.getAffixPrefix(attribute.getAmount() >= 0.0F));
             out.add(valueDisplay.getString());
             out.add(" to Mana Cost of ");
-            out.add(attribute.getAbilityKey());
+            out.add(this.formatAbilityName(attribute.getAbilityKey()).getString());
          }
       }
    }

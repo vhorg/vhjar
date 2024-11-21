@@ -17,7 +17,7 @@ public class ThrowAttack implements IMeleeAttack {
    private final double damageMultiplier;
    private boolean hasThrown = false;
    private int throwCooldown = 0;
-   private final Set<UUID> playersThrown = new HashSet<>();
+   private final Set<UUID> entitiesThrown = new HashSet<>();
 
    public ThrowAttack(VaultBossBaseEntity artifactBossEntity, double damageMultiplier) {
       this.artifactBossEntity = artifactBossEntity;
@@ -26,17 +26,17 @@ public class ThrowAttack implements IMeleeAttack {
 
    @Override
    public boolean start(LivingEntity target, double distToTarget, double reach) {
-      List<Player> players = this.artifactBossEntity
+      List<LivingEntity> entities = this.artifactBossEntity
          .getLevel()
-         .getNearbyPlayers(TARGETING_CONDITIONS, this.artifactBossEntity, this.artifactBossEntity.getBoundingBox().inflate(5.0));
-      if (!players.isEmpty()) {
+         .getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this.artifactBossEntity, this.artifactBossEntity.getBoundingBox().inflate(5.0));
+      if (!entities.isEmpty()) {
          this.throwCooldown = 30;
-         players.forEach(player -> {
+         entities.forEach(player -> {
             player.hasImpulse = true;
             player.setNoGravity(true);
             player.setDeltaMovement(player.position().subtract(this.artifactBossEntity.position()).normalize().multiply(0.3, 0.0, 0.3).add(0.0, 0.1, 0.0));
             player.hurtMarked = true;
-            this.playersThrown.add(player.getUUID());
+            this.entitiesThrown.add(player.getUUID());
          });
          return true;
       } else {
@@ -47,31 +47,31 @@ public class ThrowAttack implements IMeleeAttack {
    @Override
    public void stop() {
       this.hasThrown = false;
-      this.playersThrown.forEach(playerId -> {
+      this.entitiesThrown.forEach(playerId -> {
          Player player = this.artifactBossEntity.getLevel().getPlayerByUUID(playerId);
          if (player != null) {
             player.setNoGravity(false);
          }
       });
-      this.playersThrown.clear();
+      this.entitiesThrown.clear();
    }
 
    @Override
    public void tick(double reach) {
       if (!this.hasThrown && --this.throwCooldown <= 0) {
-         List<Player> players = this.artifactBossEntity
+         List<LivingEntity> entities = this.artifactBossEntity
             .getLevel()
-            .getNearbyPlayers(TARGETING_CONDITIONS_WIDER, this.artifactBossEntity, this.artifactBossEntity.getBoundingBox().inflate(7.0));
-         players.forEach(player -> {
-            if (this.playersThrown.contains(player.getUUID())) {
+            .getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS_WIDER, this.artifactBossEntity, this.artifactBossEntity.getBoundingBox().inflate(7.0));
+         entities.forEach(player -> {
+            if (this.entitiesThrown.contains(player.getUUID())) {
                player.setNoGravity(false);
                player.hasImpulse = true;
                player.setDeltaMovement(player.position().subtract(this.artifactBossEntity.position()).normalize().multiply(10.0, 1.0, 10.0).add(0.0, 0.2, 0.0));
                player.hurtMarked = true;
-               this.playersThrown.remove(player.getUUID());
+               this.entitiesThrown.remove(player.getUUID());
             }
          });
-         this.playersThrown.forEach(playerId -> {
+         this.entitiesThrown.forEach(playerId -> {
             Player player = this.artifactBossEntity.getLevel().getPlayerByUUID(playerId);
             if (player != null) {
                player.setNoGravity(false);
@@ -87,7 +87,7 @@ public class ThrowAttack implements IMeleeAttack {
    }
 
    @Override
-   public Optional<BossAttackMove> getAttackMove() {
-      return Optional.of(BossAttackMove.SUMMON);
+   public Optional<String> getAttackMove() {
+      return Optional.of("summon");
    }
 }

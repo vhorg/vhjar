@@ -113,7 +113,7 @@ public class MenuPlayerStatDescriptionConfig extends Config {
             this.put(ModGearAttributes.ITEM_QUANTITY.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.ITEM_RARITY.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.TRAP_DISARMING.getRegistryName(), "Configure me!");
-            this.put(ModGearAttributes.SOUL_CHANCE.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.SOUL_QUANTITY.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.DAMAGE_INCREASE.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.DAMAGE_ILLAGERS.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.DAMAGE_SPIDERS.getRegistryName(), "Configure me!");

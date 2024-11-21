@@ -8,6 +8,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.layout.ClassicPresetLayout;
+import iskallia.vault.core.world.generator.layout.VaultGridLayout;
 import iskallia.vault.core.world.generator.layout.VaultLayout;
 import iskallia.vault.core.world.template.data.DirectTemplateEntry;
 import iskallia.vault.core.world.template.data.TemplatePool;
@@ -28,7 +29,10 @@ public class HeraldCrystalLayout extends ClassicInfiniteCrystalLayout {
 
    public StructurePreset getPreset() {
       return new StructurePreset()
-         .put(RegionPos.ORIGIN, new PoolTemplatePreset(new TemplatePool().addLeaf(new DirectTemplateEntry(VaultMod.id("vault/starts/herald")), 1.0)));
+         .put(
+            RegionPos.ORIGIN,
+            new PoolTemplatePreset(VaultLayout.PieceType.ROOM, new TemplatePool().addLeaf(new DirectTemplateEntry(VaultMod.id("vault/starts/herald")), 1.0))
+         );
    }
 
    @Override
@@ -38,7 +42,7 @@ public class HeraldCrystalLayout extends ClassicInfiniteCrystalLayout {
             if (generator instanceof GridGenerator grid) {
                grid.set(GridGenerator.CELL_X, Integer.valueOf(512));
                grid.set(GridGenerator.CELL_Z, Integer.valueOf(512));
-               grid.set(GridGenerator.LAYOUT, new ClassicPresetLayout(this.tunnelSpan, this.getPreset()).set(VaultLayout.FILL_AIR));
+               grid.set(GridGenerator.LAYOUT, new ClassicPresetLayout(this.tunnelSpan, this.getPreset()).set(VaultGridLayout.FILL_AIR));
             }
          });
       }

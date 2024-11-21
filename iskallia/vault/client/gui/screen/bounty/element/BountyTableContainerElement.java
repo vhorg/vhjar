@@ -26,10 +26,12 @@ import iskallia.vault.network.message.bounty.ServerboundRerollMessage;
 import iskallia.vault.util.TextUtil;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -100,6 +102,8 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
                return List.of(new TextComponent("Select a bounty to see the cost of reroll"));
             } else if (this.bountyElement.getStatus() != BountyElement.Status.AVAILABLE) {
                return List.of(new TextComponent("Only \"Available\" bounties can be rerolled."));
+            } else if (Screen.hasShiftDown()) {
+               return Collections.emptyList();
             } else {
                List<Component> tooltips = new ArrayList<>();
                tooltips.add(new TextComponent("Reroll Selected Bounty"));

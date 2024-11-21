@@ -25,6 +25,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -42,19 +43,33 @@ import net.minecraft.world.phys.BlockHitResult;
 public class VaultChestBlock extends ChestBlock {
    public static final EnumProperty<VaultChestBlock.Variant> VARIANT = EnumProperty.create("variant", VaultChestBlock.Variant.class);
    private final VaultChestType type;
+   private final boolean locked;
+   private final boolean dynamicRenderer;
 
-   protected VaultChestBlock(VaultChestType type, Properties builder, Supplier<BlockEntityType<? extends ChestBlockEntity>> tileSupplier) {
+   protected VaultChestBlock(
+      VaultChestType type, boolean locked, boolean dynamicRenderer, Properties builder, Supplier<BlockEntityType<? extends ChestBlockEntity>> tileSupplier
+   ) {
       super(builder, tileSupplier);
       this.type = type;
+      this.locked = locked;
+      this.dynamicRenderer = dynamicRenderer;
+   }
+
+   public VaultChestBlock(VaultChestType type, boolean locked, boolean dynamicRenderer, Properties builder) {
+      this(type, locked, dynamicRenderer, builder, () -> ModBlocks.VAULT_CHEST_TILE_ENTITY);
    }
 
    public VaultChestBlock(VaultChestType type, Properties builder) {
-      this(type, builder, () -> ModBlocks.VAULT_CHEST_TILE_ENTITY);
+      this(type, false, true, builder, () -> ModBlocks.VAULT_CHEST_TILE_ENTITY);
    }
 
    protected void createBlockStateDefinition(@Nonnull Builder<Block, BlockState> builder) {
       super.createBlockStateDefinition(builder);
       builder.add(new Property[]{VARIANT});
+   }
+
+   public boolean hasDynamicRenderer() {
+      return this.dynamicRenderer;
    }
 
    public VaultChestType getType() {
@@ -69,12 +84,14 @@ public class VaultChestBlock extends ChestBlock {
          || this == ModBlocks.ENIGMA_CHEST;
    }
 
-   public boolean isStrongbox() {
-      return this == ModBlocks.ORNATE_STRONGBOX || this == ModBlocks.GILDED_STRONGBOX || this == ModBlocks.LIVING_STRONGBOX;
+   public boolean isLocked() {
+      return this.locked;
    }
 
-   public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-      return this.isStrongbox() && !pPlayer.isCreative() ? InteractionResult.FAIL : super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+   public InteractionResult use(BlockState pState, Level level, BlockPos pos, Player player, InteractionHand pHand, BlockHitResult pHit) {
+      return this.isLocked() && !player.isCreative() && level.getBlockEntity(pos) instanceof VaultChestTileEntity entity && entity.isVaultChest()
+         ? InteractionResult.FAIL
+         : super.use(pState, level, pos, player, pHand, pHit);
    }
 
    @Nullable
@@ -142,6 +159,10 @@ public class VaultChestBlock extends ChestBlock {
                || state.getBlock() == ModBlocks.ORNATE_STRONGBOX
                || state.getBlock() == ModBlocks.GILDED_STRONGBOX
                || state.getBlock() == ModBlocks.LIVING_STRONGBOX
+               || state.getBlock() == ModBlocks.GILDED_BARREL
+               || state.getBlock() == ModBlocks.LIVING_BARREL
+               || state.getBlock() == ModBlocks.ORNATE_BARREL
+               || state.getBlock() == ModBlocks.WOODEN_BARREL
          )
          && level.getBlockEntity(pos) instanceof VaultChestTileEntity te) {
          return new MenuProvider() {
@@ -184,6 +205,10 @@ public class VaultChestBlock extends ChestBlock {
             }
          } : super.getMenuProvider(state, level, pos);
       }
+   }
+
+   public RenderShape getRenderShape(BlockState pState) {
+      return this.dynamicRenderer ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.MODEL;
    }
 
    public static enum Variant implements StringRepresentable {

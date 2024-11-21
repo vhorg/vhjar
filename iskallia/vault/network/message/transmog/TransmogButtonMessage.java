@@ -48,7 +48,7 @@ public record TransmogButtonMessage() {
 
                ItemStack resultingStack = gearSlot.getItem().copy();
                VaultGearData gearData = VaultGearData.read(resultingStack);
-               gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, container.getSelectedModelId());
+               gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, container.getSelectedModelId());
                gearData.write(resultingStack);
                gearSlot.set(ItemStack.EMPTY);
                ItemStack bronze = bronzeSlot.getItem().copy();

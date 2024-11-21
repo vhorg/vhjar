@@ -1,5 +1,6 @@
 package iskallia.vault.entity.boss.trait;
 
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import iskallia.vault.entity.boss.VaultBossEntity;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -60,7 +61,7 @@ public class ApplyPotionOnHitEffect implements IOnHitEffect, ITrait {
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.mobEffect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(nbt.getString("MobEffect")));
       this.duration = nbt.getInt("Duration");
       this.amplifier = nbt.getInt("Amplifier");

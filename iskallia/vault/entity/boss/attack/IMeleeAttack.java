@@ -10,8 +10,8 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
 public interface IMeleeAttack {
-   TargetingConditions PLAYERS_CLOSE_TARGETING_CONDITIONS = TargetingConditions.forCombat().range(3.0);
-   TargetingConditions PLAYERS_HIT_TARGETING_CONDITIONS = TargetingConditions.forCombat().range(7.0);
+   TargetingConditions ENTITIES_CLOSE_TARGETING_CONDITIONS = TargetingConditions.forCombat().range(3.0);
+   TargetingConditions ENTITIES_HIT_TARGETING_CONDITIONS = TargetingConditions.forCombat().range(7.0);
 
    boolean start(LivingEntity var1, double var2, double var4);
 
@@ -21,14 +21,14 @@ public interface IMeleeAttack {
 
    int getDuration();
 
-   Optional<BossAttackMove> getAttackMove();
+   Optional<String> getAttackMove();
 
    default boolean isWithinAttackableSlice(VaultBossBaseEntity boss, LivingEntity target, float closenessRatioRequired, float angleOffset) {
       if (target == null) {
          return false;
       } else {
          Vec3 bossViewVector = boss.calculateViewVector(boss.getViewYRot(1.0F) + angleOffset).normalize();
-         Vec3 positionsVector = new Vec3(target.getX() - boss.getX(), target.getEyeY() - boss.getEyeY(), target.getZ() - boss.getZ());
+         Vec3 positionsVector = new Vec3(target.getX() - boss.getX(), target.getY() - boss.getY(), target.getZ() - boss.getZ());
          positionsVector = positionsVector.normalize();
          double closenessRatio = bossViewVector.dot(positionsVector);
          return closenessRatio > closenessRatioRequired;

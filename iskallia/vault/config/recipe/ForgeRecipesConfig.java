@@ -61,7 +61,7 @@ public abstract class ForgeRecipesConfig<T extends ConfigForgeRecipe<V>, V exten
    }
 
    @Override
-   protected void onLoad(Config oldConfigInstance) {
+   protected void onLoad(@Nullable Config oldConfigInstance) {
       this.inputItemCache.clear();
 
       for (T recipe : this.getConfigRecipes()) {

@@ -1,9 +1,7 @@
 package iskallia.vault.entity.boss.attack;
 
 import iskallia.vault.entity.boss.VaultBossBaseEntity;
-import iskallia.vault.init.ModSounds;
 import java.util.Optional;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -58,15 +56,18 @@ public class BasicMeleeAttack implements IMeleeAttack {
    public void tick(double reach) {
       if (this.targetId > -1 && this.boss.getLevel().getEntity(this.targetId) instanceof LivingEntity target) {
          if (--this.damageCooldown <= 0) {
-            this.boss.getLevel().getNearbyPlayers(PLAYERS_HIT_TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(reach)).forEach(player -> {
-               if (this.isWithinAttackableSlice(player)) {
-                  double pDistToEnemySqr = this.boss.distanceToSqr(player);
-                  if (pDistToEnemySqr <= reach) {
-                     this.doHurtTarget(player);
-                     this.targetId = -1;
+            this.boss
+               .getLevel()
+               .getNearbyEntities(LivingEntity.class, ENTITIES_HIT_TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(reach))
+               .forEach(entity -> {
+                  if (this.isWithinAttackableSlice(entity)) {
+                     double pDistToEnemySqr = this.boss.distanceToSqr(entity);
+                     if (pDistToEnemySqr <= reach) {
+                        this.doHurtTarget(entity);
+                        this.targetId = -1;
+                     }
                   }
-               }
-            });
+               });
          } else if (this.damageCooldown > 0 && !this.isWithinAttackableSlice(target)) {
             this.rotateTowardTarget(target);
          }
@@ -79,7 +80,7 @@ public class BasicMeleeAttack implements IMeleeAttack {
          double zDiff = target.getZ() - this.boss.getZ();
          if (!(Math.abs(zDiff) <= 1.0E-5F) || !(Math.abs(xDiff) <= 1.0E-5F)) {
             float targetAtAngle = (float)(Mth.atan2(zDiff, xDiff) * 180.0F / (float)Math.PI) - 90.0F;
-            float maxDelta = 1.0F;
+            float maxDelta = 15.0F;
             float angleDiff = Mth.degreesDifference(this.boss.getYRot(), targetAtAngle);
             float rotateBy = Mth.clamp(angleDiff, -maxDelta, maxDelta);
             float newYRot = this.boss.getYRot() + rotateBy;
@@ -102,7 +103,7 @@ public class BasicMeleeAttack implements IMeleeAttack {
          this.boss.setLastHurtMob(target);
       }
 
-      this.boss.level.playSound(null, this.boss.blockPosition(), ModSounds.ARTIFACT_BOSS_ATTACK, SoundSource.HOSTILE, 1.0F, 1.0F);
+      this.boss.playAttackSound();
       return flag;
    }
 
@@ -112,15 +113,15 @@ public class BasicMeleeAttack implements IMeleeAttack {
    }
 
    @Override
-   public Optional<BossAttackMove> getAttackMove() {
-      return this.attackData == null ? Optional.empty() : Optional.of(this.attackData.attackMove());
+   public Optional<String> getAttackMove() {
+      return this.attackData == null ? Optional.empty() : Optional.of(this.attackData.attackMoveName());
    }
 
    public record BasicMeleeAttackAttributes(
       BasicMeleeAttack.BasicMeleeAttackAttributes.Slice attackableSlice,
       int swingDuration,
       int damageCooldown,
-      BossAttackMove attackMove,
+      String attackMoveName,
       float horizontalKnockbackMultiplier,
       float verticalKnockbackMultiplier
    ) {

@@ -4,8 +4,8 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.entity.entity.guardian.GuardianStats;
-import iskallia.vault.entity.entity.guardian.GuardianType;
+import iskallia.vault.entity.entity.guardian.helper.GuardianStats;
+import iskallia.vault.entity.entity.guardian.helper.GuardianType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 

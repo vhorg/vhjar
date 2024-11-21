@@ -3,6 +3,7 @@ package iskallia.vault.config.recipe;
 import iskallia.vault.gear.crafting.recipe.CatalystForgeRecipe;
 import iskallia.vault.gear.crafting.recipe.GearForgeRecipe;
 import iskallia.vault.gear.crafting.recipe.InscriptionForgeRecipe;
+import iskallia.vault.gear.crafting.recipe.JewelCraftingRecipe;
 import iskallia.vault.gear.crafting.recipe.JewelForgeRecipe;
 import iskallia.vault.gear.crafting.recipe.ToolForgeRecipe;
 import iskallia.vault.gear.crafting.recipe.TrinketForgeRecipe;
@@ -21,7 +22,8 @@ public enum ForgeRecipeType {
    TRINKET(TrinketForgeRecipe::new, () -> ModConfigs.TRINKET_RECIPES),
    TOOL(ToolForgeRecipe::new, () -> ModConfigs.TOOL_RECIPES),
    INSCRIPTION(InscriptionForgeRecipe::new, () -> ModConfigs.INSCRIPTION_RECIPES),
-   CATALYST(CatalystForgeRecipe::new, () -> ModConfigs.CATALYST_RECIPES);
+   CATALYST(CatalystForgeRecipe::new, () -> ModConfigs.CATALYST_RECIPES),
+   JEWEL_CRAFTING(JewelCraftingRecipe::new, () -> ModConfigs.JEWEL_CRAFTING_RECIPES);
 
    private final BiFunction<ResourceLocation, ItemStack, ? extends VaultForgeRecipe> recipeClassCtor;
    private final Supplier<ForgeRecipesConfig<?, ?>> configSupplier;

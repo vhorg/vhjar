@@ -60,7 +60,7 @@ public class StonefallAbility extends AbstractStonefallAbility {
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
-         player.addEffect(new MobEffectInstance(ModEffects.STONEFALL, this.getDurationTicks(), 0, false, false, true));
+         player.addEffect(new MobEffectInstance(ModEffects.STONEFALL, this.getDurationTicks(player), 0, false, false, true));
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
    }

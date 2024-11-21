@@ -81,7 +81,7 @@ public class TauntAbility extends AbstractTauntAbility {
          .map(
             player -> {
                player.removeEffect(ModEffects.TAUNT);
-               player.addEffect(new MobEffectInstance(ModEffects.TAUNT, this.getDurationTicks(), 0, false, false, true));
+               player.addEffect(new MobEffectInstance(ModEffects.TAUNT, this.getDurationTicks(player), 0, false, false, true));
                float radius = this.getRadius(player);
                List<Mob> nearbyMobs = player.level
                   .getNearbyEntities(
@@ -98,8 +98,8 @@ public class TauntAbility extends AbstractTauntAbility {
                         overrideEffect.setTauntingPlayer(player);
                      }
 
-                     mob.addEffect(new MobEffectInstance(effect, this.getDurationTicks(), 0, false, false));
-                     mob.addEffect(new MobEffectInstance(ModEffects.VULNERABLE, this.getDurationTicks(), this.getAmplifier(), false, false) {});
+                     mob.addEffect(new MobEffectInstance(effect, this.getDurationTicks(player), 0, false, false));
+                     mob.addEffect(new MobEffectInstance(ModEffects.VULNERABLE, this.getDurationTicks(player), this.getAmplifier(), false, false));
                      mob.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
                      mob.getNavigation().stop();
                      this.sortByShortestDistanceTo(candidateTeleportPositionList, player.blockPosition(), mob.getOnPos());

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import iskallia.vault.VaultMod;
+import iskallia.vault.entity.entity.elite.EliteEndermanEntity;
 import iskallia.vault.entity.model.ModModelLayers;
 import javax.annotation.Nonnull;
 import net.minecraft.client.model.EndermanModel;
@@ -22,19 +23,21 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class EliteEnderOrnamentLayer<T extends EnderMan> extends RenderLayer<T, EndermanModel<T>> {
+public class EliteEnderOrnamentLayer<T extends EliteEndermanEntity> extends RenderLayer<T, EndermanModel<T>> {
    public static final ResourceLocation ORNAMENT_TEXTURE = VaultMod.id("textures/entity/elite/enderman_ornament.png");
+   protected int index;
    protected float angleOffset;
    protected EliteEnderOrnamentLayer.EnderOrnamentModel model;
 
-   public EliteEnderOrnamentLayer(RenderLayerParent<T, EndermanModel<T>> renderer, EntityModelSet modelSet, float angleOffset) {
+   public EliteEnderOrnamentLayer(RenderLayerParent<T, EndermanModel<T>> renderer, EntityModelSet modelSet, int index) {
       super(renderer);
-      this.angleOffset = angleOffset;
+      int ornamentCount = EliteEndermanEntity.getVisibleOrnamentCount(1.0);
+      this.index = index;
+      this.angleOffset = index * 360.0F / ornamentCount;
       this.model = new EliteEnderOrnamentLayer.EnderOrnamentModel(modelSet.bakeLayer(ModModelLayers.ELITE_ENDERMAN_ORNAMENT));
    }
 
@@ -50,22 +53,25 @@ public class EliteEnderOrnamentLayer<T extends EnderMan> extends RenderLayer<T, 
       float pNetHeadYaw,
       float pHeadPitch
    ) {
-      matrixStack.pushPose();
-      matrixStack.translate(0.0, -2.0, 0.0);
-      float radius = 0.8F;
-      float angle = this.angleOffset + pAgeInTicks * 3.5F;
-      matrixStack.mulPose(Vector3f.XP.rotationDegrees(30.0F));
-      matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
-      matrixStack.translate(radius, 0.0, 0.0);
-      matrixStack.mulPose(Vector3f.ZN.rotationDegrees(angle));
-      matrixStack.mulPose(Vector3f.XN.rotationDegrees(30.0F));
-      matrixStack.mulPose(Vector3f.YP.rotationDegrees(pNetHeadYaw));
-      matrixStack.mulPose(Vector3f.XP.rotationDegrees(pHeadPitch));
-      float scale = 0.75F;
-      matrixStack.scale(scale, scale, scale);
-      VertexConsumer vertexConsumer = bufferSource.getBuffer(this.model.renderType(ORNAMENT_TEXTURE));
-      this.model.renderToBuffer(matrixStack, vertexConsumer, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-      matrixStack.popPose();
+      int ornamentCount = entity.getVisibleOrnamentCount();
+      if (this.index < ornamentCount) {
+         matrixStack.pushPose();
+         matrixStack.translate(0.0, -2.0, 0.0);
+         float radius = 0.8F;
+         float angle = this.angleOffset + pAgeInTicks * 3.5F;
+         matrixStack.mulPose(Vector3f.XP.rotationDegrees(30.0F));
+         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(angle));
+         matrixStack.translate(radius, 0.0, 0.0);
+         matrixStack.mulPose(Vector3f.ZN.rotationDegrees(angle));
+         matrixStack.mulPose(Vector3f.XN.rotationDegrees(30.0F));
+         matrixStack.mulPose(Vector3f.YP.rotationDegrees(pNetHeadYaw));
+         matrixStack.mulPose(Vector3f.XP.rotationDegrees(pHeadPitch));
+         float scale = 0.75F;
+         matrixStack.scale(scale, scale, scale);
+         VertexConsumer vertexConsumer = bufferSource.getBuffer(this.model.renderType(ORNAMENT_TEXTURE));
+         this.model.renderToBuffer(matrixStack, vertexConsumer, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+         matrixStack.popPose();
+      }
    }
 
    public static class EnderOrnamentModel extends Model {

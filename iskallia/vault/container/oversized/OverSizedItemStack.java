@@ -30,6 +30,10 @@ public record OverSizedItemStack(ItemStack stack, int amount) {
       return overSized;
    }
 
+   public boolean isEmpty() {
+      return this.amount() <= 0 || this.overSizedStack().isEmpty();
+   }
+
    public List<ItemStack> splitByStackSize() {
       List<ItemStack> split = new ArrayList<>();
       ItemStack sample = this.stack();

@@ -6,9 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,12 +29,7 @@ public class AntiqueRewardItemList extends AntiqueReward {
       List<ItemStack> out = new ArrayList<>();
       this.results.getRandom(random).ifPresent(stack -> {
          ItemStack result = stack.copy();
-         if (result.getItem() instanceof VaultLevelItem levelItem) {
-            levelItem.initializeVaultLoot(level, result, null, null);
-         }
-
-         result = DataTransferItem.doConvertStack(result, random);
-         DataInitializationItem.doInitialize(result, random);
+         result = LootInitialization.initializeVaultLoot(result, level, random);
          result.setCount(this.count.get(random));
          out.add(result);
       });

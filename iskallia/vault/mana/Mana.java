@@ -9,16 +9,16 @@ public final class Mana {
       return ((ManaPlayer)player).getMana();
    }
 
-   public static float set(Player player, float amount) {
-      return ((ManaPlayer)player).setMana(amount);
+   public static float set(Player player, ManaAction action, float amount) {
+      return ((ManaPlayer)player).setMana(action, amount);
    }
 
-   public static float increase(Player player, float amount) {
-      return ((ManaPlayer)player).increaseMana(amount);
+   public static float increase(Player player, ManaAction action, float amount) {
+      return ((ManaPlayer)player).increaseMana(action, amount);
    }
 
-   public static float decrease(Player player, float amount) {
-      return ((ManaPlayer)player).decreaseMana(amount);
+   public static float decrease(Player player, ManaAction action, float amount) {
+      return ((ManaPlayer)player).decreaseMana(action, amount);
    }
 
    public static float getMax(Player player) {

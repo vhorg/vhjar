@@ -4,6 +4,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.world.DummyProgressListener;
 import iskallia.vault.core.world.generator.DummyChunkGenerator;
+import iskallia.vault.core.world.threading.ThreadingMode;
 import iskallia.vault.mixin.AccessorMinecraftServer;
 import iskallia.vault.mixin.AccessorServerChunkCache;
 import iskallia.vault.mixin.AccessorWorld;
@@ -137,13 +138,13 @@ public class VirtualWorld extends ServerLevel {
             CommonEvents.BLOCK_SET.invoke(this, pos, state, flags, recursionLeft, BlockSetEvent.Type.RETURN);
             return false;
          } else {
-            BlockState blockstate1 = this.getBlockState(pos);
+            BlockState existing = this.getBlockState(pos);
             if ((flags & 128) == 0
-               && blockstate1 != blockstate
+               && existing != blockstate
                && (
-                  blockstate1.getLightBlock(this, pos) != oldOpacity
-                     || blockstate1.getLightEmission(this, pos) != oldLight
-                     || blockstate1.useShapeForLightOcclusion()
+                  existing.getLightBlock(this, pos) != oldOpacity
+                     || existing.getLightEmission(this, pos) != oldLight
+                     || existing.useShapeForLightOcclusion()
                      || blockstate.useShapeForLightOcclusion()
                )) {
                this.getProfiler().push("queueCheckLight");

@@ -1,0 +1,7 @@
+{
+	"parent": "the_vault:block/barrel",
+	"textures": {
+		"0": "the_vault:block/gilded_barrel",
+		"particle": "minecraft:block/deepslate"
+	}
+}

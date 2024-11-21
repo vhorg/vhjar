@@ -3,39 +3,36 @@ package iskallia.vault.entity.boss;
 import iskallia.vault.config.VaultBossConfig;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.entity.VaultBoss;
-import iskallia.vault.entity.boss.attack.BossAttackMove;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.attack.IMeleeAttack;
 import iskallia.vault.entity.boss.trait.IOnHitEffect;
 import iskallia.vault.entity.boss.trait.ITrait;
 import iskallia.vault.entity.boss.trait.VaultBossTraitRegistry;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.network.message.ClientboundBossSyncTraitsMessage;
+import iskallia.vault.util.LootInitialization;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.BossEvent.BossBarColor;
 import net.minecraft.world.BossEvent.BossBarOverlay;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -50,10 +47,12 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -61,33 +60,17 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 @EventBusSubscriber
 public class VaultBossEntity extends VaultBossBaseEntity implements IAnimatable, VaultBoss {
-   public static final EntityDataSerializer<Optional<BossAttackMove>> OPTIONAL_ATTACK_MOVE = new EntityDataSerializer<Optional<BossAttackMove>>() {
-      public void write(FriendlyByteBuf buf, Optional<BossAttackMove> value) {
-         if (value.isPresent()) {
-            buf.writeBoolean(true);
-            buf.writeEnum(value.get());
-         } else {
-            buf.writeBoolean(false);
-         }
-      }
-
-      public Optional<BossAttackMove> read(FriendlyByteBuf buf) {
-         return buf.readBoolean() ? Optional.of((BossAttackMove)buf.readEnum(BossAttackMove.class)) : Optional.empty();
-      }
-
-      public Optional<BossAttackMove> copy(Optional<BossAttackMove> value) {
-         return value;
-      }
-   };
-   private static final EntityDataAccessor<Optional<BossAttackMove>> ACTIVE_ATTACK_MOVE = SynchedEntityData.defineId(
-      VaultBossEntity.class, OPTIONAL_ATTACK_MOVE
-   );
    private VaultBossEntity.CompositeGoal compositeGoal = new VaultBossEntity.CompositeGoal(this);
    private final AnimationFactory animationFactory = GeckoLibUtil.createFactory(this);
    private boolean bossInitialized = false;
    private Set<IOnHitEffect> onHitEffects = new HashSet<>();
    private Map<String, ITrait> traits = new LinkedHashMap<>();
    private List<ItemStack> loot = new ArrayList<>();
+
+   @Override
+   public Map<String, BiFunction<VaultBossBaseEntity, Double, IMeleeAttack>> getMeleeAttackFactories() {
+      return Map.of();
+   }
 
    public VaultBossEntity(EntityType<? extends Monster> entityType, Level level) {
       super(entityType, level);
@@ -98,12 +81,12 @@ public class VaultBossEntity extends VaultBossBaseEntity implements IAnimatable,
    }
 
    @Override
-   public WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return WeightedList.empty();
    }
 
    @Override
-   public WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks() {
       return WeightedList.empty();
    }
 
@@ -232,11 +215,18 @@ public class VaultBossEntity extends VaultBossBaseEntity implements IAnimatable,
    protected void dropAllDeathLoot(DamageSource pDamageSource) {
       super.dropAllDeathLoot(pDamageSource);
       this.loot.forEach(d -> ServerVaults.get(this.level).ifPresent(vault -> {
-         VaultLevelItem.doInitializeVaultLoot(d, vault, this.blockPosition());
-         ItemStack drop = DataTransferItem.doConvertStack(d);
-         DataInitializationItem.doInitialize(drop);
+         ItemStack drop = LootInitialization.initializeVaultLoot(d, vault, this.blockPosition());
          this.spawnAtLocation(drop);
       }));
+   }
+
+   @Nullable
+   @Override
+   public SpawnGroupData finalizeSpawn(
+      ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag
+   ) {
+      this.addTraits(Collections.emptyMap());
+      return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
    }
 
    public void setLoot(List<ItemStack> loot) {

@@ -24,6 +24,11 @@ public abstract class CardModifier<C extends CardModifier.Config> extends CardPr
 
    public abstract int getHighlightColor();
 
+   @Override
+   public boolean voidConfigIfPopulated() {
+      return false;
+   }
+
    public static class Adapter extends TypeSupplierAdapter<CardModifier<?>> {
       public Adapter() {
          super("type", true);

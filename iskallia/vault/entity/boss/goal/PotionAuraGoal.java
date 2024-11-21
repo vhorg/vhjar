@@ -10,9 +10,11 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class PotionAuraGoal extends Goal implements ITrait {
+   public static final int MAX_DISTANCE = 64;
    private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(64.0);
    public static String TYPE = "potion_aura";
    private static final int CHECK_COOLDOWN = 5;
@@ -21,6 +23,7 @@ public class PotionAuraGoal extends Goal implements ITrait {
    private int duration;
    private int amplifier;
    private int range;
+   private boolean invertEffectRange;
    private final VaultBossBaseEntity boss;
    private long cooldownTime = -1L;
 
@@ -28,11 +31,12 @@ public class PotionAuraGoal extends Goal implements ITrait {
       this.boss = boss;
    }
 
-   public PotionAuraGoal setAttributes(MobEffect mobEffect, int duration, int amplifier, int range) {
+   public PotionAuraGoal setAttributes(MobEffect mobEffect, int duration, int amplifier, int range, boolean invertEffectRange) {
       this.mobEffect = mobEffect;
       this.duration = duration;
       this.amplifier = amplifier;
       this.range = range;
+      this.invertEffectRange = invertEffectRange;
       return this;
    }
 
@@ -60,18 +64,28 @@ public class PotionAuraGoal extends Goal implements ITrait {
    public void tick() {
       if (this.mobEffect != null && !this.boss.getLevel().isClientSide() && this.cooldownTime <= this.boss.getLevel().getGameTime()) {
          this.cooldownTime = this.boss.getLevel().getGameTime() + 5L;
-         this.boss.getLevel().getNearbyPlayers(TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(this.range)).forEach(player -> {
-            if (player.hasEffect(this.mobEffect)) {
-               if (player.getEffect(this.mobEffect).getAmplifier() >= this.amplifier) {
-                  return;
+         if (this.effectOutsideOfRange()) {
+            this.boss.getLevel().getNearbyPlayers(TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(64.0)).forEach(player -> {
+               if (!(player.distanceTo(this.boss) < this.range)) {
+                  this.applyEffectTo(player);
                }
-
-               player.removeEffect(this.mobEffect);
-            }
-
-            player.addEffect(new MobEffectInstance(this.mobEffect, this.duration, this.amplifier));
-         });
+            });
+         } else {
+            this.boss.getLevel().getNearbyPlayers(TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(this.range)).forEach(this::applyEffectTo);
+         }
       }
+   }
+
+   private void applyEffectTo(Player player) {
+      if (player.hasEffect(this.mobEffect)) {
+         if (player.getEffect(this.mobEffect).getAmplifier() >= this.amplifier) {
+            return;
+         }
+
+         player.removeEffect(this.mobEffect);
+      }
+
+      player.addEffect(new MobEffectInstance(this.mobEffect, this.duration, this.amplifier));
    }
 
    @Override
@@ -81,15 +95,17 @@ public class PotionAuraGoal extends Goal implements ITrait {
       nbt.putInt("Duration", this.duration);
       nbt.putInt("Amplifier", this.amplifier);
       nbt.putInt("Range", this.range);
+      nbt.putBoolean("InvertEffectRange", this.invertEffectRange);
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.mobEffect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(nbt.getString("MobEffect")));
       this.duration = nbt.getInt("Duration");
       this.amplifier = nbt.getInt("Amplifier");
       this.range = nbt.getInt("Range");
+      this.invertEffectRange = nbt.getBoolean("InvertEffectRange");
    }
 
    public int getRange() {
@@ -98,5 +114,9 @@ public class PotionAuraGoal extends Goal implements ITrait {
 
    public MobEffect getMobEffect() {
       return this.mobEffect;
+   }
+
+   public boolean effectOutsideOfRange() {
+      return this.invertEffectRange;
    }
 }

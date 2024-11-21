@@ -30,7 +30,7 @@ public class MineBlockTask extends ProgressConfiguredTask<Integer, MineBlockTask
             this,
             EventPriority.LOW,
             data -> {
-               if (this.parent == null || this.parent.isCompleted()) {
+               if (this.parent == null || this.parent.hasActiveChildren()) {
                   if (!data.getPlayer().getLevel().isClientSide()) {
                      if (context.getSource() instanceof EntityTaskSource entitySource) {
                         if (entitySource.matches(data.getPlayer())) {

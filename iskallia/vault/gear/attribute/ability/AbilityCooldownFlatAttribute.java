@@ -15,7 +15,7 @@ public class AbilityCooldownFlatAttribute extends AbilityFloatValueAttribute {
       super(abilityKey, amount);
    }
 
-   public float adjustCooldown(String ability, float cooldown) {
+   public float adjustCooldown(@Nullable String ability, float cooldown) {
       return this.affectsAbility(ability) ? cooldown + this.getAmount() : cooldown;
    }
 
@@ -54,7 +54,7 @@ public class AbilityCooldownFlatAttribute extends AbilityFloatValueAttribute {
                .append(" to ")
                .append(cooldownCmp)
                .append(" of ")
-               .append(new TextComponent(attribute.getAbilityKey()).withStyle(this.getAbilityStyle()))
+               .append(this.formatAbilityName(attribute.getAbilityKey()))
                .setStyle(this.getColoredTextStyle());
          }
       }
@@ -73,7 +73,7 @@ public class AbilityCooldownFlatAttribute extends AbilityFloatValueAttribute {
             out.add(type.getAffixPrefix(attribute.getAmount() >= 0.0F));
             out.add(valueDisplay.getString());
             out.add("s to Cooldown of ");
-            out.add(attribute.getAbilityKey());
+            out.add(this.formatAbilityName(attribute.getAbilityKey()).getString());
          }
       }
    }

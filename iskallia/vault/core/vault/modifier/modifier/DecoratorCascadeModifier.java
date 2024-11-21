@@ -97,9 +97,15 @@ public class DecoratorCascadeModifier extends VaultModifier<DecoratorCascadeModi
 
                tile.place(world, result, 3);
                CompoundTag rawResult = access.getBlockEntityNbt(result);
-               if (rawResult != null) {
-                  rawResult.putBoolean("cascade_duped", true);
+               if (rawResult == null) {
+                  rawResult = new CompoundTag();
+                  rawResult.putInt("x", result.getX());
+                  rawResult.putInt("y", result.getY());
+                  rawResult.putInt("z", result.getZ());
+                  access.setBlockEntityNbt(rawResult);
                }
+
+               rawResult.putBoolean("cascade_duped", true);
             }
          }
 

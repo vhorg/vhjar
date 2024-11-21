@@ -1,9 +1,12 @@
 package iskallia.vault.config.entry;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.util.MathUtilities;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 
 public class FloatRangeEntry {
+   private static final RandomSource rand = JavaRandom.ofNanoTime();
+   public static final FloatRangeEntry EMPTY = new FloatRangeEntry(0.0F, 0.0F);
    @Expose
    private final float min;
    @Expose
@@ -23,6 +26,10 @@ public class FloatRangeEntry {
    }
 
    public float getRandom() {
-      return MathUtilities.randomFloat(this.min, this.max);
+      return this.getRandom(rand);
+   }
+
+   public float getRandom(RandomSource src) {
+      return this.max <= this.min ? this.min : this.min + src.nextFloat() * (this.max - this.min);
    }
 }

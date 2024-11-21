@@ -74,7 +74,8 @@ public class AntiqueItem extends Item implements DynamicModelItem {
    }
 
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag advanced) {
-      Optional.ofNullable(getAntique(stack))
+      Antique antique = getAntique(stack);
+      Optional.ofNullable(antique)
          .map(Antique::getConfig)
          .map(AntiquesConfig.Entry::getInfo)
          .filter(info -> info.getRewardDescription() != null && info.getSubtext() != null)
@@ -87,6 +88,8 @@ public class AntiqueItem extends Item implements DynamicModelItem {
                   .<TextComponent>map(TextComponent::new)
                   .map(cmp -> TextComponentUtils.applyStyle(cmp, Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true)))
                   .forEach(tooltip::add);
+               String author = antique.getAuthorName() != null ? antique.getAuthorName() : "Unknown";
+               tooltip.add(new TextComponent("By: " + author).withStyle(ChatFormatting.GRAY).withStyle(ChatFormatting.ITALIC));
             }
          );
    }

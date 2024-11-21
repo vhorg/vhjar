@@ -4,8 +4,11 @@ import com.mojang.math.Vector3f;
 import iskallia.vault.client.particles.ArtifactBossImmunityParticleOptions;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.entity.boss.attack.AoeCloseAttack;
+import iskallia.vault.entity.boss.attack.BasicMeleeAttack;
 import iskallia.vault.entity.boss.attack.BossMeleeAttackGoal;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.attack.IMeleeAttack;
+import iskallia.vault.entity.boss.attack.ThrowAttack;
 import iskallia.vault.entity.boss.stage.BossStageManager;
 import iskallia.vault.entity.boss.stage.IBossStage;
 import iskallia.vault.entity.boss.stage.SparkStage;
@@ -21,7 +24,9 @@ import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.WorldSettings;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.nbt.CompoundTag;
@@ -73,6 +78,39 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 @EventBusSubscriber
 public class ArtifactBossEntity extends VaultBossBaseEntity implements IAnimatable {
+   public static final String SUMMON_ATTACK_NAME = "summon";
+   public static final String PUNCH_ATTACK_NAME = "punch";
+   public static final String HAMMER_SMASH_ATTACK_NAME = "hammersmash";
+   public static final String UPPERCUT_ATTACK_NAME = "uppercut";
+   public static final String GROUND_SLAM_ATTACK_NAME = "groundslam";
+   public static final String THROW_ATTACK_NAME = "throw";
+   public static final String AOE_CLOSE_ATTACK_NAME = "aoeclose";
+   public static final BasicMeleeAttack.BasicMeleeAttackAttributes HAMMERSMASH_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 30, 17, "hammersmash", 1.0F, 0.0F
+   );
+   public static final BasicMeleeAttack.BasicMeleeAttackAttributes UPPERCUT_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 25, 15, "uppercut", 1.5F, 0.3F
+   );
+   public static final BasicMeleeAttack.BasicMeleeAttackAttributes GROUNDSLAM_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 45, 24, "groundslam", 2.5F, 0.1F
+   );
+   public static final BasicMeleeAttack.BasicMeleeAttackAttributes PUNCH_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(0.0F, 0.6F), 20, 8, "punch", 0.5F, 0.0F
+   );
+   public static final Map<String, BiFunction<VaultBossBaseEntity, Double, IMeleeAttack>> MELEE_ATTACK_FACTORIES = Map.of(
+      "hammersmash",
+      (boss, multiplier) -> new BasicMeleeAttack(boss, multiplier, HAMMERSMASH_ATTACK),
+      "uppercut",
+      (boss, multiplier) -> new BasicMeleeAttack(boss, multiplier, UPPERCUT_ATTACK),
+      "groundslam",
+      (boss, multiplier) -> new BasicMeleeAttack(boss, multiplier, GROUNDSLAM_ATTACK),
+      "throw",
+      ThrowAttack::new,
+      "aoeclose",
+      AoeCloseAttack::new,
+      "punch",
+      (boss, multiplier) -> new BasicMeleeAttack(boss, multiplier, PUNCH_ATTACK)
+   );
    private static final EntityDataAccessor<Integer> CURRENT_STAGE_INDEX = SynchedEntityData.defineId(ArtifactBossEntity.class, EntityDataSerializers.INT);
    private static final EntityDataAccessor<Boolean> IS_STUNNED = SynchedEntityData.defineId(ArtifactBossEntity.class, EntityDataSerializers.BOOLEAN);
    private final List<IBossStage> stages = new ArrayList<>();
@@ -256,6 +294,11 @@ public class ArtifactBossEntity extends VaultBossBaseEntity implements IAnimatab
    }
 
    @Override
+   public Map<String, BiFunction<VaultBossBaseEntity, Double, IMeleeAttack>> getMeleeAttackFactories() {
+      return MELEE_ATTACK_FACTORIES;
+   }
+
+   @Override
    protected void defineSynchedData() {
       super.defineSynchedData();
       this.entityData.define(CURRENT_STAGE_INDEX, -1);
@@ -263,12 +306,12 @@ public class ArtifactBossEntity extends VaultBossBaseEntity implements IAnimatab
    }
 
    @Override
-   public WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return this.getCurrentStage().map(IBossStage::getMeleeAttacks).orElse(WeightedList.empty());
    }
 
    @Override
-   public WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks() {
       return this.getCurrentStage().map(IBossStage::getRageAttacks).orElse(WeightedList.empty());
    }
 
@@ -398,23 +441,23 @@ public class ArtifactBossEntity extends VaultBossBaseEntity implements IAnimatab
       AnimationController<ArtifactBossEntity> controller = event.getController();
       return this.getActiveAttackMove().map(attackMove -> {
          return switch (attackMove) {
-            case HAMMERSMASH -> {
+            case "hammersmash" -> {
                controller.setAnimation(HAMMERSMASH_ANIM);
                yield PlayState.CONTINUE;
             }
-            case UPPERCUT -> {
+            case "uppercut" -> {
                controller.setAnimation(UPPERCUT_ANIM);
                yield PlayState.CONTINUE;
             }
-            case GROUNDSLAM -> {
+            case "groundslam" -> {
                controller.setAnimation(GROUNDSLAM_ANIM);
                yield PlayState.CONTINUE;
             }
-            case SUMMON -> {
+            case "summon" -> {
                controller.setAnimation(SUMMON_ANIM);
                yield PlayState.CONTINUE;
             }
-            case AOECLOSE -> {
+            case "aoeclose" -> {
                controller.setAnimation(AOE_CLOSE);
                yield PlayState.CONTINUE;
             }
@@ -511,8 +554,9 @@ public class ArtifactBossEntity extends VaultBossBaseEntity implements IAnimatab
       return new ServerBossEvent(this.getDisplayName(), BossBarColor.RED, BossBarOverlay.PROGRESS);
    }
 
-   static {
-      EntityDataSerializers.registerSerializer(OPTIONAL_ATTACK_MOVE);
+   @Override
+   public void playAttackSound() {
+      this.level.playSound(null, this.blockPosition(), ModSounds.ARTIFACT_BOSS_ATTACK, SoundSource.HOSTILE, 1.0F, 1.0F);
    }
 
    private static class BossStageGoal extends Goal {

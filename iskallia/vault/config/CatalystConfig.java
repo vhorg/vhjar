@@ -78,7 +78,7 @@ public class CatalystConfig extends Config {
       });
    }
 
-   private static class Entry {
+   public static class Entry {
       @Expose
       private final IntRoll size;
       @Expose
@@ -93,7 +93,7 @@ public class CatalystConfig extends Config {
       }
    }
 
-   private static class Pool implements LevelEntryList.ILevelEntry {
+   public static class Pool implements LevelEntryList.ILevelEntry {
       @Expose
       private final int level;
       @Expose

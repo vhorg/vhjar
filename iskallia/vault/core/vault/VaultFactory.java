@@ -14,15 +14,17 @@ import iskallia.vault.item.crystal.CrystalData;
 import java.util.Random;
 import java.util.UUID;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 
 public class VaultFactory {
-   public static Vault create(Version version, CrystalData crystal) {
+   public static Vault create(Version version, CrystalData crystal, ServerPlayer creator) {
       long seed = new Random().nextLong();
       JavaRandom random = JavaRandom.ofScrambled(seed);
       Vault vault = new Vault();
       vault.set(Vault.ID, UUID.randomUUID())
          .set(Vault.VERSION, version)
          .set(Vault.SEED, Long.valueOf(seed))
+         .set(Vault.OWNER, creator.getUUID())
          .set(Vault.CLOCK, new TickTimer())
          .set(
             Vault.WORLD,

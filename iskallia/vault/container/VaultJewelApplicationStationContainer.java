@@ -31,10 +31,6 @@ public class VaultJewelApplicationStationContainer extends OverSizedSlotContaine
       }
    }
 
-   public void broadcastChanges() {
-      super.broadcastChanges();
-   }
-
    private void initSlots(Inventory playerInventory) {
       for (int row = 0; row < 3; row++) {
          for (int column = 0; column < 9; column++) {
@@ -58,6 +54,11 @@ public class VaultJewelApplicationStationContainer extends OverSizedSlotContaine
             this.addSlot(new TabSlot(invContainer, i * 3 + j + 1, -999 + j * 18, 50 + i * 18) {
                public boolean mayPlace(ItemStack stack) {
                   return stack.getItem() instanceof JewelItem;
+               }
+
+               @Override
+               public boolean isActive() {
+                  return false;
                }
             });
          }

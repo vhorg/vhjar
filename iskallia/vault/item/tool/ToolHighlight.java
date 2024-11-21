@@ -37,7 +37,7 @@ public class ToolHighlight {
          if (!ActiveFlags.IS_AOE_MINING.isSet()) {
             if (stack.getItem() == ModItems.TOOL) {
                if (InputEvents.isShiftDown()) {
-                  ToolItem.getHammerPositions(stack, var5, side, player)
+                  ToolItem.getHammerPositions(player.level, stack, var5, side, player)
                      .forEachRemaining(
                         p -> {
                            if (!p.equals(var5)) {

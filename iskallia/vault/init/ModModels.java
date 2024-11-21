@@ -54,6 +54,7 @@ import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.item.AugmentItem;
 import iskallia.vault.item.ItemDrillArrow;
+import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.item.tool.JewelItem;
@@ -136,14 +137,20 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_WEATHERED, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_OXIDIZED, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.GRID_GATEWAY, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.TASK_PILLAR, RenderType.cutout());
       setRenderLayers(ModBlocks.VAULT_SWEETS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.DIVINE_ALTAR, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_JEWEL_CUTTING_STATION, RenderType.cutout(), RenderType.translucent());
+      setRenderLayers(ModBlocks.JEWEL_CRAFTING_TABLE, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_ARCHIVE, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.HOURGLASS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());
+      setRenderLayers(ModBlocks.RAID_CONTROLLER, RenderType.translucent());
+      setRenderLayers(ModBlocks.X_MARK_CONTROLLER, RenderType.translucent());
+      setRenderLayers(ModBlocks.ELITE_CONTROLLER, RenderType.translucent());
+      setRenderLayers(ModBlocks.ELITE_CONTROLLER_PROXY, RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_CHARM_CONTROLLER_BLOCK, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRAKE_PEDESTAL, RenderType.translucent());
       setRenderLayers(ModBlocks.WENDARR_JEWEL_GLASS, RenderType.translucent());
@@ -334,7 +341,7 @@ public class ModModels {
          VaultGod type;
          return nbt != null && (type = VaultGod.fromName(nbt.getString("type"))) != null
             ? type.ordinal()
-            : (float)((ClientScheduler.INSTANCE.getTickCount() >> 4) % VaultGod.values().length);
+            : (float)((ClientScheduler.INSTANCE.getTick() >> 4) % VaultGod.values().length);
       };
       public static ItemPropertyFunction GOD_ALTAR_TYPE = (stack, world, entity, seed) -> {
          CompoundTag nbt = stack.getTag();
@@ -364,6 +371,9 @@ public class ModModels {
             ModItems.DRILL_ARROW,
             new ResourceLocation("tier"),
             (stack, world, entity, seed) -> (float)ItemDrillArrow.getArrowTier(stack).ordinal() / ItemDrillArrow.ArrowTier.values().length
+         );
+         ItemProperties.register(
+            ModItems.JEWEL_POUCH, new ResourceLocation("open"), (stack, world, entity, seed) -> JewelPouchItem.getJewels(stack).isEmpty() ? 0.0F : 1.0F
          );
          ItemProperties.register(
             Item.byBlock(ModBlocks.CRYO_CHAMBER),

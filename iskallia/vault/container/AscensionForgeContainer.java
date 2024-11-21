@@ -82,6 +82,7 @@ public class AscensionForgeContainer extends OverSizedSlotContainer {
 
       this.hotbarIndexRange = new AbstractElementContainer.SlotIndexRange(this.playerInventoryIndexRange.end(), containerSlotIndex);
       this.addSlot((new OverSizedTabSlot(this.internalInventory, 0, 92, 61) {
+         @Override
          public void setChanged() {
             super.setChanged();
             AscensionForgeContainer.this.slotsChanged(this.container);
@@ -133,7 +134,7 @@ public class AscensionForgeContainer extends OverSizedSlotContainer {
                this.previewItemStack = new ItemStack(item);
                VaultGearData gearData = VaultGearData.read(this.previewItemStack);
                gearData.setState(VaultGearState.IDENTIFIED);
-               gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, modelId);
+               gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, modelId);
                gearData.write(this.previewItemStack);
             }
          });

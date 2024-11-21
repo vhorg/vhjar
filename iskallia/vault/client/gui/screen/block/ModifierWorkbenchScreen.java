@@ -146,7 +146,10 @@ public class ModifierWorkbenchScreen extends AbstractElementContainerScreen<Modi
 
                VaultGearModifier<?> modifier = cfg.createModifier().orElse(null);
                if (modifier != null) {
-                  ModifierWorkbenchHelper.removeCraftedModifiers(gearCopy);
+                  if (ModifierWorkbenchHelper.hasCraftedModifier(gearCopy) && !ModifierWorkbenchHelper.removeCraftedModifiers(gearCopy)) {
+                     return;
+                  }
+
                   VaultGearData data = VaultGearData.read(gearCopy);
                   Set<String> modGroups = data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS);
                   if (modGroups.contains(modifier.getModifierGroup())) {

@@ -3,6 +3,9 @@ package iskallia.vault.skill.ability.component;
 public final class AbilityLabelBindingKeys {
    public static final String COOLDOWN = "cooldown";
    public static final String DAMAGE = "damage";
+   public static final String ADDITIONAL_THORNS_DAMAGE = "additional_thorns_damage";
+   public static final String THORNS_DAMAGE = "thornsDamage";
+   public static final String MANA_DAMAGE = "manaDamage";
    public static final String ABILITY_POWER = "ability_power";
    public static final String DISTANCE = "distance";
    public static final String MANA_COST = "manaCost";
@@ -59,6 +62,7 @@ public final class AbilityLabelBindingKeys {
    public static final String LUCKY_HIT_PER_STACK = "luckyHitPerStack";
    public static final String MAX_GLACIAL_PRISON = "maxGlacialPrison";
    public static final String GLACIAL_CHANCE = "glacialChance";
+   public static final String BARRIER_POINTS = "barrierPoints";
 
    private AbilityLabelBindingKeys() {
    }

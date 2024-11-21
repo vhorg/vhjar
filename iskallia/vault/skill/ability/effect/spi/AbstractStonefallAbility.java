@@ -5,6 +5,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -37,11 +38,6 @@ public abstract class AbstractStonefallAbility extends InstantManaAbility {
    public AbstractStonefallAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Stonefall";
-   }
-
    public float getDamageReduction() {
       return this.damageReduction;
    }
@@ -53,14 +49,19 @@ public abstract class AbstractStonefallAbility extends InstantManaAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
    }
 
-   public int getDurationTicks() {
+   public int getDurationTicksUnmodified() {
       return this.durationTicks;
+   }
+
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getDurationTicksUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    public float getKnockbackMultiplier() {

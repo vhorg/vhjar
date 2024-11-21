@@ -2,7 +2,9 @@ package iskallia.vault.entity.entity;
 
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModParticles;
+import iskallia.vault.util.MiscUtils;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -134,15 +136,15 @@ public class VaultStormArrow extends AbstractArrow {
       this.percentAbilityPowerDealt = percentAbilityPowerDealt;
    }
 
-   public void setType(int id) {
-      this.entityData.set(ID_TYPE, id);
+   public void setStormArrowType(int id) {
+      this.setStormArrowType(VaultStormArrow.StormType.byId(id));
    }
 
-   public void setType(String type) {
-      this.entityData.set(ID_TYPE, VaultStormArrow.StormType.byName(type).ordinal());
+   public void setStormArrowType(VaultStormArrow.StormType type) {
+      this.entityData.set(ID_TYPE, type.ordinal());
    }
 
-   public VaultStormArrow.StormType getStormType() {
+   public VaultStormArrow.StormType getStormArrowType() {
       return VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE));
    }
 
@@ -205,9 +207,9 @@ public class VaultStormArrow extends AbstractArrow {
                0.0
             );
             if (particle != null) {
-               if (this.getStormType() == VaultStormArrow.StormType.BASE) {
+               if (this.getStormArrowType() == VaultStormArrow.StormType.BASE) {
                   particle.setColor(1.0F, 0.9F, 0.0F);
-               } else if (this.getStormType() == VaultStormArrow.StormType.BLIZZARD) {
+               } else if (this.getStormArrowType() == VaultStormArrow.StormType.BLIZZARD) {
                   particle.setColor(0.6F, 0.7F, 0.9F);
                }
 
@@ -224,9 +226,9 @@ public class VaultStormArrow extends AbstractArrow {
                0.0
             );
             if (particle != null) {
-               if (this.getStormType() == VaultStormArrow.StormType.BASE) {
+               if (this.getStormArrowType() == VaultStormArrow.StormType.BASE) {
                   particle.setColor(1.0F, 0.9F, 0.9F);
-               } else if (this.getStormType() == VaultStormArrow.StormType.BLIZZARD) {
+               } else if (this.getStormArrowType() == VaultStormArrow.StormType.BLIZZARD) {
                   particle.setColor(0.7F, 0.8F, 1.0F);
                }
 
@@ -388,8 +390,8 @@ public class VaultStormArrow extends AbstractArrow {
          this.percentAbilityPowerDealt,
          this.intervalTicks
       );
-      storm.setIdType(this.getStormType().ordinal());
-      if (this.getStormType() == VaultStormArrow.StormType.BLIZZARD) {
+      storm.setStormArrowType(this.getStormArrowType());
+      if (this.getStormArrowType() == VaultStormArrow.StormType.BLIZZARD) {
          storm.setAmplifier(this.getAmplifier());
          storm.setSlowDuration(this.getSlowDuration());
          storm.setFrostbiteDuration(this.getFrostbiteDuration());
@@ -472,7 +474,7 @@ public class VaultStormArrow extends AbstractArrow {
       super.readAdditionalSaveData(pCompound);
       this.grounded = pCompound.getBoolean("Grounded");
       if (pCompound.contains("type")) {
-         this.setType(pCompound.getInt("type"));
+         this.setStormArrowType(pCompound.getInt("type"));
       }
 
       if (pCompound.contains("slowDuration")) {
@@ -499,7 +501,7 @@ public class VaultStormArrow extends AbstractArrow {
    public void addAdditionalSaveData(CompoundTag pCompound) {
       super.addAdditionalSaveData(pCompound);
       pCompound.putBoolean("Grounded", this.grounded);
-      pCompound.putInt("type", this.getStormType().ordinal());
+      pCompound.putInt("type", this.getStormArrowType().ordinal());
       pCompound.putInt("slowDuration", this.slowDuration);
       pCompound.putInt("frostbiteDuration", this.frostbiteDuration);
       pCompound.putInt("amplifier", this.amplifier);
@@ -523,43 +525,16 @@ public class VaultStormArrow extends AbstractArrow {
    }
 
    public static enum StormType {
-      BASE("base"),
-      BLIZZARD("blizzard");
-
-      private final String name;
-
-      private StormType(String name) {
-         this.name = name;
-      }
-
-      public String getName() {
-         return this.name;
-      }
+      BASE,
+      BLIZZARD;
 
       @Override
       public String toString() {
-         return this.name;
+         return this.name().toLowerCase(Locale.ROOT);
       }
 
-      public static VaultStormArrow.StormType byId(int pId) {
-         VaultStormArrow.StormType[] javelinType = values();
-         if (pId < 0 || pId >= javelinType.length) {
-            pId = 0;
-         }
-
-         return javelinType[pId];
-      }
-
-      public static VaultStormArrow.StormType byName(String pName) {
-         VaultStormArrow.StormType[] javelinType = values();
-
-         for (int i = 0; i < javelinType.length; i++) {
-            if (javelinType[i].getName().equals(pName)) {
-               return javelinType[i];
-            }
-         }
-
-         return javelinType[0];
+      public static VaultStormArrow.StormType byId(int id) {
+         return MiscUtils.getEnumEntry(VaultStormArrow.StormType.class, id);
       }
    }
 }

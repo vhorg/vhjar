@@ -11,6 +11,7 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractIceBoltAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,8 +24,13 @@ public class IceBoltArrowAbility extends AbstractIceBoltAbility {
    private int durationTicks;
    private int amplifier;
 
-   public int getDurationTicks() {
+   public int getDurationTicksUnmodified() {
       return this.durationTicks;
+   }
+
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getDurationTicksUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    public int getAmplifier() {
@@ -36,7 +42,7 @@ public class IceBoltArrowAbility extends AbstractIceBoltAbility {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          IceBoltEntity entity = new IceBoltEntity(player, IceBoltEntity.Model.ARROW, result -> {
             if (result instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity living) {
-               living.addEffect(new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(), this.getAmplifier(), false, false, false));
+               living.addEffect(new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(player), this.getAmplifier(), false, false, false));
                CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, living));
             }
          });

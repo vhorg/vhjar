@@ -397,7 +397,7 @@ public class CrystalWorkbenchScreen extends AbstractElementContainerScreen<Cryst
                }
 
                this.renderItemStack(this.getDisplayStack(), this.worldSpatial.x() + 1, this.worldSpatial.y() + 1, this.isDisabled());
-               this.renderLabel(poseStack);
+               this.renderLabel(this.getDisplayStack(), poseStack);
                if (this.containsMouse(mouseX, mouseY)) {
                   renderSlotHighlight(poseStack, this.worldSpatial.x() + 1, this.worldSpatial.y() + 1, 20, -2130706433);
                }

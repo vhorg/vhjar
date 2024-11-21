@@ -10,10 +10,10 @@ import iskallia.vault.task.BingoTask;
 import iskallia.vault.task.CraftingTask;
 import iskallia.vault.task.DiscoverTransmogTask;
 import iskallia.vault.task.GodAltarTask;
-import iskallia.vault.task.InVaultTask;
 import iskallia.vault.task.ItemRewardTask;
 import iskallia.vault.task.KillEntityTask;
 import iskallia.vault.task.MineBlockTask;
+import iskallia.vault.task.MultiVaultTask;
 import iskallia.vault.task.PlayerVaultLevelTask;
 import iskallia.vault.task.Task;
 import iskallia.vault.task.TimedTask;
@@ -196,12 +196,13 @@ public class TaskRenderer<T extends Task, C extends RendererContext> implements 
          this.register("achievement", MineBlockTaskRenderer.Achievement.class, MineBlockTaskRenderer.Achievement::new, MineBlockTask.class);
          this.register("achievement", TransmogRewardRenderer.Achievement.class, TransmogRewardRenderer.Achievement::new, DiscoverTransmogTask.class);
          this.register("achievement", ItemRewardRenderer.Achievement.class, ItemRewardRenderer.Achievement::new, ItemRewardTask.class);
-         this.register("achievement", InVaultTaskRenderer.Achievement.class, InVaultTaskRenderer.Achievement::new, InVaultTask.class);
+         this.register("achievement", InVaultTaskRenderer.Achievement.class, InVaultTaskRenderer.Achievement::new, MultiVaultTask.class);
          this.register("achievement", TimedTaskRenderer.Achievement.class, TimedTaskRenderer.Achievement::new, TimedTask.class);
          this.register("achievement", PlayerVaultLevelTaskRenderer.Achievement.class, PlayerVaultLevelTaskRenderer.Achievement::new, PlayerVaultLevelTask.class);
          this.register("bingo", BingoRenderer.Leaf.class, BingoRenderer.Leaf::new);
          this.register("bingo", BingoRenderer.Root.class, BingoRenderer.Root::new, BingoTask.class);
          this.register("card", CardTaskRenderer.class, CardTaskRenderer::new);
+         this.register("team", TeamRenderer.class, TeamRenderer::new);
       }
 
       private void initialize() {

@@ -6,4 +6,8 @@ import net.minecraft.world.item.ItemStack;
 
 public interface IConditionalDamageable {
    boolean isImmuneToDamage(ItemStack var1, @Nullable Player var2);
+
+   default boolean doesDurabilityReductionApply(ItemStack stack, @Nullable Player player) {
+      return true;
+   }
 }

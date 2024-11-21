@@ -5,17 +5,17 @@ import iskallia.vault.core.event.CommonEvents;
 public interface ManaPlayer {
    float getMana();
 
-   float setMana(float var1);
+   float setMana(ManaAction var1, float var2);
 
    float getManaMax();
 
    float getManaRegenPerSecond();
 
-   float increaseMana(float var1);
+   float increaseMana(ManaAction var1, float var2);
 
-   float decreaseMana(float var1);
+   float decreaseMana(ManaAction var1, float var2);
 
-   default void onModify(float oldAmount, float newAmount) {
-      CommonEvents.MANA_MODIFY.invoke(this, oldAmount, newAmount);
+   default void onModify(ManaAction action, float oldAmount, float newAmount) {
+      CommonEvents.MANA_MODIFY.invoke(this, action, oldAmount, newAmount);
    }
 }

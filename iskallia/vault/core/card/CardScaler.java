@@ -110,6 +110,11 @@ public class CardScaler extends CardProperty<CardScaler.Config> {
       }
    }
 
+   @Override
+   public boolean voidConfigIfPopulated() {
+      return true;
+   }
+
    public int getFrequency(int tier, CardPos origin, CardDeck deck) {
       int total = 0;
 

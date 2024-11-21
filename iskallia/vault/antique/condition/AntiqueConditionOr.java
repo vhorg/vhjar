@@ -5,6 +5,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.minecraft.util.GsonHelper;
 
@@ -13,6 +14,11 @@ public class AntiqueConditionOr extends AntiqueCondition {
 
    public void addCondition(AntiqueCondition condition) {
       this.conditions.add(condition);
+   }
+
+   @Override
+   public List<? extends AntiqueCondition> getChildConditions() {
+      return Collections.unmodifiableList(this.conditions);
    }
 
    @Override

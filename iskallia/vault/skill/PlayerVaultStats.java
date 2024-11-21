@@ -103,7 +103,7 @@ public class PlayerVaultStats implements INBTSerializable<CompoundTag> {
       int maxLevel = ModConfigs.LEVELS_META.getMaxLevel();
       if (this.getVaultLevel() < maxLevel) {
          this.exp = Math.max(this.exp, 0);
-         this.exp += exp;
+         this.exp = (int)(this.exp + exp * ModConfigs.LEVELS_META.getExpMultiplier());
          int initialLevel = this.vaultLevel;
 
          int neededExp;

@@ -1,6 +1,7 @@
 package iskallia.vault.effect;
 
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -15,7 +16,7 @@ public class ManaStealEffect extends MobEffect {
 
    public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
       if (!livingEntity.getLevel().isClientSide() && livingEntity instanceof Player player) {
-         Mana.decrease(player, Mana.getMax(player) * 0.005F * (amplifier + 1));
+         Mana.decrease(player, ManaAction.NEGATIVE_GAME_MECHANIC, Mana.getMax(player) * 0.005F * (amplifier + 1));
       }
    }
 

@@ -30,11 +30,6 @@ public abstract class AbstractJavelinAbility extends InstantManaAbility {
    protected AbstractJavelinAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Javelin";
-   }
-
    public float getPercentAttackDamageDealt() {
       return this.percentAttackDamageDealt;
    }

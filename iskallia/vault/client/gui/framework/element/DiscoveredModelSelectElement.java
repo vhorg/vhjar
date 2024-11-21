@@ -7,6 +7,7 @@ import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.dynamodel.DynamicModel;
+import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
@@ -121,6 +122,12 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
                            .map(modelRegistry::get)
                            .filter(Optional::isPresent)
                            .map(Optional::get)
+                           .filter(
+                              model -> model instanceof ArmorPieceModel armorPieceModel
+                                    && armorPieceModel.getArmorModel().getModelProperties().doesAllowTransmogrification()
+                                 ? true
+                                 : model.getModelProperties().doesAllowTransmogrification()
+                           )
                            .map(
                               model -> new DiscoveredModelSelectElement.TransmogModelEntry(
                                  this.makeModelItem(vaultGearItem, model.getId()),
@@ -142,7 +149,7 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
          ItemStack stack = item.defaultItem();
          VaultGearData gearData = VaultGearData.read(stack);
          gearData.setState(VaultGearState.IDENTIFIED);
-         gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, modelId);
+         gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, modelId);
          gearData.write(stack);
          return stack;
       }

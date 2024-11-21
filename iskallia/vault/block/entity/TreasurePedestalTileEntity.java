@@ -73,7 +73,9 @@ public class TreasurePedestalTileEntity extends LootableTileEntity {
             rand.nextFloat() * 0.04F,
             rand.nextFloat() * 0.02F * (rand.nextBoolean() ? 1 : -1)
          );
-         particle.setColor(r, g, b);
+         if (particle != null) {
+            particle.setColor(r, g, b);
+         }
       }
    }
 

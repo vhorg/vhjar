@@ -39,6 +39,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -56,6 +57,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    private boolean hidden;
    private BlockState renderState;
    private int ticksSinceSync;
+   private boolean vaultChest;
    private final List<String> templateTags = new ArrayList<>();
 
    public VaultChestTileEntity(BlockPos pos, BlockState state) {
@@ -69,21 +71,11 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    }
 
    private int getSize(BlockState state) {
-      if (state.getBlock() == ModBlocks.TREASURE_CHEST || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE) {
+      Block block = state.getBlock();
+      if (block == ModBlocks.TREASURE_CHEST || block == ModBlocks.TREASURE_CHEST_PLACEABLE) {
          return 54;
-      } else if (state.getBlock() == ModBlocks.FLESH_CHEST_PLACEABLE
-         || state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
-         || state.getBlock() == ModBlocks.GILDED_CHEST_PLACEABLE
-         || state.getBlock() == ModBlocks.ORNATE_STRONGBOX
-         || state.getBlock() == ModBlocks.GILDED_STRONGBOX
-         || state.getBlock() == ModBlocks.LIVING_STRONGBOX) {
-         return 36;
       } else {
-         return state.getBlock() != ModBlocks.LIVING_CHEST_PLACEABLE
-               && state.getBlock() != ModBlocks.ALTAR_CHEST_PLACEABLE
-               && state.getBlock() != ModBlocks.ENIGMA_CHEST_PLACEABLE
-            ? 27
-            : 45;
+         return block != ModBlocks.WOODEN_CHEST && block != ModBlocks.WOODEN_CHEST_PLACEABLE && block != ModBlocks.WOODEN_BARREL ? 45 : 36;
       }
    }
 
@@ -105,6 +97,10 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       return this.hidden;
    }
 
+   public boolean isVaultChest() {
+      return this.vaultChest;
+   }
+
    @Override
    public void setHidden(boolean hidden) {
       if (this.hidden != (this.hidden = hidden)) {
@@ -112,7 +108,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       }
    }
 
-   public void startOpen(Player player) {
+   public void startOpen(@NotNull Player player) {
       super.startOpen(player);
       this.playVaultChestSound();
    }
@@ -122,10 +118,10 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       tile.addParticles();
    }
 
-   public boolean canOpen(Player pPlayer) {
-      return this.getBlockState().getBlock() instanceof VaultChestBlock chestBlock && chestBlock.isStrongbox() && !pPlayer.isCreative()
+   public boolean canOpen(@NotNull Player player) {
+      return this.vaultChest && !player.isCreative() && this.getBlockState().getBlock() instanceof VaultChestBlock chestBlock && chestBlock.isLocked()
          ? false
-         : super.canOpen(pPlayer);
+         : super.canOpen(player);
    }
 
    private void playVaultChestSound() {
@@ -170,7 +166,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    }
 
    public void generateChestLoot(Player source, boolean compress) {
-      if (this.getLevel() != null && !this.getLevel().isClientSide() && source instanceof ServerPlayer player && !this.generated) {
+      if (this.getLevel() != null && !this.getLevel().isClientSide() && source instanceof ServerPlayer player && !this.generated && this.vaultChest) {
          if (!MiscUtils.isPlayerFakeMP(player) && !source.isSpectator()) {
             List<ItemStack> loot = new ArrayList<>();
             ChestGenerationEvent.Data data = CommonEvents.CHEST_LOOT_GENERATION
@@ -333,7 +329,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       }
    }
 
-   public void setItem(int index, ItemStack stack) {
+   public void setItem(int index, @NotNull ItemStack stack) {
       super.setItem(index, stack);
       this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
    }
@@ -380,6 +376,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       this.generated = nbt.getBoolean("Generated");
       this.generatedStacksCount = nbt.getInt("GeneratedStacksCount");
       this.hidden = nbt.getBoolean("Hidden");
+      this.vaultChest = nbt.contains("LootTable", 8) && !nbt.getString("LootTable").isBlank();
       this.templateTags.addAll(this.loadTemplateTags(nbt));
    }
 
@@ -448,11 +445,28 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
          if (state.getBlock() == ModBlocks.LIVING_STRONGBOX) {
             return new TextComponent(rarity + " Living Strongbox");
          }
+
+         if (state.getBlock() == ModBlocks.WOODEN_BARREL) {
+            return new TextComponent(rarity + " Wooden Barrel");
+         }
+
+         if (state.getBlock() == ModBlocks.GILDED_BARREL) {
+            return new TextComponent(rarity + " Gilded Barrel");
+         }
+
+         if (state.getBlock() == ModBlocks.LIVING_BARREL) {
+            return new TextComponent(rarity + " Living Barrel");
+         }
+
+         if (state.getBlock() == ModBlocks.ORNATE_BARREL) {
+            return new TextComponent(rarity + " Ornate Barrel");
+         }
       }
 
       return super.getDisplayName();
    }
 
+   @NotNull
    public CompoundTag getUpdateTag() {
       return this.saveWithoutMetadata();
    }

@@ -7,10 +7,6 @@ import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.eternal.ActiveEternalData;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.entity.eternal.EternalHelper;
-import iskallia.vault.gear.attribute.ability.special.EternalsSpeedModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.archetype.archetype.CommanderArchetype;
@@ -71,11 +67,6 @@ public class SummonEternalAbility extends InstantManaAbility {
    public SummonEternalAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Summon Eternal";
-   }
-
    public int getNumberOfEternals() {
       return this.numberOfEternals;
    }
@@ -118,9 +109,7 @@ public class SummonEternalAbility extends InstantManaAbility {
          .as(ServerPlayer.class)
          .map(
             player -> {
-               if (!(player.getCommandSenderWorld() instanceof ServerLevel world)) {
-                  return Ability.ActionResult.fail();
-               } else {
+               if (player.getCommandSenderWorld() instanceof ServerLevel world) {
                   EternalsData.EternalGroup var10 = EternalsData.get(world).getEternals(player);
                   ArrayList eternals = new ArrayList();
                   int count = this.getNumberOfEternals();
@@ -152,12 +141,6 @@ public class SummonEternalAbility extends InstantManaAbility {
                   } else {
                      float speedIncrease = 0.0F;
 
-                     for (ConfiguredModification<FloatValueConfig, EternalsSpeedModification> mod : SpecialAbilityModification.getModifications(
-                        player, EternalsSpeedModification.class
-                     )) {
-                        speedIncrease = mod.modification().adjustEternalSpeed(mod.config(), speedIncrease);
-                     }
-
                      for (EternalData eternalData : eternals) {
                         EternalEntity eternalx = EternalHelper.spawnEternal(world, eternalData);
                         eternalx.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
@@ -182,6 +165,8 @@ public class SummonEternalAbility extends InstantManaAbility {
 
                      return Ability.ActionResult.successCooldownImmediate();
                   }
+               } else {
+                  return Ability.ActionResult.fail();
                }
             }
          )

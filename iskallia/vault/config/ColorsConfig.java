@@ -64,8 +64,10 @@ public class ColorsConfig extends Config {
    public static final String STACKS_USED_PER_HIT = "stacksUsedPerHit";
    public static final String MAX_STACKS = "maxStacks";
    public static final String LUCKY_HIT = "luckyHit";
+   public static final String AREA_OF_EFFECT = "areaOfEffect";
    public static final String MAX_GLACIAL_PRISON = "maxGlacialPrison";
    public static final String GLACIAL_CHANCE = "glacialChance";
+   public static final String BARRIER_POINTS = "healthPoints";
    @Expose
    private final ColorsConfig.Colors colors = new ColorsConfig.Colors();
 
@@ -122,6 +124,7 @@ public class ColorsConfig extends Config {
       this.colors.builtin.put("maxStacks", TextColor.fromRgb(52084));
       this.colors.builtin.put("stacksUsedPerHit", TextColor.fromRgb(13748480));
       this.colors.builtin.put("luckyHit", TextColor.fromRgb(1308067));
+      this.colors.builtin.put("areaOfEffect", TextColor.fromRgb(15319925));
       this.colors.builtin.put("maxGlacialPrison", TextColor.fromRgb(4703456));
       this.colors.builtin.put("glacialChance", TextColor.fromRgb(8973822));
    }

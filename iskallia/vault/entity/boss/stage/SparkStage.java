@@ -8,9 +8,9 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mixin.AccessorChunkMap;
+import iskallia.vault.network.message.AbsorbingParticleMessage;
 import iskallia.vault.network.message.ClientboundArtifactBossWendarrExplodeMessage;
 import iskallia.vault.network.message.ClientboundSafePointPlaceParticleMessage;
-import iskallia.vault.network.message.PylonConsumeParticleMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,9 +97,7 @@ public class SparkStage implements IBossStage {
                            ModNetwork.CHANNEL
                               .send(
                                  PacketDistributor.ALL.noArg(),
-                                 new PylonConsumeParticleMessage(
-                                    new Vec3(sparkPosition.getX(), sparkPosition.getY(), sparkPosition.getZ()), this.boss.getId(), 16769280
-                                 )
+                                 new AbsorbingParticleMessage(new Vec3(sparkPosition.getX(), sparkPosition.getY(), sparkPosition.getZ()), this.boss, 16769280)
                               );
                         }
                      }

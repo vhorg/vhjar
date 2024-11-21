@@ -33,7 +33,7 @@ public class ModTrinkets {
       VaultMod.id("chromatic_powder"), ModGearAttributes.DURABILITY_WEAR_REDUCTION, 0.25F
    );
    public static final AttributeTrinket<Float> IDONAS_BLADE = new AttributeTrinket<>(
-      VaultMod.id("idonas_blade"), ModGearAttributes.SOUL_CHANCE_PERCENTILE, 1.0F
+      VaultMod.id("idonas_blade"), ModGearAttributes.SOUL_QUANTITY_PERCENTILE, 1.0F
    );
    public static final AttributeTrinket<Float> TENOS_CHARM = new AttributeTrinket<>(VaultMod.id("tenos_charm"), ModGearAttributes.ITEM_QUANTITY, 0.25F);
    public static final AttributeTrinket<Float> LUCKY_GOOSE = new AttributeTrinket<>(VaultMod.id("lucky_goose"), ModGearAttributes.ITEM_RARITY, 0.5F);

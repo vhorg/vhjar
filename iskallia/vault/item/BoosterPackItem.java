@@ -10,7 +10,7 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.tool.IManualModelLoading;
-import iskallia.vault.network.message.BoosterPackUpdateMessage;
+import iskallia.vault.network.message.OpenClientScreenMessage;
 import iskallia.vault.util.ServerScheduler;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,7 +119,12 @@ public class BoosterPackItem extends Item implements IManualModelLoading {
          ServerScheduler.INSTANCE
             .schedule(
                1,
-               () -> ModNetwork.CHANNEL.sendTo(new BoosterPackUpdateMessage(), ((ServerPlayer)player).connection.connection, NetworkDirection.PLAY_TO_CLIENT)
+               () -> ModNetwork.CHANNEL
+                  .sendTo(
+                     new OpenClientScreenMessage(OpenClientScreenMessage.Type.BOOSTER_PACK),
+                     ((ServerPlayer)player).connection.connection,
+                     NetworkDirection.PLAY_TO_CLIENT
+                  )
             );
       }
 

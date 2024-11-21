@@ -7,6 +7,7 @@ import iskallia.vault.gear.data.GearDataVersion;
 import iskallia.vault.gear.data.VaultGearData;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -28,6 +29,10 @@ public class VaultGearAttributeInstance<T> {
 
    public static <T> VaultGearAttributeInstance<T> cast(VaultGearAttribute<T> attr, Object value) {
       return new VaultGearAttributeInstance<>(attr, attr.getType().cast(value));
+   }
+
+   public static <T> VaultGearAttributeInstance<T> cast(VaultGearAttributeInstance<?> inst) {
+      return (VaultGearAttributeInstance<T>)inst;
    }
 
    public VaultGearAttribute<T> getAttribute() {
@@ -87,5 +92,34 @@ public class VaultGearAttributeInstance<T> {
    @Override
    public String toString() {
       return "%s:%s".formatted(this.attribute, this.value);
+   }
+
+   public static class Serializer implements VaultGearAttributeSerializer.AttributeInstanceSerializer<VaultGearAttributeInstance<?>> {
+      @Override
+      public boolean accepts(VaultGearAttributeInstance<?> instance) {
+         return true;
+      }
+
+      @Nullable
+      @Override
+      public VaultGearAttributeInstance<?> deserialize(CompoundTag tag, GearDataVersion version) {
+         return this.deserializeInto(tag, version, VaultGearAttributeInstance::new);
+      }
+
+      @Nullable
+      @Override
+      public VaultGearAttributeInstance<?> deserialize(BitBuffer buf, GearDataVersion version) {
+         return this.deserializeInto(buf, version, VaultGearAttributeInstance::new);
+      }
+
+      @Override
+      public void serialize(VaultGearAttributeInstance<?> instance, CompoundTag tag) {
+         this.serializeInto(instance, tag);
+      }
+
+      @Override
+      public void serialize(VaultGearAttributeInstance<?> instance, BitBuffer buf) {
+         this.serializeInto(instance, buf);
+      }
    }
 }

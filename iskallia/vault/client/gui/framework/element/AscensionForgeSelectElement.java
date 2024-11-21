@@ -125,7 +125,7 @@ public class AscensionForgeSelectElement<E extends AscensionForgeSelectElement<E
                                  if (stack.getItem() instanceof VaultGearItem vaultGearItem) {
                                     VaultGearData gearData = VaultGearData.read(stack);
                                     gearData.setState(VaultGearState.IDENTIFIED);
-                                    gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, listing.modelId());
+                                    gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, listing.modelId());
                                     gearData.write(stack);
                                     VaultGearRarity rarity = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(stack, listing.modelId());
                                     MutableComponent cmp = new TextComponent(((DynamicModel)pair.getFirst()).getDisplayName());

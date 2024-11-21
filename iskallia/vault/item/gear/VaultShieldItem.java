@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -49,7 +50,7 @@ public class VaultShieldItem extends ShieldItem implements VaultGearItem {
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       VaultGearData gearData = VaultGearData.read(stack);
-      EquipmentSlot intendedSlot = this.getIntendedSlot(stack);
+      EquipmentSlot intendedSlot = this.getGearType(stack).getEquipmentSlot();
       return ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRandomRoll(stack, gearData, intendedSlot, random);
    }
 
@@ -65,10 +66,10 @@ public class VaultShieldItem extends ShieldItem implements VaultGearItem {
       return ProficiencyType.SHIELD;
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return EquipmentSlot.OFFHAND;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.SHIELD;
    }
 
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {

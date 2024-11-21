@@ -43,7 +43,7 @@ public class HealGroupAbility extends AbstractHealAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;

@@ -6,6 +6,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
@@ -16,7 +17,6 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.CaveSpider;
-import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
@@ -104,8 +104,8 @@ public class VaultSpiderEntity extends CaveSpider {
       this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, false));
    }
 
-   static class SpiderAttackGoal extends MeleeAttackGoal {
-      public SpiderAttackGoal(Spider p_33822_) {
+   public static class SpiderAttackGoal extends MeleeAttackGoal {
+      public SpiderAttackGoal(PathfinderMob p_33822_) {
          super(p_33822_, 1.0, true);
       }
 

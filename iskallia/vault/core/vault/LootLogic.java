@@ -13,9 +13,7 @@ import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -107,9 +105,6 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
    }
 
    protected ItemStack initializeLoot(Vault vault, ItemStack stack, BlockPos pos, RandomSource random) {
-      VaultLevelItem.doInitializeVaultLoot(stack, vault, pos);
-      stack = DataTransferItem.doConvertStack(stack, random);
-      DataInitializationItem.doInitialize(stack, random);
-      return stack;
+      return LootInitialization.initializeVaultLoot(stack, vault, pos, random);
    }
 }

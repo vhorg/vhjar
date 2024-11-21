@@ -9,11 +9,13 @@ import iskallia.vault.network.message.ClientboundFireballExplosionMessage;
 import iskallia.vault.skill.ability.effect.spi.AbstractFireballAbility;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -98,11 +100,11 @@ public class VaultFireball extends AbstractArrow {
    }
 
    public void setType(int id) {
-      this.entityData.set(ID_TYPE, id);
+      this.setType(VaultFireball.FireballType.byId(id));
    }
 
-   public void setType(String type) {
-      this.entityData.set(ID_TYPE, VaultFireball.FireballType.byName(type).ordinal());
+   public void setType(VaultFireball.FireballType type) {
+      this.entityData.set(ID_TYPE, type.ordinal());
    }
 
    public VaultFireball.FireballType getFireballType() {
@@ -481,7 +483,7 @@ public class VaultFireball extends AbstractArrow {
 
    public void explode(Vec3 pos) {
       if (this.getOwner() != null && this.getOwner() instanceof ServerPlayer player) {
-         float radius = AreaOfEffectHelper.adjustAreaOfEffect(player, 3.0F);
+         float radius = AreaOfEffectHelper.adjustAreaOfEffectKey(player, this.getFireballType().getAbilityName(), 3.0F);
          List<LivingEntity> targetEntities = this.getTargetEntities(player.level, player, pos, radius);
          targetEntities.removeIf(livingEntity -> livingEntity.distanceToSqr(pos) > radius * radius);
          float attackDamage = this.getDamage();
@@ -711,44 +713,27 @@ public class VaultFireball extends AbstractArrow {
    }
 
    public static enum FireballType {
-      BASE("base"),
-      BOUNCING("bouncing"),
-      FIRESHOT("fireshot");
+      BASE("Fireball_Base"),
+      BOUNCING("Fireball_Volley"),
+      FIRESHOT("Fireball_Fireshot");
 
-      private final String name;
+      private final String abilityName;
 
-      private FireballType(String name) {
-         this.name = name;
+      private FireballType(String abilityName) {
+         this.abilityName = abilityName;
       }
 
-      public String getName() {
-         return this.name;
+      public String getAbilityName() {
+         return this.abilityName;
       }
 
       @Override
       public String toString() {
-         return this.name;
+         return this.name().toLowerCase(Locale.ROOT);
       }
 
       public static VaultFireball.FireballType byId(int pId) {
-         VaultFireball.FireballType[] javelinType = values();
-         if (pId < 0 || pId >= javelinType.length) {
-            pId = 0;
-         }
-
-         return javelinType[pId];
-      }
-
-      public static VaultFireball.FireballType byName(String pName) {
-         VaultFireball.FireballType[] javelinType = values();
-
-         for (int i = 0; i < javelinType.length; i++) {
-            if (javelinType[i].getName().equals(pName)) {
-               return javelinType[i];
-            }
-         }
-
-         return javelinType[0];
+         return MiscUtils.getEnumEntry(VaultFireball.FireballType.class, pId);
       }
    }
 }

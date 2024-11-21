@@ -58,5 +58,9 @@ public final class LootInfoGroupDefinitionRegistry {
       register("living_strongbox", () -> new ItemStack(ModBlocks.LIVING_STRONGBOX));
       register("gilded_strongbox", () -> new ItemStack(ModBlocks.GILDED_STRONGBOX));
       register("ornate_strongbox", () -> new ItemStack(ModBlocks.ORNATE_STRONGBOX));
+      register("wooden_barrel", () -> new ItemStack(ModBlocks.WOODEN_BARREL));
+      register("living_barrel", () -> new ItemStack(ModBlocks.LIVING_BARREL));
+      register("gilded_barrel", () -> new ItemStack(ModBlocks.GILDED_BARREL));
+      register("ornate_barrel", () -> new ItemStack(ModBlocks.ORNATE_BARREL));
    }
 }

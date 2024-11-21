@@ -23,7 +23,7 @@ public class StormArrowRenderer extends ArrowRenderer<VaultStormArrow> {
 
    @Nonnull
    public ResourceLocation getTextureLocation(@Nonnull VaultStormArrow entity) {
-      return entity.getStormType() == VaultStormArrow.StormType.BASE ? TEXTURE_LOCATION : TEXTURE_LOCATION_BLIZZARD;
+      return entity.getStormArrowType() == VaultStormArrow.StormType.BASE ? TEXTURE_LOCATION : TEXTURE_LOCATION_BLIZZARD;
    }
 
    @ParametersAreNonnullByDefault

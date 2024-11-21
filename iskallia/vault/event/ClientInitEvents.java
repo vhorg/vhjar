@@ -33,5 +33,12 @@ public class ClientInitEvents {
                .orElse(0),
             new net.minecraft.world.level.block.Block[]{ModBlocks.GRID_GATEWAY}
          );
+      event.getBlockColors()
+         .register(
+            (pState, pLevel, pPos, pTintIndex) -> pLevel.getBlockEntity(pPos, ModBlocks.TASK_PILLAR_TILE_ENTITY)
+               .map(tileEntity -> tileEntity.getTintColor(pTintIndex))
+               .orElse(0),
+            new net.minecraft.world.level.block.Block[]{ModBlocks.TASK_PILLAR}
+         );
    }
 }

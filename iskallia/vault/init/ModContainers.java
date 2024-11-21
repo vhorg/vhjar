@@ -8,8 +8,8 @@ import iskallia.vault.container.AscensionForgeContainer;
 import iskallia.vault.container.BountyContainer;
 import iskallia.vault.container.CrystalWorkbenchContainer;
 import iskallia.vault.container.InscriptionTableContainer;
+import iskallia.vault.container.JewelCraftingTableContainer;
 import iskallia.vault.container.LootStatueContainer;
-import iskallia.vault.container.ModifierDiscoveryContainer;
 import iskallia.vault.container.ModifierWorkbenchContainer;
 import iskallia.vault.container.NBTElementContainer;
 import iskallia.vault.container.RenamingContainer;
@@ -42,6 +42,9 @@ import iskallia.vault.container.inventory.EtchingTradeContainer;
 import iskallia.vault.container.inventory.MagnetTableContainerMenu;
 import iskallia.vault.container.inventory.ShardPouchContainer;
 import iskallia.vault.container.inventory.ShardTradeContainer;
+import iskallia.vault.container.inventory.VaultKeyringContainer;
+import iskallia.vault.container.modifier.ModifierArchiveContainer;
+import iskallia.vault.container.modifier.ModifierScrollContainer;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.vault.stat.StatTotals;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
@@ -50,7 +53,6 @@ import iskallia.vault.skill.archetype.ArchetypeContainer;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.skill.tree.TalentTree;
-import iskallia.vault.world.data.PlayerStoredAntiquesData;
 import iskallia.vault.world.data.SkillAltarData;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +80,7 @@ public class ModContainers {
    public static MenuType<CatalystInfusionTableContainer> CATALYST_INFUSION_TABLE_CONTAINER;
    public static MenuType<ShardPouchContainer> SHARD_POUCH_CONTAINER;
    public static MenuType<AntiqueCollectorBookContainer> ANTIQUE_COLLECTOR_BOOK_CONTAINER;
+   public static MenuType<VaultKeyringContainer> VAULT_KEYRING_CONTAINER;
    public static MenuType<ShardTradeContainer> SHARD_TRADE_CONTAINER;
    public static MenuType<CryochamberContainer> CRYOCHAMBER_CONTAINER;
    public static MenuType<EtchingTradeContainer> ETCHING_TRADE_CONTAINER;
@@ -90,6 +93,7 @@ public class ModContainers {
    public static MenuType<VaultArtisanStationContainer> VAULT_ARTISAN_STATION_CONTAINER;
    public static MenuType<VaultJewelCuttingStationContainer> VAULT_JEWEL_CUTTING_STATION_CONTAINER;
    public static MenuType<VaultJewelApplicationStationContainer> VAULT_JEWEL_APPLICATION_STATION_CONTAINER;
+   public static MenuType<JewelCraftingTableContainer> JEWEL_CRAFTING_TABLE_CONTAINER;
    public static MenuType<CrystalWorkbenchContainer> CRYSTAL_MODIFICATION_STATION_CONTAINER;
    public static MenuType<VaultRecyclerContainer> VAULT_RECYCLER_CONTAINER;
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
@@ -103,7 +107,8 @@ public class ModContainers {
    public static MenuType<ModifierWorkbenchContainer> MODIFIER_WORKBENCH_CONTAINER;
    public static MenuType<AlchemyTableContainer> ALCHEMY_TABLE_CONTAINER;
    public static MenuType<AlchemyArchiveContainer> ALCHEMY_ARCHIVE_CONTAINER;
-   public static MenuType<ModifierDiscoveryContainer> MODIFIER_DISCOVERY_CONTAINER;
+   public static MenuType<ModifierArchiveContainer> MODIFIER_ARCHIVE_CONTAINER;
+   public static MenuType<ModifierScrollContainer> MODIFIER_SCROLL_CONTAINER;
    public static MenuType<VaultEnchanterContainer> VAULT_ENCHANTER_CONTAINER;
    public static MenuType<SkillAltarContainer.Default> SKILL_ALTAR_CONTAINER;
    public static MenuType<SkillAltarContainer.Import> SKILL_ALTAR_IMPORT_CONTAINER;
@@ -171,9 +176,11 @@ public class ModContainers {
       });
       ANTIQUE_COLLECTOR_BOOK_CONTAINER = IForgeMenuType.create((windowId, inventory, data) -> {
          int bookSlot = data.readInt();
-         PlayerStoredAntiquesData.StoredAntiques antiques = new PlayerStoredAntiquesData.StoredAntiques();
-         antiques.load(data);
-         return new AntiqueCollectorBookContainer(windowId, inventory, bookSlot, antiques);
+         return new AntiqueCollectorBookContainer(windowId, inventory, bookSlot);
+      });
+      VAULT_KEYRING_CONTAINER = IForgeMenuType.create((windowId, inventory, data) -> {
+         int slot = data.readInt();
+         return new VaultKeyringContainer(windowId, inventory, slot);
       });
       SHARD_TRADE_CONTAINER = IForgeMenuType.create((windowId, inventory, data) -> new ShardTradeContainer(windowId, inventory));
       CRYOCHAMBER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -220,6 +227,11 @@ public class ModContainers {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
          return new VaultJewelApplicationStationContainer(windowId, world, pos, inventory);
+      });
+      JEWEL_CRAFTING_TABLE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new JewelCraftingTableContainer(windowId, world, pos, inventory);
       });
       CRYSTAL_MODIFICATION_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
@@ -300,12 +312,21 @@ public class ModContainers {
             );
          }
       );
-      MODIFIER_DISCOVERY_CONTAINER = IForgeMenuType.create(
+      MODIFIER_ARCHIVE_CONTAINER = IForgeMenuType.create(
          (windowId, inventory, buffer) -> {
             Level world = inventory.player.getCommandSenderWorld();
             BlockPos pos = buffer.readBlockPos();
-            return new ModifierDiscoveryContainer(
+            return new ModifierArchiveContainer(
                windowId, world, pos, inventory.player, ModifierDiscoveryTileEntity.readGearModifiers(buffer.readNbt().getList("gearModifiers", 10))
+            );
+         }
+      );
+      MODIFIER_SCROLL_CONTAINER = IForgeMenuType.create(
+         (windowId, inventory, buffer) -> {
+            int slot = buffer.readInt();
+            UUID scrollUuid = buffer.readUUID();
+            return new ModifierScrollContainer(
+               windowId, slot, scrollUuid, inventory.player, ModifierDiscoveryTileEntity.readGearModifiers(buffer.readNbt().getList("gearModifiers", 10))
             );
          }
       );
@@ -346,6 +367,7 @@ public class ModContainers {
                (MenuType)CATALYST_INFUSION_TABLE_CONTAINER.setRegistryName("catalyst_infusion_table_container"),
                (MenuType)SHARD_POUCH_CONTAINER.setRegistryName("shard_pouch_container"),
                (MenuType)ANTIQUE_COLLECTOR_BOOK_CONTAINER.setRegistryName("antique_collector_book_container"),
+               (MenuType)VAULT_KEYRING_CONTAINER.setRegistryName("vault_keyring"),
                (MenuType)SHARD_TRADE_CONTAINER.setRegistryName("shard_trade_container"),
                (MenuType)CRYOCHAMBER_CONTAINER.setRegistryName("cryochamber_container"),
                (MenuType)ETCHING_TRADE_CONTAINER.setRegistryName("etching_trade_container"),
@@ -358,6 +380,7 @@ public class ModContainers {
                (MenuType)VAULT_ARTISAN_STATION_CONTAINER.setRegistryName("vault_artisan_station_container"),
                (MenuType)VAULT_JEWEL_CUTTING_STATION_CONTAINER.setRegistryName("vault_jewel_cutting_station_container"),
                (MenuType)VAULT_JEWEL_APPLICATION_STATION_CONTAINER.setRegistryName("vault_jewel_application_station_container"),
+               (MenuType)JEWEL_CRAFTING_TABLE_CONTAINER.setRegistryName("jewel_crafting_table_container"),
                (MenuType)CRYSTAL_MODIFICATION_STATION_CONTAINER.setRegistryName("crystal_modification_station_container"),
                (MenuType)VAULT_RECYCLER_CONTAINER.setRegistryName("vault_recycler_container"),
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),
@@ -371,7 +394,8 @@ public class ModContainers {
                (MenuType)MODIFIER_WORKBENCH_CONTAINER.setRegistryName("modifier_workbench_container"),
                (MenuType)ALCHEMY_TABLE_CONTAINER.setRegistryName("alchemy_table_container"),
                (MenuType)ALCHEMY_ARCHIVE_CONTAINER.setRegistryName("alchemy_archive_container"),
-               (MenuType)MODIFIER_DISCOVERY_CONTAINER.setRegistryName("modifier_discovery_container"),
+               (MenuType)MODIFIER_ARCHIVE_CONTAINER.setRegistryName("modifier_discovery_container"),
+               (MenuType)MODIFIER_SCROLL_CONTAINER.setRegistryName("modifier_scroll_container"),
                (MenuType)VAULT_ENCHANTER_CONTAINER.setRegistryName("vault_enchanter_container"),
                (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container"),
                (MenuType)SKILL_ALTAR_IMPORT_CONTAINER.setRegistryName("skill_altar_import_container"),

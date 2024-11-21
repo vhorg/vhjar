@@ -8,7 +8,7 @@ import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
-import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
+import iskallia.vault.gear.attribute.VaultGearAttributeSerializer;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.util.data.ObjectHolder;
@@ -123,7 +123,7 @@ public class VaultGearData extends AttributeGearData {
    }
 
    @Override
-   public boolean has(VaultGearAttribute<?> attribute) {
+   public boolean hasAttribute(VaultGearAttribute<?> attribute) {
       return this.has(attribute, VaultGearData.Type.ALL);
    }
 
@@ -137,6 +137,14 @@ public class VaultGearData extends AttributeGearData {
          .filter(instance -> instance instanceof VaultGearModifier)
          .map(instance -> (VaultGearModifier)instance)
          .anyMatch(modifier -> modifier.getModifierIdentifier().equals(modifierIdentifier));
+   }
+
+   public Stream<? extends VaultGearModifier<?>> getModifiers(ResourceLocation modifierIdentifier) {
+      return VaultGearData.Type.ALL
+         .getAttributeSource(this)
+         .filter(inst -> inst instanceof VaultGearModifier)
+         .map(inst -> (VaultGearModifier<?>)inst)
+         .filter(mod -> modifierIdentifier.equals(mod.getModifierIdentifier()));
    }
 
    public boolean removeModifier(VaultGearModifier<?> modifier) {
@@ -253,9 +261,9 @@ public class VaultGearData extends AttributeGearData {
       buf.writeEnum(this.rarity);
       buf.writeInt(this.repairSlots);
       buf.writeInt(this.usedRepairSlots);
-      buf.writeCollection(this.baseModifiers, VaultGearAttributeRegistry::writeAttributeInstance);
-      buf.writeCollection(this.prefixes, VaultGearAttributeRegistry::writeAttributeInstance);
-      buf.writeCollection(this.suffixes, VaultGearAttributeRegistry::writeAttributeInstance);
+      buf.writeCollection(this.baseModifiers, VaultGearAttributeSerializer::serialize);
+      buf.writeCollection(this.prefixes, VaultGearAttributeSerializer::serialize);
+      buf.writeCollection(this.suffixes, VaultGearAttributeSerializer::serialize);
    }
 
    @Override
@@ -266,11 +274,11 @@ public class VaultGearData extends AttributeGearData {
       this.rarity = buf.readEnum(VaultGearRarity.class);
       this.repairSlots = buf.readInt();
       this.usedRepairSlots = buf.readInt();
-      this.baseModifiers = buf.readCollection(i -> new LinkedList<>(), this.versioned(VaultGearAttributeRegistry::readModifier));
+      this.baseModifiers = buf.readCollection(i -> new LinkedList<>(), this.readVersionedModifier(VaultGearAttributeSerializer::deserialize));
       this.baseModifiers.removeIf(Objects::isNull);
-      this.prefixes = buf.readCollection(i -> new LinkedList<>(), this.versioned(VaultGearAttributeRegistry::readModifier));
+      this.prefixes = buf.readCollection(i -> new LinkedList<>(), this.readVersionedModifier(VaultGearAttributeSerializer::deserialize));
       this.prefixes.removeIf(Objects::isNull);
-      this.suffixes = buf.readCollection(i -> new LinkedList<>(), this.versioned(VaultGearAttributeRegistry::readModifier));
+      this.suffixes = buf.readCollection(i -> new LinkedList<>(), this.readVersionedModifier(VaultGearAttributeSerializer::deserialize));
       this.suffixes.removeIf(Objects::isNull);
    }
 
@@ -283,13 +291,13 @@ public class VaultGearData extends AttributeGearData {
       tag.putInt("repairSlots", this.repairSlots);
       tag.putInt("usedRepairSlots", this.usedRepairSlots);
       ListTag baseModifiers = new ListTag();
-      this.baseModifiers.stream().map(VaultGearAttributeRegistry::serializeAttributeInstance).forEach(baseModifiers::add);
+      this.baseModifiers.stream().map(VaultGearAttributeSerializer::serializeTag).forEach(baseModifiers::add);
       tag.put("baseModifiers", baseModifiers);
       ListTag prefixes = new ListTag();
-      this.prefixes.stream().map(VaultGearAttributeRegistry::serializeAttributeInstance).forEach(prefixes::add);
+      this.prefixes.stream().map(VaultGearAttributeSerializer::serializeTag).forEach(prefixes::add);
       tag.put("prefixes", prefixes);
       ListTag suffixes = new ListTag();
-      this.suffixes.stream().map(VaultGearAttributeRegistry::serializeAttributeInstance).forEach(suffixes::add);
+      this.suffixes.stream().map(VaultGearAttributeSerializer::serializeTag).forEach(suffixes::add);
       tag.put("suffixes", suffixes);
       return tag;
    }
@@ -306,21 +314,21 @@ public class VaultGearData extends AttributeGearData {
       ListTag baseModifiers = tag.getList("baseModifiers", 10);
       baseModifiers.stream()
          .map(nbt -> (CompoundTag)nbt)
-         .map(nbt -> VaultGearAttributeRegistry.deserializeModifier(nbt, version))
+         .map(nbt -> this.deserializeModifier(nbt, version))
          .filter(Objects::nonNull)
          .forEach(this.baseModifiers::add);
       ListTag prefixes = tag.getList("prefixes", 10);
-      prefixes.stream()
-         .map(nbt -> (CompoundTag)nbt)
-         .map(nbt -> VaultGearAttributeRegistry.deserializeModifier(nbt, version))
-         .filter(Objects::nonNull)
-         .forEach(this.prefixes::add);
+      prefixes.stream().map(nbt -> (CompoundTag)nbt).map(nbt -> this.deserializeModifier(nbt, version)).filter(Objects::nonNull).forEach(this.prefixes::add);
       ListTag suffixes = tag.getList("suffixes", 10);
-      suffixes.stream()
-         .map(nbt -> (CompoundTag)nbt)
-         .map(nbt -> VaultGearAttributeRegistry.deserializeModifier(nbt, version))
-         .filter(Objects::nonNull)
-         .forEach(this.suffixes::add);
+      suffixes.stream().map(nbt -> (CompoundTag)nbt).map(nbt -> this.deserializeModifier(nbt, version)).filter(Objects::nonNull).forEach(this.suffixes::add);
+   }
+
+   private VaultGearModifier<?> deserializeModifier(CompoundTag nbt, GearDataVersion version) {
+      if (GearDataVersion.V0_6.isLaterThan(version)) {
+         nbt.putInt("type", 1);
+      }
+
+      return VaultGearAttributeSerializer.deserializeTag(nbt, version);
    }
 
    @Override

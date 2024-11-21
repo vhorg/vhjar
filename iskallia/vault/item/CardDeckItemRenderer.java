@@ -25,7 +25,7 @@ public class CardDeckItemRenderer extends SpecialItemRenderer {
       String model = ModConfigs.CARD_DECK.getModel(id).orElse(null);
       if (model == null) {
          List<String> models = new ArrayList<>(ModConfigs.CARD_DECK.getModels());
-         model = models.get((int)(ClientScheduler.INSTANCE.getTickCount() >> 4) % models.size());
+         model = models.get((int)(ClientScheduler.INSTANCE.getTick() >> 4) % models.size());
       }
 
       ModelResourceLocation base = new ModelResourceLocation(model);

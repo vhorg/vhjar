@@ -54,8 +54,12 @@ public class GearAttributeTalent extends LearnableSkill implements GearAttribute
    public void onTick(SkillContext context) {
       if (!this.isUnlocked()) {
          this.onRemoveModifiers(context);
-      } else if (this.canApply(context)) {
-         this.onAddModifiers(context);
+      } else {
+         if (this.canApply(context)) {
+            this.onAddModifiers(context);
+         } else {
+            this.onRemoveModifiers(context);
+         }
       }
    }
 

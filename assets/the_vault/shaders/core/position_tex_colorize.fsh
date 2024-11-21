@@ -11,11 +11,11 @@ in vec2 texCoord0;
 out vec4 fragColor;
 
 void main() {
-    vec4 color = texture(Sampler0, texCoord0);
-    if (color.a == 0.0) {
+    vec4 renderer = texture(Sampler0, texCoord0);
+    if (renderer.a == 0.0) {
         discard;
     }
-    vec4 grayscale = vec4(mix(color.rgb, vec3(0.2 * color.r + 0.7 * color.g + 0.7 * color.b), Grayscale) * Brightness, color.w);
+    vec4 grayscale = vec4(mix(renderer.rgb, vec3(0.2 * renderer.r + 0.7 * renderer.g + 0.7 * renderer.b), Grayscale) * Brightness, renderer.w);
     vec4 colorize = vec4(Colorize.rgb, 1.0);
 
     fragColor = grayscale * colorize;

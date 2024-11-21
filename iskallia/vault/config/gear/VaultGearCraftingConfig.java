@@ -2,136 +2,193 @@ package iskallia.vault.config.gear;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.Config;
-import iskallia.vault.config.entry.LevelEntryList;
-import iskallia.vault.gear.VaultGearRarity;
+import iskallia.vault.config.entry.FloatLevelEntryList;
+import iskallia.vault.config.entry.MultipleGearAttributeRollOutputEntry;
+import iskallia.vault.config.entry.MultipleRollOutputEntry;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.util.SidedHelper;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Optional;
+import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 public class VaultGearCraftingConfig extends Config {
+   private static final Map<Integer, Integer> proficiencyCaps = new HashMap<>();
    @Expose
    private String defaultCraftedPool;
    @Expose
-   private float legendaryModifierChance;
-   @Expose
-   private float potentialIncreasePerLevel;
-   @Expose
-   private final Map<VaultGearRarity, VaultGearCraftingConfig.Range> potentialRanges = new HashMap<>();
-   @Expose
-   private Map<String, Double> potentialModifiers = new HashMap<>();
-   @Expose
-   private int totalMaximumProficiency;
-   @Expose
-   private int totalCategoryProficiency;
-   @Expose
-   private VaultGearCraftingConfig.Range proficiencyPerCraft;
-   @Expose
-   private final LevelEntryList<VaultGearCraftingConfig.Pool> proficiencyPools = new LevelEntryList<>();
+   private final FloatLevelEntryList<VaultGearCraftingConfig.ProficiencyStep> proficiencyPools = new FloatLevelEntryList<>();
 
    @Override
    public String getName() {
       return "gear%sgear_crafting".formatted(File.separator);
    }
 
-   public float getLegendaryModifierChance() {
-      return this.legendaryModifierChance;
-   }
-
-   public int getTotalMaximumProficiency() {
-      return this.totalMaximumProficiency;
-   }
-
-   public int getTotalCategoryProficiency() {
-      return this.totalCategoryProficiency;
-   }
-
-   public int getRandomProficiencyGain() {
-      return this.proficiencyPerCraft.getRandom(rand);
-   }
-
-   public float getPotentialIncreasePerLevel() {
-      return this.potentialIncreasePerLevel;
-   }
-
-   public int getMaxCraftingPotential(VaultGearRarity rarity, String pool) {
-      VaultGearCraftingConfig.Range range = this.potentialRanges.get(rarity);
-      return range == null ? 0 : (int)Math.round(range.getMax() * this.potentialModifiers.getOrDefault(pool, 1.0));
-   }
-
-   public int getNewCraftingPotential(VaultGearRarity rarity, String pool) {
-      VaultGearCraftingConfig.Range range = this.potentialRanges.get(rarity);
-      return range == null ? 0 : (int)Math.round(range.getRandom(rand) * this.potentialModifiers.getOrDefault(pool, 1.0));
-   }
-
    public VaultGearTypeConfig.RollType getDefaultCraftedPool() {
       return ModConfigs.VAULT_GEAR_TYPE_CONFIG.getRollPool(this.defaultCraftedPool).orElse(ModConfigs.VAULT_GEAR_TYPE_CONFIG.getDefaultRoll());
    }
 
-   public VaultGearTypeConfig.RollType getRollPool(int proficiency) {
-      String rollPool = this.proficiencyPools.getForLevel(proficiency).map(VaultGearCraftingConfig.Pool::getPool).orElse(this.defaultCraftedPool);
-      return ModConfigs.VAULT_GEAR_TYPE_CONFIG.getRollPool(rollPool).orElse(ModConfigs.VAULT_GEAR_TYPE_CONFIG.getDefaultRoll());
+   public Optional<VaultGearCraftingConfig.ProficiencyStep> getProficiencyStep(float proficiencyDegree) {
+      return this.proficiencyPools.getForValue(proficiencyDegree);
+   }
+
+   public List<VaultGearCraftingConfig.ProficiencyStep> getProficiencySteps() {
+      return Collections.unmodifiableList(this.proficiencyPools);
    }
 
    @Override
    protected void reset() {
       this.defaultCraftedPool = "Scrappy";
-      this.legendaryModifierChance = 0.03F;
-      this.potentialIncreasePerLevel = 0.015F;
-      this.potentialRanges.clear();
-      this.potentialRanges.put(VaultGearRarity.SCRAPPY, new VaultGearCraftingConfig.Range(30, 50));
-      this.potentialRanges.put(VaultGearRarity.COMMON, new VaultGearCraftingConfig.Range(50, 70));
-      this.potentialRanges.put(VaultGearRarity.RARE, new VaultGearCraftingConfig.Range(70, 90));
-      this.potentialRanges.put(VaultGearRarity.EPIC, new VaultGearCraftingConfig.Range(90, 115));
-      this.potentialRanges.put(VaultGearRarity.OMEGA, new VaultGearCraftingConfig.Range(115, 140));
-      this.totalMaximumProficiency = 2000;
-      this.totalCategoryProficiency = 1000;
-      this.proficiencyPerCraft = new VaultGearCraftingConfig.Range(5, 15);
       this.proficiencyPools.clear();
-      this.proficiencyPools.add(new VaultGearCraftingConfig.Pool(0, "Scrappy"));
-      this.proficiencyPools.add(new VaultGearCraftingConfig.Pool(300, "Scrappy+"));
+      this.proficiencyPools
+         .add(
+            new VaultGearCraftingConfig.ProficiencyStep(
+               "Tier 0",
+               "Normal",
+               0.0F,
+               "Scrappy",
+               65280,
+               1.0F,
+               List.of(new MultipleGearAttributeRollOutputEntry(MultipleRollOutputEntry.OutcomeBias.BEST, 1, "the_vault:base_durability")),
+               1.0F,
+               4,
+               0.1F,
+               new ResourceLocation("the_vault:base_soulbound")
+            )
+         );
    }
 
-   public static class Pool implements LevelEntryList.ILevelEntry {
+   @Override
+   protected void onLoad(@Nullable Config oldConfigInstance) {
+      super.onLoad(oldConfigInstance);
+      rebuildProficiencyCaps();
+   }
+
+   public static void rebuildProficiencyCaps() {
+      proficiencyCaps.clear();
+
+      for (int level = 1; level <= 100; level++) {
+         double absProficiencyCapAtLevel = 2.71E-8 * Math.pow(level, 6.49) + 25 * level;
+         proficiencyCaps.put(level, (int)Math.round(absProficiencyCapAtLevel));
+      }
+   }
+
+   public static int getProficiencyCap(int level) {
+      return proficiencyCaps.getOrDefault(level, 1);
+   }
+
+   public static float calculateRelativeProficiency(int absoluteProficiency, Player player) {
+      return calculateRelativeProficiency(absoluteProficiency, SidedHelper.getVaultLevel(player));
+   }
+
+   public static float calculateRelativeProficiency(int absoluteProficiency, int playerLevel) {
+      int proficiencyCap = getProficiencyCap(playerLevel);
+      return absoluteProficiency >= proficiencyCap ? 1.0F : Mth.clamp((float)absoluteProficiency / proficiencyCap, 0.0F, 1.0F);
+   }
+
+   public static class ProficiencyStep implements FloatLevelEntryList.FloatLevelEntry {
       @Expose
-      private int minProficiency;
+      private String proficiencyName;
+      @Expose
+      private String durabilityOutcomeName;
+      @Expose
+      private float minProficiency;
       @Expose
       private String pool;
+      @Expose
+      private int color;
+      @Expose
+      private float craftingPotentialMultiplier;
+      @Expose
+      private List<MultipleGearAttributeRollOutputEntry> gearRollOutcomeModifiers;
+      @Expose
+      private float greaterModifierChance;
+      @Expose
+      private int maximumRepairSlots;
+      @Expose
+      private float soulboundChance;
+      @Expose
+      private ResourceLocation soulboundModifierId;
 
-      public Pool(int minProficiency, String pool) {
+      public ProficiencyStep(
+         String proficiencyName,
+         String durabilityOutcomeName,
+         float minProficiency,
+         String pool,
+         int color,
+         float craftingPotentialMultiplier,
+         List<MultipleGearAttributeRollOutputEntry> gearRollOutcomeModifiers,
+         float greaterModifierChance,
+         int maximumRepairSlots,
+         float soulboundChance,
+         ResourceLocation soulboundModifierId
+      ) {
+         this.proficiencyName = proficiencyName;
+         this.durabilityOutcomeName = durabilityOutcomeName;
          this.minProficiency = minProficiency;
          this.pool = pool;
+         this.color = color;
+         this.craftingPotentialMultiplier = craftingPotentialMultiplier;
+         this.gearRollOutcomeModifiers = gearRollOutcomeModifiers;
+         this.greaterModifierChance = greaterModifierChance;
+         this.maximumRepairSlots = maximumRepairSlots;
+         this.soulboundChance = soulboundChance;
+         this.soulboundModifierId = soulboundModifierId;
+      }
+
+      public String getProficiencyName() {
+         return this.proficiencyName;
+      }
+
+      public String getDurabilityOutcomeName() {
+         return this.durabilityOutcomeName;
+      }
+
+      public float getMinProficiency() {
+         return this.minProficiency;
       }
 
       public String getPool() {
          return this.pool;
       }
 
+      public int getColor() {
+         return this.color;
+      }
+
+      public float getCraftingPotentialMultiplier() {
+         return this.craftingPotentialMultiplier;
+      }
+
+      public List<MultipleGearAttributeRollOutputEntry> getGearRollOutcomeModifiers() {
+         return this.gearRollOutcomeModifiers;
+      }
+
+      public float getGreaterModifierChance() {
+         return this.greaterModifierChance;
+      }
+
+      public int getMaximumRepairSlots() {
+         return this.maximumRepairSlots;
+      }
+
+      public float getSoulboundChance() {
+         return this.soulboundChance;
+      }
+
+      public ResourceLocation getSoulboundModifierId() {
+         return this.soulboundModifierId;
+      }
+
       @Override
-      public int getLevel() {
-         return this.minProficiency;
-      }
-   }
-
-   public static class Range {
-      @Expose
-      private int min;
-      @Expose
-      private int max;
-
-      public Range(int min, int max) {
-         this.min = min;
-         this.max = max;
-      }
-
-      public int getRandom(Random rand) {
-         return Mth.randomBetweenInclusive(rand, this.min, this.max);
-      }
-
-      public int getMax() {
-         return this.max;
+      public float getMinValue() {
+         return this.getMinProficiency();
       }
    }
 }

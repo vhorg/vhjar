@@ -11,6 +11,7 @@ import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.gear.data.CardDeckGearData;
 import iskallia.vault.gear.item.CuriosGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.tool.IManualModelLoading;
@@ -123,14 +124,20 @@ public class CardDeckItem extends Item implements CuriosGearItem, ICurioItem, IM
       }
    }
 
-   public static CardDeck setCardDeck(ItemStack stack, CardDeck card) {
-      card.writeNbt().ifPresent(tag -> stack.getOrCreateTag().put("data", tag));
-      return card;
+   public static void setCardDeck(ItemStack stack, CardDeck deck) {
+      deck.writeNbt().ifPresent(tag -> stack.getOrCreateTag().put("data", tag));
+      CardDeckGearData data = CardDeckGearData.read(stack);
+      data.refresh(deck);
+      data.write(stack);
+   }
+
+   public static boolean hasCardDeck(ItemStack stack) {
+      return stack.getTag() != null && stack.getTag().contains("data");
    }
 
    public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
-      getCardDeck(stack).ifPresent(deck -> deck.addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTickCount()));
+      getCardDeck(stack).ifPresent(deck -> deck.addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTick()));
    }
 
    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
@@ -138,11 +145,11 @@ public class CardDeckItem extends Item implements CuriosGearItem, ICurioItem, IM
       if (!world.isClientSide()) {
          RandomSource random = JavaRandom.ofNanoTime();
          String deckId = getId(stack);
-         if (deckId == null || !ModConfigs.CARD_DECK.has(deckId) && getCardDeck(stack).isEmpty()) {
+         if (deckId == null || !ModConfigs.CARD_DECK.has(deckId) && !hasCardDeck(stack)) {
             setId(stack, ModConfigs.CARD_DECK.getFirst());
          }
 
-         if (getCardDeck(stack).isEmpty()) {
+         if (!hasCardDeck(stack)) {
             ModConfigs.CARD_DECK.generate(getId(stack), random).ifPresent(deck -> setCardDeck(stack, deck));
          }
       }

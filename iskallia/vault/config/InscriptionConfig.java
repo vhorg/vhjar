@@ -222,7 +222,7 @@ public class InscriptionConfig extends Config {
       });
    }
 
-   private static class Entry {
+   public static class Entry {
       @Expose
       private final List<InscriptionData.Entry> entries;
       @Expose
@@ -249,7 +249,7 @@ public class InscriptionConfig extends Config {
       }
    }
 
-   private static class Pool implements LevelEntryList.ILevelEntry {
+   public static class Pool implements LevelEntryList.ILevelEntry {
       @Expose
       private final int level;
       @Expose

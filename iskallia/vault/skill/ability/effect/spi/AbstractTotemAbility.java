@@ -4,12 +4,14 @@ import com.google.gson.JsonObject;
 import iskallia.vault.block.entity.TotemTileEntity;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.core.world.storage.IZonedWorld;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.util.calc.TotemDurationHelper;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -44,7 +47,7 @@ public abstract class AbstractTotemAbility<T extends TotemTileEntity> extends In
    protected AbstractTotemAbility() {
    }
 
-   public int getTotemDurationTicks() {
+   public int getUnmodifiedTotemDurationTicks() {
       return this.totemDurationTicks;
    }
 
@@ -54,18 +57,18 @@ public abstract class AbstractTotemAbility<T extends TotemTileEntity> extends In
 
    public float getTotemEffectRadius(Player player) {
       float realRadius = this.getUnmodifiedTotemEffectRadius();
-      return AreaOfEffectHelper.adjustAreaOfEffect(player, realRadius);
+      return AreaOfEffectHelper.adjustAreaOfEffect(player, this, realRadius);
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Totem";
+   public int getTotemDurationTicks(LivingEntity entity) {
+      int duration = this.getUnmodifiedTotemDurationTicks();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
-         int cooldownDelayTicks = TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks());
+         int cooldownDelayTicks = TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks(player));
          return this.placeTotem(player) ? Ability.ActionResult.successCooldownDelayed(cooldownDelayTicks) : Ability.ActionResult.fail();
       }).orElse(Ability.ActionResult.fail());
    }
@@ -91,7 +94,7 @@ public abstract class AbstractTotemAbility<T extends TotemTileEntity> extends In
       if (spawnPosition == null) {
          return false;
       } else {
-         level.setBlockAndUpdate(spawnPosition, this.getTotemForPlacement());
+         IZonedWorld.runWithBypass(level, true, () -> level.setBlockAndUpdate(spawnPosition, this.getTotemForPlacement()));
          BlockEntity blockEntity = level.getBlockEntity(spawnPosition);
          if (this.getTotemTileEntityClass().isInstance(blockEntity)) {
             this.initializeTotem(this.getTotemTileEntityClass().cast(blockEntity), player);

@@ -17,7 +17,7 @@ public class SkillAltarTileEntity extends BlockEntity {
    private static final String OWNER_ID_TAG = "ownerId";
    @Nullable
    private UUID ownerId = null;
-   private final OverSizedInventory regretOrbInventory = new OverSizedInventory(1, this::setChanged, player -> true);
+   private final OverSizedInventory regretOrbInventory = new OverSizedInventory(1, stacks -> this.setChanged(), player -> true);
    private int renderIconKeyIndex = -1;
    private long lastIconSwitchTime = 0L;
    private long nextIconSwitchTime = 0L;

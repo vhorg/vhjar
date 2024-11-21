@@ -1,5 +1,6 @@
 package iskallia.vault.item.bottle;
 
+import iskallia.vault.util.calc.EffectDurationHelper;
 import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -41,7 +42,9 @@ public class PotionBottleEffect extends BottleEffect {
          player.removeEffectNoUpdate(this.potion);
       }
 
-      player.addEffect(new PotionBottleEffect.BottleMobEffectInstance(this.potion, this.duration, totalAmplifier));
+      int durationTicks = this.duration;
+      durationTicks = EffectDurationHelper.adjustEffectDurationFloor(player, durationTicks);
+      player.addEffect(new PotionBottleEffect.BottleMobEffectInstance(this.potion, durationTicks, totalAmplifier));
    }
 
    @Override

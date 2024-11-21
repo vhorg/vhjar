@@ -15,15 +15,14 @@ import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.entity.entity.FloatingGodAltarItemEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.task.GodAltarTask;
 import iskallia.vault.task.KillEntityTask;
 import iskallia.vault.task.Task;
 import iskallia.vault.task.counter.TaskCounter;
+import iskallia.vault.task.counter.TaskCounterPredicate;
 import iskallia.vault.task.renderer.GodAltarRenderer;
 import iskallia.vault.task.source.EntityTaskSource;
+import iskallia.vault.util.LootInitialization;
 import iskallia.vault.world.VaultDifficulty;
 import iskallia.vault.world.data.GodAltarData;
 import iskallia.vault.world.data.ServerVaults;
@@ -53,7 +52,7 @@ public class GodAltarTileEntity extends BlockEntity {
    protected ItemStack loot;
    protected Task taskPool = new KillEntityTask(
          new KillEntityTask.Config(EntityPredicate.of("@the_vault:zombie", true).orElse(EntityPredicate.FALSE)),
-         TaskCounter.ofTargetInt(IntRoll.ofUniform(1, 5))
+         TaskCounter.ofTargetInt(IntRoll.ofUniform(1, 5), TaskCounterPredicate.GREATER_OR_EQUAL_TO)
       )
       .setRenderer(new GodAltarRenderer.Child("Kill Zombies", "${current}/${target}"));
    protected ResourceLocation modifierCompletionPool = VaultMod.id("default");
@@ -166,9 +165,7 @@ public class GodAltarTileEntity extends BlockEntity {
       }
 
       Vault vault = ServerVaults.get(world).orElse(null);
-      VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
-      stack = DataTransferItem.doConvertStack(stack);
-      DataInitializationItem.doInitialize(stack);
+      stack = LootInitialization.initializeVaultLoot(stack, vault, pos);
       Direction facing = this.getBlockState().hasProperty(FacedBlock.FACING) ? (Direction)this.getBlockState().getValue(FacedBlock.FACING) : Direction.NORTH;
       FloatingGodAltarItemEntity floatingItemEntity = new FloatingGodAltarItemEntity(
          world,

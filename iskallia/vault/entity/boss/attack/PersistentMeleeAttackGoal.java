@@ -9,7 +9,7 @@ import net.minecraft.nbt.ListTag;
 
 public class PersistentMeleeAttackGoal extends BossMeleeAttackGoal implements ITrait {
    public static final String TYPE = "melee_attack";
-   private final WeightedList<MeleeAttacks.AttackData> meleeAttacks = new WeightedList<>();
+   private final WeightedList<VaultBossBaseEntity.AttackData> meleeAttacks = new WeightedList<>();
 
    public PersistentMeleeAttackGoal(VaultBossBaseEntity boss) {
       super(boss);
@@ -17,17 +17,17 @@ public class PersistentMeleeAttackGoal extends BossMeleeAttackGoal implements IT
    }
 
    private void addPunchDefault() {
-      this.meleeAttacks.add(new MeleeAttacks.AttackData("punch", 1.0), 1);
+      this.meleeAttacks.add(new VaultBossBaseEntity.AttackData("punch", 1.0), 1);
    }
 
-   public PersistentMeleeAttackGoal setAttributes(WeightedList<MeleeAttacks.AttackData> attacks) {
+   public PersistentMeleeAttackGoal setAttributes(WeightedList<VaultBossBaseEntity.AttackData> attacks) {
       this.meleeAttacks.clear();
       attacks.forEach(this.meleeAttacks::add);
       return this;
    }
 
    @Override
-   protected WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   protected WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return this.meleeAttacks;
    }
 
@@ -66,15 +66,17 @@ public class PersistentMeleeAttackGoal extends BossMeleeAttackGoal implements IT
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.meleeAttacks.clear();
       if (nbt.contains("Attacks")) {
          ListTag attacks = nbt.getList("Attacks", 10);
          attacks.forEach(tag -> {
             CompoundTag attackNbt = (CompoundTag)tag;
-            MeleeAttacks.AttackData attack = MeleeAttacks.AttackData.from(attackNbt);
-            double weight = attackNbt.getDouble("Weight");
-            this.meleeAttacks.add(attack, weight);
+            VaultBossBaseEntity.AttackData attack = VaultBossBaseEntity.AttackData.from(attackNbt);
+            if (boss.getMeleeAttackFactories().containsKey(attack.name())) {
+               double weight = attackNbt.getDouble("Weight");
+               this.meleeAttacks.add(attack, weight);
+            }
          });
       } else {
          this.addPunchDefault();

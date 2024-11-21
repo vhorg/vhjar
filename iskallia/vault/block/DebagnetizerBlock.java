@@ -1,17 +1,11 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.DebagnetizerTileEntity;
-import iskallia.vault.init.ModBlocks;
-import iskallia.vault.util.DimensionPos;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -22,21 +16,36 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.Vec3;
 
 public class DebagnetizerBlock extends Block implements EntityBlock {
    private static final int RANGE = 32;
-   private final Set<DimensionPos> debagnetizerBlocks = new HashSet<>();
    public static final BooleanProperty DEACTIVATED = BooleanProperty.create("deactivated");
 
    public DebagnetizerBlock() {
       super(Properties.copy(Blocks.IRON_BLOCK).noOcclusion());
    }
 
-   public boolean isInRange(ResourceKey<Level> dimension, BlockPos pos) {
-      for (DimensionPos dimensionPos : this.debagnetizerBlocks) {
-         if (dimensionPos.isInRange(dimension, pos, 32)) {
-            return true;
+   public boolean isInRange(Level world, Vec3 origin) {
+      ChunkPos min = new ChunkPos((int)(origin.x - 32.0) >> 4, (int)(origin.z - 32.0) >> 4);
+      ChunkPos max = new ChunkPos((int)(origin.x + 32.0) >> 4, (int)(origin.z + 32.0) >> 4);
+
+      for (int x = min.x; x <= max.x; x++) {
+         for (int z = min.z; z <= max.z; z++) {
+            LevelChunk chunk = world.getChunkSource().getChunkNow(x, z);
+            if (chunk != null) {
+               for (BlockEntity entity : chunk.getBlockEntities().values()) {
+                  if (entity instanceof DebagnetizerTileEntity debagnetizer) {
+                     double dx = origin.x - debagnetizer.getBlockPos().getX();
+                     double dz = origin.z - debagnetizer.getBlockPos().getZ();
+                     double distanceSq = dx * dx + dz * dz;
+                     if (distanceSq <= 1024.0) {
+                        return true;
+                     }
+                  }
+               }
+            }
          }
       }
 
@@ -47,59 +56,22 @@ public class DebagnetizerBlock extends Block implements EntityBlock {
       builder.add(new Property[]{DEACTIVATED});
    }
 
-   @Nullable
-   public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-      return (BlockState)super.defaultBlockState().setValue(DEACTIVATED, pContext.getLevel().hasNeighborSignal(pContext.getClickedPos()));
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      return (BlockState)super.defaultBlockState().setValue(DEACTIVATED, context.getLevel().hasNeighborSignal(context.getClickedPos()));
    }
 
-   public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-      if (!level.isClientSide) {
-         boolean flag = (Boolean)state.getValue(DEACTIVATED);
-         if (flag != level.hasNeighborSignal(pos)) {
-            if (flag) {
-               level.scheduleTick(pos, this, 1);
-            } else {
-               level.setBlock(pos, (BlockState)state.cycle(DEACTIVATED), 2);
-               if ((Boolean)state.getValue(DEACTIVATED)) {
-                  this.debagnetizerBlocks.remove(new DimensionPos(level.dimension(), pos));
-               } else {
-                  this.debagnetizerBlocks.add(new DimensionPos(level.dimension(), pos));
-               }
-            }
-         }
+   public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+      if (!world.isClientSide()) {
+         world.scheduleTick(pos, this, 1);
       }
    }
 
-   public void tick(BlockState state, ServerLevel level, BlockPos pos, Random rand) {
-      if ((Boolean)state.getValue(DEACTIVATED) && !level.hasNeighborSignal(pos)) {
-         level.setBlock(pos, (BlockState)state.cycle(DEACTIVATED), 2);
-         if ((Boolean)state.getValue(DEACTIVATED)) {
-            this.debagnetizerBlocks.remove(new DimensionPos(level.dimension(), pos));
-         } else {
-            this.debagnetizerBlocks.add(new DimensionPos(level.dimension(), pos));
-         }
+   public void tick(BlockState state, ServerLevel world, BlockPos pos, Random random) {
+      if ((Boolean)state.getValue(DEACTIVATED) != world.hasNeighborSignal(pos)) {
+         world.setBlock(pos, (BlockState)state.cycle(DEACTIVATED), 2);
       }
    }
 
-   public void setPlacedBy(Level level, BlockPos pos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
-      super.setPlacedBy(level, pos, pState, pPlacer, pStack);
-      this.addDebagnetizerAt(level.dimension(), pos);
-   }
-
-   public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-      if (pState.getBlock() != pNewState.getBlock()) {
-         pLevel.getBlockEntity(pPos, ModBlocks.DEBAGNETIZER_TILE_ENTITY)
-            .ifPresent(blockEntity -> this.debagnetizerBlocks.remove(new DimensionPos(pLevel.dimension(), pPos)));
-      }
-
-      super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
-   }
-
-   public void addDebagnetizerAt(ResourceKey<Level> dimension, BlockPos worldPosition) {
-      this.debagnetizerBlocks.add(new DimensionPos(dimension, worldPosition));
-   }
-
-   @Nullable
    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
       return new DebagnetizerTileEntity(pos, state);
    }

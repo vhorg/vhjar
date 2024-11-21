@@ -5,6 +5,7 @@ import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -58,7 +59,7 @@ public class VaultAxeItem extends AxeItem implements VaultGearItem {
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       VaultGearData gearData = VaultGearData.read(stack);
-      EquipmentSlot intendedSlot = this.getIntendedSlot(stack);
+      EquipmentSlot intendedSlot = this.getGearType(stack).getEquipmentSlot();
       return ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRandomRoll(stack, gearData, intendedSlot, random);
    }
 
@@ -67,10 +68,10 @@ public class VaultAxeItem extends AxeItem implements VaultGearItem {
       return (Optional<? extends DynamicModel<?>>)ModDynamicModels.Axes.REGISTRY.get(key);
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return EquipmentSlot.MAINHAND;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.AXE;
    }
 
    @NotNull

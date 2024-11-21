@@ -2,7 +2,7 @@ package iskallia.vault.entity.boss.stage;
 
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.entity.boss.ArtifactBossEntity;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
@@ -81,12 +81,12 @@ public class MeleeStage<T extends MeleeStageAttributes> implements IBossStage {
    }
 
    @Override
-   public WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return this.meleeStageAttributes.getMeleeAttacks();
    }
 
    @Override
-   public WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks() {
       return this.meleeStageAttributes.getRageAttacks();
    }
 

@@ -72,8 +72,8 @@ public class MegaJumpBreakUpAbility extends MegaJumpAbility {
                } else {
                   ability.ticks = ticks;
                   if (focusedAbilityNode != null && focusedAbilityNode.getClass() == ability.getClass()) {
-                     float radius = AreaOfEffectHelper.adjustAreaOfEffect(player, 4.0F);
-                     float yRadius = AreaOfEffectHelper.adjustAreaOfEffect(player, 6.0F);
+                     float radius = AreaOfEffectHelper.adjustAreaOfEffect(player, focusedAbilityNode, 4.0F);
+                     float yRadius = AreaOfEffectHelper.adjustAreaOfEffect(player, focusedAbilityNode, 6.0F);
                      BlockHelper.withEllipsoidPositions(player.blockPosition().above(3), radius, yRadius, radius, offset -> {
                         BlockState state = world.getBlockState(offset);
                         if (ability.canBreakBlock(state)) {

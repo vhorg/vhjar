@@ -7,9 +7,7 @@ import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.config.entry.ItemStackPool;
 import iskallia.vault.config.entry.LevelEntryMap;
 import iskallia.vault.container.oversized.OverSizedItemStack;
-import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,12 +62,7 @@ public class RewardConfig extends Config {
          List<OverSizedItemStack> items = new ArrayList<>();
 
          for (ItemStack reward : rewardEntry.itemPool.getRandomStacks()) {
-            if (reward.getItem() instanceof VaultGearItem gearItem) {
-               gearItem.setItemLevel(reward, vaultLevel);
-            }
-
-            reward = DataTransferItem.doConvertStack(reward);
-            DataInitializationItem.doInitialize(reward);
+            reward = LootInitialization.initializeVaultLoot(reward, vaultLevel);
             items.add(OverSizedItemStack.of(reward));
          }
 

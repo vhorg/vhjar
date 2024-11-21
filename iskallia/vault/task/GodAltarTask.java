@@ -1,7 +1,6 @@
 package iskallia.vault.task;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.base.GodAltarTileEntity;
 import iskallia.vault.core.data.adapter.Adapters;
@@ -37,7 +36,6 @@ import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.LongTag;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -122,12 +120,12 @@ public class GodAltarTask extends Task {
          if (!this.expired) {
             Vault vault = ServerVaults.get(this.vaultUuid).orElse(null);
             if (this.vaultUuid != null && vault == null) {
-               this.onFail(context);
+               this.onFail(null, context);
             } else {
                if (vault != null && context.getSource() instanceof EntityTaskSource entitySource) {
                   for (UUID uuid : entitySource.getUuids()) {
                      if (!vault.get(Vault.LISTENERS).contains(uuid)) {
-                        this.onFail(context);
+                        this.onFail(vault, context);
                         return;
                      }
                   }
@@ -136,7 +134,7 @@ public class GodAltarTask extends Task {
                if (this.child.isCompleted() && this.child.streamDescendants().allMatch(Task::isCompleted)) {
                   this.onSucceed(vault, context);
                } else if (!this.child.isCompleted()) {
-                  this.onFail(context);
+                  this.onFail(vault, context);
                }
             }
          }
@@ -144,9 +142,9 @@ public class GodAltarTask extends Task {
       super.onAttach(context);
    }
 
-   public void onFail(TaskContext context) {
+   public void onFail(Vault vault, TaskContext context) {
       this.expired = true;
-      this.doCompletionEffects(null, context, true);
+      this.doCompletionEffects(vault, context, true);
    }
 
    public void onSucceed(Vault vault, TaskContext context) {
@@ -310,7 +308,7 @@ public class GodAltarTask extends Task {
       this.vaultUuid = Adapters.UUID.readNbt(nbt.get("vaultUuid")).orElse(null);
       this.god = Adapters.GOD_NAME.readNbt(nbt.get("god")).orElse(null);
       this.dimension = Adapters.DIMENSION.readNbt(nbt.get("dimension")).orElse(null);
-      this.pos = Adapters.BLOCK_POS.readNbt((LongTag)nbt.get("pos")).orElse(null);
+      this.pos = Adapters.BLOCK_POS.readNbt(nbt.get("pos")).orElse(null);
       this.modifierCompletionPool = Adapters.IDENTIFIER.readNbt(nbt.get("modifierCompletionPool")).orElse(null);
       this.modifierFailurePool = Adapters.IDENTIFIER.readNbt(nbt.get("modifierFailurePool")).orElse(null);
       this.child = (TimedTask)Adapters.TASK.readNbt(nbt.get("child")).orElse(null);
@@ -340,7 +338,7 @@ public class GodAltarTask extends Task {
       this.vaultUuid = Adapters.UUID.readJson(json.get("vaultUuid")).orElse(null);
       this.god = Adapters.GOD_NAME.readJson(json.get("god")).orElse(null);
       this.dimension = Adapters.DIMENSION.readJson(json.get("dimension")).orElse(null);
-      this.pos = Adapters.BLOCK_POS.readJson((JsonPrimitive)json.get("pos")).orElse(null);
+      this.pos = Adapters.BLOCK_POS.readJson(json.get("pos")).orElse(null);
       this.modifierCompletionPool = Adapters.IDENTIFIER.readJson(json.get("modifierCompletionPool")).orElse(null);
       this.modifierFailurePool = Adapters.IDENTIFIER.readJson(json.get("modifierFailurePool")).orElse(null);
       this.child = (TimedTask)Adapters.TASK.readJson(json.get("child")).orElse(null);

@@ -15,17 +15,23 @@ import iskallia.vault.core.Version;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.VaultRegistry;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.loot.LootTable;
 import iskallia.vault.entity.boss.MobSpawningUtils;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import iskallia.vault.entity.boss.attack.PersistentMeleeAttackGoal;
 import iskallia.vault.entity.boss.goal.BloodOrbGoal;
+import iskallia.vault.entity.boss.goal.CobwebRangedAttackGoal;
 import iskallia.vault.entity.boss.goal.EvokerFangsGoal;
 import iskallia.vault.entity.boss.goal.FireballRangedAttackGoal;
+import iskallia.vault.entity.boss.goal.GolemHandRangedAttackGoal;
 import iskallia.vault.entity.boss.goal.HealGoal;
+import iskallia.vault.entity.boss.goal.PlaceBlockAroundGoal;
 import iskallia.vault.entity.boss.goal.PotionAuraGoal;
 import iskallia.vault.entity.boss.goal.ShulkerAttackGoal;
-import iskallia.vault.entity.boss.goal.SummoningGoal;
+import iskallia.vault.entity.boss.goal.SnowballRangedAttackGoal;
+import iskallia.vault.entity.boss.goal.SummonAtTargetGoal;
+import iskallia.vault.entity.boss.goal.SummonGoal;
 import iskallia.vault.entity.boss.goal.ThrowPotionGoal;
 import iskallia.vault.entity.boss.trait.ApplyPotionOnHitEffect;
 import iskallia.vault.entity.boss.trait.AttributeModifierTrait;
@@ -52,6 +58,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 public class VaultBossConfig extends Config {
    @Expose
@@ -73,15 +80,52 @@ public class VaultBossConfig extends Config {
          .put(
             "fireball_ranged_attack",
             new VaultBossConfig.TraitDefinition(
-               "fireball_ranged_attack", new FireballRangedAttackGoal(null).setAttributes(1.0, 20, 60, 25.0F, 0.5).serializeNBT()
+               "fireball_ranged_attack", new FireballRangedAttackGoal(null).setAttributes(1.0, 20, 60, 25.0F, 0.5, true).serializeNBT()
             )
          );
-      WeightedList<MeleeAttacks.AttackData> meleeAttacks = new WeightedList<MeleeAttacks.AttackData>().add(new MeleeAttacks.AttackData("punch", 1.0), 1);
       this.traits
          .put(
-            "melee_attack", new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
+            "snowball_ranged_attack",
+            new VaultBossConfig.TraitDefinition(
+               "snowball_ranged_attack", new SnowballRangedAttackGoal(null).setAttributes(1.0, 10, 20, 25.0F, 12.0F, 0.5F, false).serializeNBT()
+            )
          );
-      meleeAttacks = new WeightedList<MeleeAttacks.AttackData>().add(new MeleeAttacks.AttackData("aoeclose", 1.0), 1);
+      this.traits
+         .put(
+            "golem_hand_ranged_attack",
+            new VaultBossConfig.TraitDefinition(
+               "golem_hand_ranged_attack", new GolemHandRangedAttackGoal(null).setAttributes(1.0, 20, 60, 25.0F, 12.0F, 0.5F, false).serializeNBT()
+            )
+         );
+      this.traits
+         .put(
+            "cobweb_ranged_attack",
+            new VaultBossConfig.TraitDefinition(
+               "cobweb_ranged_attack", new CobwebRangedAttackGoal(null).setAttributes(1.0, 20, 60, 25.0F, 12.0F, true).serializeNBT()
+            )
+         );
+      WeightedList<VaultBossBaseEntity.AttackData> meleeAttacks = new WeightedList<VaultBossBaseEntity.AttackData>()
+         .add(new VaultBossBaseEntity.AttackData("punch", 1.0), 1);
+      this.traits
+         .put(
+            "golem_melee_attack",
+            new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
+         );
+      meleeAttacks = new WeightedList<VaultBossBaseEntity.AttackData>().add(new VaultBossBaseEntity.AttackData("double_punch", 3.0), 1);
+      this.traits
+         .put(
+            "golem_heavy_melee_attack",
+            new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
+         );
+      meleeAttacks = new WeightedList<VaultBossBaseEntity.AttackData>()
+         .add(new VaultBossBaseEntity.AttackData("slash", 1.0), 1)
+         .add(new VaultBossBaseEntity.AttackData("jab", 1.0), 1);
+      this.traits
+         .put(
+            "boogieman_melee_attack",
+            new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
+         );
+      meleeAttacks = new WeightedList<VaultBossBaseEntity.AttackData>().add(new VaultBossBaseEntity.AttackData("aoeclose", 1.0), 1);
       this.traits
          .put(
             "sweep_attack", new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
@@ -92,8 +136,15 @@ public class VaultBossConfig extends Config {
       entityTypes.add(new MobSpawningUtils.EntitySpawnData(EntityType.CREEPER, null), 1);
       this.traits
          .put(
-            "summoning_vanilla",
-            new VaultBossConfig.TraitDefinition("summoning", new SummoningGoal(null).setAttributes(10, 1, 4, 100, 15, entityTypes).serializeNBT())
+            "summon_vanilla",
+            new VaultBossConfig.TraitDefinition("summon", new SummonGoal(null).setAttributes(10, 1, 4, 100, 1, 15, entityTypes).serializeNBT())
+         );
+      this.traits
+         .put(
+            "summon_vanilla_at_target",
+            new VaultBossConfig.TraitDefinition(
+               "summon_at_target", new SummonAtTargetGoal(null).setAttributes(10, 1, 4, 100, 5, 15, entityTypes).serializeNBT()
+            )
          );
       entityTypes.clear();
       ListTag handItemsTag = new ListTag();
@@ -105,8 +156,7 @@ public class VaultBossConfig extends Config {
       entityTypes.add(new MobSpawningUtils.EntitySpawnData(ModEntities.DUNGEON_VINDICATOR, null), 1);
       this.traits
          .put(
-            "summoning_vault",
-            new VaultBossConfig.TraitDefinition("summoning", new SummoningGoal(null).setAttributes(10, 1, 4, 100, 15, entityTypes).serializeNBT())
+            "summon_vault", new VaultBossConfig.TraitDefinition("summon", new SummonGoal(null).setAttributes(10, 1, 4, 100, 1, 15, entityTypes).serializeNBT())
          );
       this.traits
          .put("shulker_bullet", new VaultBossConfig.TraitDefinition("shulker_bullet", new ShulkerAttackGoal(null).setAttributes(10, 40).serializeNBT()));
@@ -160,37 +210,49 @@ public class VaultBossConfig extends Config {
          .put(
             "throw_lingering_poison",
             new VaultBossConfig.TraitDefinition(
-               "throw_potion", new ThrowPotionGoal(null).setAttributes(1.0, 100, 200, 10.0F, MobEffects.POISON, 100, 0, true).serializeNBT()
+               "throw_potion", new ThrowPotionGoal(null).setAttributes(1.0, 100, 200, 10.0F, MobEffects.POISON, 100, 0, true, true).serializeNBT()
             )
          );
       this.traits
          .put(
             "levitation_aura",
-            new VaultBossConfig.TraitDefinition(PotionAuraGoal.TYPE, new PotionAuraGoal(null).setAttributes(MobEffects.LEVITATION, 40, 0, 5).serializeNBT())
+            new VaultBossConfig.TraitDefinition(
+               PotionAuraGoal.TYPE, new PotionAuraGoal(null).setAttributes(MobEffects.LEVITATION, 40, 0, 5, false).serializeNBT()
+            )
          );
       this.traits
          .put(
             "bleed_aura",
-            new VaultBossConfig.TraitDefinition(PotionAuraGoal.TYPE, new PotionAuraGoal(null).setAttributes(ModEffects.BLEED, 40, 0, 5).serializeNBT())
+            new VaultBossConfig.TraitDefinition(PotionAuraGoal.TYPE, new PotionAuraGoal(null).setAttributes(ModEffects.BLEED, 40, 0, 10, true).serializeNBT())
+         );
+      this.traits.put("leap_at_target", new VaultBossConfig.TraitDefinition("leap_at_target", new CompoundTag()));
+      this.traits.put("spider_attack", new VaultBossConfig.TraitDefinition("spider_attack", new CompoundTag()));
+      this.traits
+         .put(
+            "place_cobwebs_around",
+            new VaultBossConfig.TraitDefinition(
+               "place_block_around", new PlaceBlockAroundGoal(null).setAttributes(5, 1, 20, 60, PartialBlockState.of(Blocks.COBWEB)).serializeNBT()
+            )
          );
       this.bosses = new LinkedHashMap<>();
       this.bosses
          .put(
-            ModEntities.BLAZE_BOSS.getRegistryName(),
-            new VaultBossConfig.BossDefinition(List.of("fireball_ranged_attack", "evoker_fangs", "heal"), Map.of("light_ranged", "shulker_bullet"))
-         );
-      this.bosses
-         .put(
             ModEntities.GOLEM_BOSS.getRegistryName(),
             new VaultBossConfig.BossDefinition(
-               List.of("melee_attack", "summoning_vault", "life_leech_on_hit", "levitate_on_hit"), Map.of("light_ranged", "blood_orb")
+               List.of("golem_melee_attack", "summon_vault", "life_leech_on_hit", "levitate_on_hit"), Map.of("light_ranged", "golem_hand_ranged_attack")
             )
          );
       this.bosses
          .put(
             ModEntities.BLACK_WIDOW_BOSS.getRegistryName(),
+            new VaultBossConfig.BossDefinition(List.of("place_cobwebs_around", "spider_attack", "leap_at_target"), Map.of("light_ranged", "evoker_fangs"))
+         );
+      this.bosses
+         .put(
+            ModEntities.BOOGIEMAN_BOSS.getRegistryName(),
             new VaultBossConfig.BossDefinition(
-               List.of("melee_attack", "life_leech_on_hit", "wither_on_hit", "throw_lingering_poison"), Map.of("light_ranged", "evoker_fangs")
+               List.of("boogieman_melee_attack", "snowball_ranged_attack", "summon_vanilla", "higher_health", "higher_speed"),
+               Map.of("light_ranged", "blood_orb")
             )
          );
    }
@@ -221,11 +283,10 @@ public class VaultBossConfig extends Config {
       Set<String> modifiers = this.bosses.values().iterator().next().modifierTraitMap.keySet();
       int index = rand.nextInt(modifiers.size());
       Iterator<String> it = modifiers.iterator();
-      int i = 0;
 
-      while (it.hasNext()) {
+      for (int i = 0; it.hasNext(); i++) {
          String modifier = it.next();
-         if (++i == index) {
+         if (i == index) {
             return modifier;
          }
       }
@@ -238,7 +299,7 @@ public class VaultBossConfig extends Config {
       if (levelLootTables == null) {
          return Collections.emptyList();
       } else {
-         String lootTableId = levelLootTables.OFFERING_BOSS;
+         String lootTableId = levelLootTables.OFFERING_LOOT;
          LootTable table = VaultRegistry.LOOT_TABLE.getKey(lootTableId).get(Version.latest());
          List<ItemStack> items = new ArrayList<>();
          if (table != null) {
@@ -317,6 +378,11 @@ public class VaultBossConfig extends Config {
       }
 
       return valid;
+   }
+
+   public Iterable<String> getAllModifiers() {
+      Iterator<VaultBossConfig.BossDefinition> it = this.bosses.values().iterator();
+      return (Iterable<String>)(it.hasNext() ? it.next().modifierTraitMap.keySet() : Collections.emptyList());
    }
 
    private static class BossDefinition {

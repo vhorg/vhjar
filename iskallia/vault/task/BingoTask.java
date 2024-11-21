@@ -138,6 +138,17 @@ public class BingoTask extends ConfiguredTask<BingoTask.Config> implements Level
    public void onPopulate(TaskContext context) {
       this.tasks = new NodeTask[this.getWidth() * this.getHeight()];
       WeightedList<Task> pool = this.getConfig().getTasks(context);
+      pool.keySet().forEach(task -> task.getSelfAndChildren().forEach(subTask -> {
+         if (subTask instanceof ProgressConfiguredTask<?, ?> progressTask) {
+            progressTask.getCounter().populate(context);
+         }
+      }));
+      pool.keySet()
+         .removeIf(
+            task -> task instanceof ProgressConfiguredTask<?, ?> progressTask
+               && progressTask.getCondition() != null
+               && !progressTask.getCondition().isConditionFulfilled(progressTask, context)
+         );
       int count = this.getWidth() * this.getHeight();
       List<Task> tasks = new ArrayList<>();
 

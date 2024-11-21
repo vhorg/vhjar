@@ -7,6 +7,7 @@ import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -266,27 +267,31 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
       if (item.getTags().contains("MagnetPulled")) {
          getMagnet(player)
             .ifPresent(
-               stack -> stack.hurtAndBreak(
-                  1,
-                  player,
-                  entity -> {
-                     if (!entity.isSilent()) {
-                        entity.level
-                           .playSound(
-                              null,
-                              entity.getX(),
-                              entity.getY(),
-                              entity.getZ(),
-                              SoundEvents.ITEM_BREAK,
-                              entity.getSoundSource(),
-                              0.8F,
-                              0.8F + entity.level.random.nextFloat() * 0.4F
-                           );
-                     }
+               stack -> {
+                  if (!stack.is(ModItems.SOUL_SHARD)) {
+                     stack.hurtAndBreak(
+                        1,
+                        player,
+                        entity -> {
+                           if (!entity.isSilent()) {
+                              entity.level
+                                 .playSound(
+                                    null,
+                                    entity.getX(),
+                                    entity.getY(),
+                                    entity.getZ(),
+                                    SoundEvents.ITEM_BREAK,
+                                    entity.getSoundSource(),
+                                    0.8F,
+                                    0.8F + entity.level.random.nextFloat() * 0.4F
+                                 );
+                           }
 
-                     spawnItemParticles(entity, stack, 5);
+                           spawnItemParticles(entity, stack, 5);
+                        }
+                     );
                   }
-               )
+               }
             );
       }
    }
@@ -397,10 +402,10 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
       return ProficiencyType.MAGNET;
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return null;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.MAGNET;
    }
 
    @Nullable

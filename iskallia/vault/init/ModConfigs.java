@@ -49,6 +49,8 @@ import iskallia.vault.config.HeraldConfig;
 import iskallia.vault.config.HeraldTrophyConfig;
 import iskallia.vault.config.InscriptionConfig;
 import iskallia.vault.config.ItemGroupsConfig;
+import iskallia.vault.config.JewelPouchConfig;
+import iskallia.vault.config.JewelSizeConfig;
 import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.config.LegacyMagnetConfigs;
 import iskallia.vault.config.LegendaryTreasureEpicConfig;
@@ -59,6 +61,7 @@ import iskallia.vault.config.LootInfoConfig;
 import iskallia.vault.config.ManaConfig;
 import iskallia.vault.config.MenuPlayerStatDescriptionConfig;
 import iskallia.vault.config.ModBoxConfig;
+import iskallia.vault.config.ModifierGroupsConfig;
 import iskallia.vault.config.MonolithConfig;
 import iskallia.vault.config.MysteryBoxConfig;
 import iskallia.vault.config.MysteryEggConfig;
@@ -72,6 +75,7 @@ import iskallia.vault.config.PaxelConfigs;
 import iskallia.vault.config.PlayerResearchTransferConfig;
 import iskallia.vault.config.PlayerTitlesConfig;
 import iskallia.vault.config.PotionConfig;
+import iskallia.vault.config.RaidActionsConfig;
 import iskallia.vault.config.ResearchConfig;
 import iskallia.vault.config.ResearchGroupConfig;
 import iskallia.vault.config.ResearchGroupStyleConfig;
@@ -88,9 +92,11 @@ import iskallia.vault.config.StatueLootConfig;
 import iskallia.vault.config.StatueRecyclingConfig;
 import iskallia.vault.config.TalentsConfig;
 import iskallia.vault.config.TalentsGUIConfig;
+import iskallia.vault.config.TeamTasksConfig;
 import iskallia.vault.config.TileGroupsConfig;
 import iskallia.vault.config.TooltipConfig;
 import iskallia.vault.config.TraderExclusionsConfig;
+import iskallia.vault.config.TranslationsConfig;
 import iskallia.vault.config.TrinketConfig;
 import iskallia.vault.config.UnidentifiedRelicFragmentsConfig;
 import iskallia.vault.config.UnidentifiedTreasureKeyConfig;
@@ -107,7 +113,6 @@ import iskallia.vault.config.VaultEntitiesConfig;
 import iskallia.vault.config.VaultGeneralConfig;
 import iskallia.vault.config.VaultGuardianConfig;
 import iskallia.vault.config.VaultItemsConfig;
-import iskallia.vault.config.VaultJewelCuttingConfig;
 import iskallia.vault.config.VaultLevelsConfig;
 import iskallia.vault.config.VaultMetaChestConfig;
 import iskallia.vault.config.VaultMobGearConfig;
@@ -153,6 +158,7 @@ import iskallia.vault.config.quest.SkyVaultQuestConfig;
 import iskallia.vault.config.recipe.CatalystRecipesConfig;
 import iskallia.vault.config.recipe.GearRecipesConfig;
 import iskallia.vault.config.recipe.InscriptionRecipesConfig;
+import iskallia.vault.config.recipe.JewelCraftingRecipesConfig;
 import iskallia.vault.config.recipe.JewelRecipesConfig;
 import iskallia.vault.config.recipe.ToolRecipesConfig;
 import iskallia.vault.config.recipe.TrinketRecipesConfig;
@@ -181,6 +187,7 @@ public class ModConfigs {
    public static final Set<Config> CONFIGS = new HashSet<>();
    private static boolean initialized = false;
    public static ColorsConfig COLORS;
+   public static TranslationsConfig TRANSLATIONS;
    public static AbilitiesConfig ABILITIES;
    public static AbilitiesGUIConfig ABILITIES_GUI;
    public static AbilitiesDescriptionsConfig ABILITIES_DESCRIPTIONS;
@@ -283,6 +290,7 @@ public class ModConfigs {
    public static EntityGroupsConfig ENTITY_GROUPS;
    public static TileGroupsConfig TILE_GROUPS;
    public static ItemGroupsConfig ITEM_GROUPS;
+   public static ModifierGroupsConfig MODIFIER_GROUPS;
    public static ArchitectConfig ARCHITECT;
    public static BestiaryConfig BESTIARY;
    public static HeraldTrophyConfig HERALD_TROPHY;
@@ -299,7 +307,6 @@ public class ModConfigs {
    public static BountyOresConfig BOUNTY_ORES;
    public static VaultGearCraftingConfig VAULT_GEAR_CRAFTING_CONFIG;
    public static VaultGearModificationConfig VAULT_GEAR_MODIFICATION_CONFIG;
-   public static VaultJewelCuttingConfig VAULT_JEWEL_CUTTING_CONFIG;
    public static VaultGearEnchantmentConfig VAULT_GEAR_ENCHANTMENT_CONFIG;
    public static UniqueGearConfig UNIQUE_GEAR;
    public static GearRecipesConfig GEAR_RECIPES;
@@ -308,6 +315,7 @@ public class ModConfigs {
    public static ToolRecipesConfig TOOL_RECIPES;
    public static InscriptionRecipesConfig INSCRIPTION_RECIPES;
    public static CatalystRecipesConfig CATALYST_RECIPES;
+   public static JewelCraftingRecipesConfig JEWEL_CRAFTING_RECIPES;
    public static VaultAltarIngredientsConfig VAULT_ALTAR_INGREDIENTS;
    public static SkillAltarConfig SKILL_ALTAR;
    public static QuestConfig QUESTS;
@@ -330,8 +338,12 @@ public class ModConfigs {
    public static BoosterPackConfig BOOSTER_PACK;
    public static CardDeckConfig CARD_DECK;
    public static CardEssenceExtractorConfig CARD_ESSENCE_EXTRACTOR;
+   public static JewelPouchConfig JEWEL_POUCH;
+   public static JewelSizeConfig JEWEL_SIZE;
    public static AchievementConfig ACHIEVEMENT;
    public static OfferingBossConfig OFFERING_BOSS;
+   public static TeamTasksConfig TEAM_TASKS;
+   public static RaidActionsConfig RAID_ACTIONS;
 
    public static void register() {
       INVALID_CONFIGS.clear();
@@ -341,6 +353,7 @@ public class ModConfigs {
       }
 
       COLORS = new ColorsConfig().readConfig();
+      TRANSLATIONS = new TranslationsConfig().readConfig();
       ABILITIES = new AbilitiesConfig().readConfig();
       ABILITIES_GUI = new AbilitiesGUIConfig().readConfig();
       ABILITIES_DESCRIPTIONS = new AbilitiesDescriptionsConfig().readConfig();
@@ -443,6 +456,7 @@ public class ModConfigs {
       ENTITY_GROUPS = new EntityGroupsConfig().readConfig();
       TILE_GROUPS = new TileGroupsConfig().readConfig();
       ITEM_GROUPS = new ItemGroupsConfig().readConfig();
+      MODIFIER_GROUPS = new ModifierGroupsConfig().readConfig();
       ARCHITECT = new ArchitectConfig().readConfig();
       QUESTS = new QuestConfig().readConfig();
       SKY_QUESTS = new SkyVaultQuestConfig().readConfig();
@@ -467,7 +481,6 @@ public class ModConfigs {
       VAULT_GEAR_MODIFICATION_CONFIG = new VaultGearModificationConfig().readConfig();
       VAULT_GEAR_ENCHANTMENT_CONFIG = new VaultGearEnchantmentConfig().readConfig();
       UNIQUE_GEAR = new UniqueGearConfig().readConfig();
-      VAULT_JEWEL_CUTTING_CONFIG = new VaultJewelCuttingConfig().readConfig();
       VAULT_ALTAR_INGREDIENTS = new VaultAltarIngredientsConfig().readConfig();
       GEAR_RECIPES = new GearRecipesConfig().readConfig();
       JEWEL_RECIPES = new JewelRecipesConfig().readConfig();
@@ -475,6 +488,7 @@ public class ModConfigs {
       TOOL_RECIPES = new ToolRecipesConfig().readConfig();
       INSCRIPTION_RECIPES = new InscriptionRecipesConfig().readConfig();
       CATALYST_RECIPES = new CatalystRecipesConfig().readConfig();
+      JEWEL_CRAFTING_RECIPES = new JewelCraftingRecipesConfig().readConfig();
       TRADER_EXCLUSIONS = new TraderExclusionsConfig().readConfig();
       PLAYER_RESEARCH_TRANSFER = new PlayerResearchTransferConfig().readConfig();
       BINGO = new BingoConfig().readConfig();
@@ -487,7 +501,11 @@ public class ModConfigs {
       BOOSTER_PACK = new BoosterPackConfig().readConfig();
       CARD_DECK = new CardDeckConfig().readConfig();
       CARD_ESSENCE_EXTRACTOR = new CardEssenceExtractorConfig().readConfig();
+      JEWEL_POUCH = new JewelPouchConfig().readConfig();
+      JEWEL_SIZE = new JewelSizeConfig().readConfig();
       OFFERING_BOSS = new OfferingBossConfig().readConfig();
+      TEAM_TASKS = new TeamTasksConfig().readConfig();
+      RAID_ACTIONS = new RaidActionsConfig().readConfig();
       registerBountyConfigs();
       VaultMod.LOGGER.info("Vault Configs are loaded successfully!");
    }
@@ -506,11 +524,12 @@ public class ModConfigs {
                VaultMod.LOGGER.error("Palette " + key.getId() + " is null");
             } else {
                for (TileProcessor processor : palette.getTileProcessors()) {
-                  if (processor instanceof ReferenceTileProcessor) {
-                     ReferenceTileProcessor reference = (ReferenceTileProcessor)processor;
-                     if (VaultRegistry.PALETTE.getKey(reference.getId()) == null) {
-                        VaultMod.LOGGER.error("Palette " + key.getId() + " has processor with invalid reference " + reference.getId());
-                     }
+                  if (processor instanceof ReferenceTileProcessor reference) {
+                     reference.getPool().forEach((pool, weight) -> {
+                        if (VaultRegistry.PALETTE.getKey(pool) == null) {
+                           VaultMod.LOGGER.error("Palette " + key.getId() + " has processor with invalid reference " + reference.getPool());
+                        }
+                     });
                   }
                }
             }

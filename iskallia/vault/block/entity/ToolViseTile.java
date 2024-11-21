@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class ToolViseTile extends BlockEntity implements MenuProvider {
-   private final OverSizedInventory inventory = new OverSizedInventory(6, this::setChanged, player -> true);
+   private final OverSizedInventory inventory = new OverSizedInventory(6, stacks -> this.setChanged(), player -> true);
    private final SimpleContainer pickaxeInput = new SimpleContainer(1) {
       public void setChanged() {
          super.setChanged();

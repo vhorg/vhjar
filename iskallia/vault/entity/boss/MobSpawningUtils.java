@@ -25,21 +25,23 @@ public class MobSpawningUtils {
    public static Entity spawnMob(
       ServerLevel serverLevel, double radius, int maxYOffset, EntityType<?> entityType, CompoundTag entityNbt, Vec3 spawnCenter, boolean checkCollision
    ) {
-      double x = spawnCenter.x() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
-      double y = spawnCenter.y() + (maxYOffset > 0 ? serverLevel.random.nextInt(2 * maxYOffset) - maxYOffset : 0);
-      double z = spawnCenter.z() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
+      return spawnMob(serverLevel, 0.0, radius, maxYOffset, entityType, entityNbt, spawnCenter, checkCollision);
+   }
 
-      int remainingTries;
-      for (remainingTries = 20; checkCollision && remainingTries > 0 && !serverLevel.noCollision(entityType.getAABB(x, y, z)); remainingTries--) {
-         x = spawnCenter.x() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
-         y = spawnCenter.y();
-         z = spawnCenter.z() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
-      }
-
-      if (remainingTries == 0) {
+   public static Entity spawnMob(
+      ServerLevel serverLevel,
+      double minDistanceFromCenter,
+      double radius,
+      int maxYOffset,
+      EntityType<?> entityType,
+      CompoundTag entityNbt,
+      Vec3 spawnCenter,
+      boolean checkCollision
+   ) {
+      BlockPos spawnPos = getRandomSpawnPos(serverLevel, minDistanceFromCenter, radius, maxYOffset, entityType, spawnCenter, checkCollision);
+      if (spawnPos == null) {
          return null;
       } else {
-         BlockPos spawnPos = new BlockPos(x, y, z);
          Entity entity = entityType.spawn(serverLevel, null, null, spawnPos, MobSpawnType.SPAWNER, false, false);
          if (entity == null) {
             VaultMod.LOGGER.error("Unable to spawn entity type {} because its factory returned null", entityType.getRegistryName());
@@ -59,6 +61,27 @@ public class MobSpawningUtils {
             return entity;
          }
       }
+   }
+
+   private static BlockPos getRandomSpawnPos(
+      ServerLevel serverLevel, double minDistanceFromCenter, double radius, int maxYOffset, EntityType<?> entityType, Vec3 spawnCenter, boolean checkCollision
+   ) {
+      double angle = (Math.PI * 2) * serverLevel.random.nextDouble();
+      double distance = minDistanceFromCenter + (radius - minDistanceFromCenter) * serverLevel.random.nextDouble();
+      double x = spawnCenter.x() + Math.cos(angle) * distance + 0.5;
+      double y = spawnCenter.y() + (maxYOffset > 0 ? serverLevel.random.nextInt(2 * maxYOffset) - maxYOffset : 0);
+      double z = spawnCenter.z() + Math.sin(angle) * distance + 0.5;
+
+      int remainingTries;
+      for (remainingTries = 20; checkCollision && remainingTries > 0 && !serverLevel.noCollision(entityType.getAABB(x, y, z)); remainingTries--) {
+         angle = (Math.PI * 2) * serverLevel.random.nextDouble();
+         distance = minDistanceFromCenter + (radius - minDistanceFromCenter) * serverLevel.random.nextDouble();
+         x = spawnCenter.x() + Math.cos(angle) * distance + 0.5;
+         y = spawnCenter.y() + (maxYOffset > 0 ? serverLevel.random.nextInt(2 * maxYOffset) - maxYOffset : 0);
+         z = spawnCenter.z() + Math.sin(angle) * distance + 0.5;
+      }
+
+      return remainingTries == 0 ? null : new BlockPos(x, y, z);
    }
 
    public record EntitySpawnData(EntityType<?> entityType, @javax.annotation.Nullable CompoundTag entityNbt) {

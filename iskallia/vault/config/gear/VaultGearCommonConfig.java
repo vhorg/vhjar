@@ -2,6 +2,8 @@ package iskallia.vault.config.gear;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.Config;
+import iskallia.vault.config.entry.IntRangeEntry;
+import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.init.ModItems;
 import java.io.File;
 import java.util.ArrayList;
@@ -20,6 +22,10 @@ public class VaultGearCommonConfig extends Config {
    private int swapCooldown;
    @Expose
    private final Map<EquipmentSlot, List<ResourceLocation>> swapItems = new HashMap<>();
+   @Expose
+   private float legendaryModifierChance;
+   @Expose
+   private final Map<VaultGearRarity, IntRangeEntry> craftingPotentialRanges = new HashMap<>();
 
    @Override
    public String getName() {
@@ -39,6 +45,15 @@ public class VaultGearCommonConfig extends Config {
          .toList();
    }
 
+   public float getLegendaryModifierChance() {
+      return this.legendaryModifierChance;
+   }
+
+   public int getNewCraftingPotential(VaultGearRarity rarity, String pool) {
+      IntRangeEntry range = this.craftingPotentialRanges.get(rarity);
+      return range == null ? 0 : range.getRandom(randSrc);
+   }
+
    @Override
    protected void reset() {
       this.swapCooldown = 400;
@@ -56,5 +71,12 @@ public class VaultGearCommonConfig extends Config {
       this.swapItems.put(EquipmentSlot.CHEST, List.of(ModItems.CHESTPLATE.getRegistryName()));
       this.swapItems.put(EquipmentSlot.LEGS, List.of(ModItems.LEGGINGS.getRegistryName()));
       this.swapItems.put(EquipmentSlot.FEET, List.of(ModItems.BOOTS.getRegistryName()));
+      this.legendaryModifierChance = 0.03F;
+      this.craftingPotentialRanges.clear();
+      this.craftingPotentialRanges.put(VaultGearRarity.SCRAPPY, new IntRangeEntry(30, 50));
+      this.craftingPotentialRanges.put(VaultGearRarity.COMMON, new IntRangeEntry(50, 70));
+      this.craftingPotentialRanges.put(VaultGearRarity.RARE, new IntRangeEntry(70, 90));
+      this.craftingPotentialRanges.put(VaultGearRarity.EPIC, new IntRangeEntry(90, 115));
+      this.craftingPotentialRanges.put(VaultGearRarity.OMEGA, new IntRangeEntry(115, 140));
    }
 }

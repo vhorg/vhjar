@@ -8,6 +8,7 @@ import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.EntityHelper;
@@ -139,7 +140,7 @@ public class ShellQuillAbility extends ShellPorcupineAbility {
                   float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(player);
                   reflectedDamage += additionalThornsDamage;
                   doQuill(player, reflectedDamage, ability.getQuillCount());
-                  if (Mana.decrease(player, ability.getAdditionalManaPerHit()) <= 0.0F) {
+                  if (Mana.decrease(player, ManaAction.PLAYER_ACTION, ability.getAdditionalManaPerHit()) <= 0.0F) {
                      player.removeEffect(ModEffects.SHELL_QUILL);
                      ability.putOnCooldown(SkillContext.of(player));
                      ability.setActive(false);

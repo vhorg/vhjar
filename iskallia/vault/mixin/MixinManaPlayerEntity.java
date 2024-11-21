@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModModelDiscoveryGoals;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.mana.ManaPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -68,7 +69,7 @@ public abstract class MixinManaPlayerEntity extends LivingEntity implements Mana
    }
 
    @Override
-   public float setMana(float amount) {
+   public float setMana(ManaAction action, float amount) {
       Player player = this.player();
       ManaPlayer manaSource = (ManaPlayer)player;
       float manaMax = manaSource.getManaMax();
@@ -80,7 +81,7 @@ public abstract class MixinManaPlayerEntity extends LivingEntity implements Mana
          }
 
          serverPlayer.getEntityData().set(MANA, newAmount);
-         this.onModify(oldAmount, newAmount);
+         this.onModify(action, oldAmount, newAmount);
          return newAmount;
       } else {
          throw new IllegalStateException("Don't call this from the client!");
@@ -100,12 +101,12 @@ public abstract class MixinManaPlayerEntity extends LivingEntity implements Mana
    }
 
    @Override
-   public float increaseMana(float amount) {
-      return this.setMana(this.getMana() + amount);
+   public float increaseMana(ManaAction action, float amount) {
+      return this.setMana(action, this.getMana() + amount);
    }
 
    @Override
-   public float decreaseMana(float amount) {
-      return this.increaseMana(-amount);
+   public float decreaseMana(ManaAction action, float amount) {
+      return this.increaseMana(action, -amount);
    }
 }

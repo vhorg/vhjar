@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import iskallia.vault.VaultMod;
 import iskallia.vault.antique.condition.AntiqueCondition;
 import iskallia.vault.antique.reward.AntiqueReward;
+import iskallia.vault.block.entity.challenge.raid.action.ChallengeAction;
 import iskallia.vault.config.adapter.BingoItemAdapter;
 import iskallia.vault.config.adapter.IdentifierAdapter;
 import iskallia.vault.config.adapter.ItemStackAdapter;
@@ -22,6 +23,8 @@ import iskallia.vault.core.card.CardEntry;
 import iskallia.vault.core.card.CardScaler;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.VersionedKey;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.objective.bingo.BingoItem;
 import iskallia.vault.core.vault.objective.elixir.ElixirTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
@@ -52,6 +55,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
@@ -62,6 +66,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public abstract class Config {
    public static final Random rand = new Random();
+   public static final RandomSource randSrc = JavaRandom.ofNanoTime();
    public static final Gson GSON = new GsonBuilder()
       .registerTypeHierarchyAdapter(MobEffect.class, RegistryCodecAdapter.of(ForgeRegistries.MOB_EFFECTS))
       .registerTypeHierarchyAdapter(Item.class, RegistryCodecAdapter.of(ForgeRegistries.ITEMS))
@@ -90,9 +95,10 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(LootPool.class, Adapters.LOOT_POOL)
       .registerTypeHierarchyAdapter(LootTable.Entry.class, Adapters.LOOT_TABLE_ENTRY)
       .registerTypeHierarchyAdapter(IntRoll.class, Adapters.INT_ROLL)
-      .registerTypeHierarchyAdapter(FloatRoll.class, FloatRoll.Adapter.INSTANCE)
+      .registerTypeHierarchyAdapter(FloatRoll.class, Adapters.FLOAT_ROLL)
       .registerTypeHierarchyAdapter(Skill.class, Adapters.SKILL)
       .registerTypeHierarchyAdapter(Task.class, Adapters.TASK)
+      .registerTypeHierarchyAdapter(ChallengeAction.class, Adapters.RAID_ACTION)
       .registerTypeAdapter(ElixirTask.Config.class, ElixirTask.Config.Serializer.INSTANCE)
       .registerTypeHierarchyAdapter(Quest.class, Quest.Adapter.INSTANCE)
       .registerTypeAdapter(TilePredicate.class, Adapters.TILE_PREDICATE)
@@ -111,6 +117,7 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(Component.class, Adapters.COMPONENT)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()
+      .disableHtmlEscaping()
       .setPrettyPrinting()
       .create();
    protected String root = "config%s%s%s".formatted(File.separator, "the_vault", File.separator);
@@ -157,6 +164,7 @@ public abstract class Config {
             } catch (Exception var5) {
                VaultMod.LOGGER.warn("Invalid config {}, using defaults", this, var5);
                this.reset();
+               this.onLoad(null);
                ModConfigs.INVALID_CONFIGS.add(this.getConfigFile().getName() + " - Exception: " + var5.getMessage());
                ModConfigs.CONFIGS.add(this);
                var5.printStackTrace();
@@ -177,7 +185,7 @@ public abstract class Config {
       return true;
    }
 
-   protected void onLoad(Config oldConfigInstance) {
+   protected void onLoad(@Nullable Config oldConfigInstance) {
    }
 
    public void onUnload() {

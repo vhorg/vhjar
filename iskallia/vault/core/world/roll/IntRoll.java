@@ -16,7 +16,15 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 
 public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
+   int getMin();
+
+   int getMax();
+
    int get(RandomSource var1);
+
+   default boolean contains(int value) {
+      return value >= this.getMin() && value <= this.getMax();
+   }
 
    static IntRoll.Constant ofConstant(int count) {
       return new IntRoll.Constant(count);
@@ -24,26 +32,6 @@ public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
 
    static IntRoll.Uniform ofUniform(int min, int max) {
       return new IntRoll.Uniform(min, max);
-   }
-
-   static int getMin(IntRoll roll) {
-      if (roll instanceof IntRoll.Constant constant) {
-         return constant.getCount();
-      } else if (roll instanceof IntRoll.Uniform uniform) {
-         return uniform.getMin();
-      } else {
-         throw new UnsupportedOperationException();
-      }
-   }
-
-   static int getMax(IntRoll roll) {
-      if (roll instanceof IntRoll.Constant constant) {
-         return constant.getCount();
-      } else if (roll instanceof IntRoll.Uniform uniform) {
-         return uniform.getMax();
-      } else {
-         throw new UnsupportedOperationException();
-      }
    }
 
    public static class Adapter extends TypeSupplierAdapter<IntRoll> {
@@ -90,6 +78,16 @@ public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
 
       public int getCount() {
          return this.count;
+      }
+
+      @Override
+      public int getMin() {
+         return this.getCount();
+      }
+
+      @Override
+      public int getMax() {
+         return this.getCount();
       }
 
       @Override
@@ -142,10 +140,12 @@ public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
          this.max = max;
       }
 
+      @Override
       public int getMin() {
          return this.min;
       }
 
+      @Override
       public int getMax() {
          return this.max;
       }

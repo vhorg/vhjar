@@ -2,13 +2,15 @@ package iskallia.vault.item.tool;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
-import iskallia.vault.VaultMod;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.entity.VaultChestTileEntity;
+import iskallia.vault.config.UniqueGearConfig;
 import iskallia.vault.core.util.iterator.MappingIterator;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
+import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
@@ -18,24 +20,34 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.data.ServerVaults;
 import it.unimi.dsi.fastutil.ints.IntIterators;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -71,10 +83,12 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.NotNull;
@@ -178,22 +192,25 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
                && !(Items.SHEARS.getDestroySpeed(stack, state) > 1.0F)
                && !Items.SHEARS.isCorrectToolForDrops(stack, state)) {
             if (!data.get(ModGearAttributes.WOODEN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-               || !state.is(ModBlocks.WOODEN_CHEST) && !state.is(ModBlocks.HARDENED_CHEST)) {
+               || !state.is(ModBlocks.WOODEN_CHEST) && !state.is(ModBlocks.HARDENED_CHEST) && !state.is(ModBlocks.WOODEN_BARREL)) {
                if (!data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
                   || !state.is(ModBlocks.ORNATE_CHEST)
                      && !state.is(ModBlocks.ORNATE_STRONGBOX)
                      && !state.is(ModBlocks.FLESH_CHEST)
-                     && !state.is(ModBlocks.ENIGMA_CHEST)) {
+                     && !state.is(ModBlocks.ENIGMA_CHEST)
+                     && !state.is(ModBlocks.ORNATE_BARREL)) {
                   if (!data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
                      || !state.is(ModBlocks.GILDED_CHEST)
                         && !state.is(ModBlocks.GILDED_STRONGBOX)
                         && !state.is(ModBlocks.FLESH_CHEST)
-                        && !state.is(ModBlocks.ENIGMA_CHEST)) {
+                        && !state.is(ModBlocks.ENIGMA_CHEST)
+                        && !state.is(ModBlocks.GILDED_BARREL)) {
                      if (!data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
                         || !state.is(ModBlocks.LIVING_CHEST)
                            && !state.is(ModBlocks.LIVING_STRONGBOX)
                            && !state.is(ModBlocks.FLESH_CHEST)
-                           && !state.is(ModBlocks.ENIGMA_CHEST)) {
+                           && !state.is(ModBlocks.ENIGMA_CHEST)
+                           && !state.is(ModBlocks.LIVING_BARREL)) {
                         if (data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)) {
                            return true;
                         } else {
@@ -379,6 +396,11 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       return false;
    }
 
+   @Override
+   public boolean doesDurabilityReductionApply(ItemStack stack, @Nullable Player player) {
+      return false;
+   }
+
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
       return VaultGearHelper.getModifiers(stack, slot);
    }
@@ -399,6 +421,15 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    public void appendHoverText(@Nonnull ItemStack stack, Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
       tooltip.addAll(this.createTooltip(stack, GearTooltip.toolTooltip()));
+      if (Screen.hasShiftDown()) {
+         if (!tooltip.isEmpty()) {
+            tooltip.add(TextComponent.EMPTY);
+         }
+
+         Style unqiueColorStyle = Style.EMPTY.withColor(VaultGearRarity.UNIQUE.getColor());
+         tooltip.add(new TextComponent("Applied Unique Jewels:").withStyle(unqiueColorStyle));
+         getAppliedUniques(stack).forEach(entry -> tooltip.add(new TextComponent("- " + entry.getName()).withStyle(unqiueColorStyle)));
+      }
    }
 
    @Override
@@ -445,7 +476,7 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       data.setState(VaultGearState.IDENTIFIED);
       data.setItemLevel(material.getLevel());
       data.setRepairSlots(material.getRepairs());
-      data.updateAttribute(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(material.getCapacity()));
+      data.createOrReplaceAttributeValue(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(material.getCapacity()));
       data.addModifier(VaultGearModifier.AffixType.IMPLICIT, new VaultGearModifier<>(ModGearAttributes.MINING_SPEED, material.getMiningSpeed()));
       data.addModifier(VaultGearModifier.AffixType.IMPLICIT, new VaultGearModifier<>(ModGearAttributes.DURABILITY, material.getDurability()));
       if (type.has(ToolType.HAMMER)) {
@@ -473,7 +504,7 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       stack.getOrCreateTag().putLong("offset", (long)offsetRight << 32 | Integer.toUnsignedLong(offsetUp));
    }
 
-   public static Iterator<BlockPos> getHammerPositions(ItemStack stack, BlockPos origin, Direction face, Entity entity) {
+   public static Iterator<BlockPos> getHammerPositions(Level world, ItemStack stack, BlockPos origin, Direction face, Entity entity) {
       if (!canUse(stack, entity)) {
          return Collections.emptyIterator();
       } else {
@@ -490,47 +521,69 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
          };
 
          Direction up;
-         Direction var12 = up = switch (face) {
+         Direction var14 = up = switch (face) {
             case DOWN -> entity.getDirection().getOpposite();
             case UP -> entity.getDirection();
             case NORTH, SOUTH, WEST, EAST -> Direction.UP;
             default -> throw new IncompatibleClassChangeError();
          };
+         BlockState originState = world.getBlockState(origin);
          return Iterators.concat(
-            new MappingIterator<>(
-               IntIterators.fromTo(-size, size + 1),
-               r -> new MappingIterator<>(IntIterators.fromTo(-size, size + 1), u -> origin.relative(right, r + offsetRight).relative(up, u + offsetUp))
-            )
+            new MappingIterator<>(IntIterators.fromTo(-size, size + 1), r -> new MappingIterator<>(IntIterators.fromTo(-size, size + 1), u -> {
+               BlockPos pos = origin.relative(right, r + offsetRight).relative(up, u + offsetUp);
+               BlockState state = world.getBlockState(pos);
+               if (pos.getY() < world.getMinBuildHeight() || pos.getY() >= world.getMaxBuildHeight()) {
+                  return null;
+               } else if (!(originState.getBlock() instanceof VaultChestBlock) && state.getBlock() instanceof VaultChestBlock) {
+                  return null;
+               } else {
+                  if (entity instanceof Player player) {
+                     LeftClickBlock event = ForgeHooks.onLeftClickBlock(player, pos, face);
+                     if (event.isCanceled() || !player.isCreative() && event.getUseItem() == Result.DENY) {
+                        return null;
+                     }
+                  }
+
+                  return pos;
+               }
+            }))
          );
       }
    }
 
-   public static boolean applyJewel(ItemStack tool, ItemStack jewel) {
+   public static boolean applyJewel(ItemStack tool, ItemStack jewel, boolean checkCapacity) {
       VaultGearData toolData = VaultGearData.read(tool);
+      List<ResourceLocation> appliedUniqueKeys = getAppliedUniqueKeys(tool);
       VaultGearData jewelData = VaultGearData.read(jewel);
-      int capacity = toolData.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
-      int size = jewelData.getFirstValue(ModGearAttributes.JEWEL_SIZE).orElse(0);
-      if (capacity - size < 0) {
+      List<ResourceLocation> jewelUniqueKeys = jewelData.get(ModGearAttributes.UNIQUE_ITEM_KEY, VaultGearAttributeTypeMerger.asList());
+      if (jewelUniqueKeys.stream().anyMatch(appliedUniqueKeys::contains)) {
          return false;
       } else {
-         toolData.updateAttribute(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity - size));
+         int capacity = toolData.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
+         int size = jewelData.getFirstValue(ModGearAttributes.JEWEL_SIZE).orElse(0);
+         if (checkCapacity && capacity - size < 0) {
+            return false;
+         } else {
+            toolData.createOrReplaceAttributeValue(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity - size));
 
-         for (VaultGearModifier.AffixType affix : VaultGearModifier.AffixType.explicits()) {
-            for (VaultGearModifier<?> jewelModifier : jewelData.getModifiers(affix)) {
-               if (jewelModifier.getAttribute() != ModGearAttributes.HAMMER_SIZE
-                  || toolData.get(ModGearAttributes.HAMMERING, VaultGearAttributeTypeMerger.anyTrue())) {
-                  mergeModifier(affix, toolData, jewelModifier);
+            for (VaultGearModifier.AffixType affix : VaultGearModifier.AffixType.explicits()) {
+               for (VaultGearModifier<?> jewelModifier : jewelData.getModifiers(affix)) {
+                  if (jewelModifier.getAttribute() != ModGearAttributes.HAMMER_SIZE
+                     || toolData.get(ModGearAttributes.HAMMERING, VaultGearAttributeTypeMerger.anyTrue())) {
+                     mergeModifier(affix, toolData, jewelModifier);
+                  }
                }
             }
-         }
 
-         for (VaultGearAttributeInstance<Integer> hammerSizeModifier : toolData.getModifiers(ModGearAttributes.HAMMER_SIZE, VaultGearData.Type.ALL_MODIFIERS)) {
-            hammerSizeModifier.setValue(Math.min(hammerSizeModifier.getValue(), 7));
-         }
+            for (VaultGearAttributeInstance<Integer> hammerSizeModifier : toolData.getModifiers(ModGearAttributes.HAMMER_SIZE, VaultGearData.Type.ALL_MODIFIERS)) {
+               hammerSizeModifier.setValue(Math.min(hammerSizeModifier.getValue(), 7));
+            }
 
-         toolData.setItemLevel(Math.max(toolData.getItemLevel(), jewelData.getItemLevel()));
-         toolData.write(tool);
-         return true;
+            toolData.setItemLevel(Math.max(toolData.getItemLevel(), jewelData.getItemLevel()));
+            toolData.write(tool);
+            jewelUniqueKeys.forEach(key -> addAppliedUnique(tool, key));
+            return true;
+         }
       }
    }
 
@@ -539,21 +592,27 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       if (matching.isEmpty()) {
          targetData.addModifier(affix, new VaultGearModifier<>(toAdd.getAttribute(), toAdd.getValue()));
       } else {
-         matching.stream().findFirst().ifPresent(current -> current.setValue(merge((VaultGearAttributeInstance<T>)current, toAdd.getValue())));
+         matching.stream().findFirst().ifPresent(current -> {
+            T newValue = merge((VaultGearAttributeInstance<T>)current, toAdd.getValue()).orElse(null);
+            if (newValue != null) {
+               current.setValue(newValue);
+            } else {
+               targetData.addModifier(affix, toAdd);
+            }
+         });
       }
    }
 
-   private static <T> T merge(VaultGearAttributeInstance<T> attributeInstance, T toAdd) {
+   private static <T> Optional<T> merge(VaultGearAttributeInstance<T> attributeInstance, T toAdd) {
       VaultGearAttribute<T> attribute = attributeInstance.getAttribute();
       if (attribute.getAttributeComparator() != null) {
          T result = attribute.getAttributeComparator().merge(attributeInstance.getValue(), toAdd).orElse(null);
          if (result != null) {
-            return result;
+            return Optional.of(result);
          }
       }
 
-      VaultMod.LOGGER.error("Unsupported merging on attribute " + attribute.getRegistryName(), new UnsupportedOperationException());
-      return attributeInstance.getValue();
+      return Optional.empty();
    }
 
    @Nonnull
@@ -568,16 +627,45 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       return ProficiencyType.UNKNOWN;
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return EquipmentSlot.MAINHAND;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.TOOL;
    }
 
    @Nullable
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       return null;
+   }
+
+   public static void addAppliedUnique(ItemStack stack, ResourceLocation uniqueKey) {
+      if (stack.getItem() instanceof ToolItem) {
+         CompoundTag tag = stack.getOrCreateTag();
+         ListTag uniques = tag.getList("addedUniques", 8);
+         uniques.add(StringTag.valueOf(uniqueKey.toString()));
+         tag.put("addedUniques", uniques);
+      }
+   }
+
+   public static List<UniqueGearConfig.Entry> getAppliedUniques(ItemStack stack) {
+      return getAppliedUniqueKeys(stack).stream().map(key -> ModConfigs.UNIQUE_GEAR.getEntry(key)).filter(Optional::isPresent).map(Optional::get).toList();
+   }
+
+   public static List<ResourceLocation> getAppliedUniqueKeys(ItemStack stack) {
+      if (!(stack.getItem() instanceof ToolItem)) {
+         return Collections.emptyList();
+      } else {
+         CompoundTag tag = stack.getOrCreateTag();
+         ListTag uniques = tag.getList("addedUniques", 8);
+         List<ResourceLocation> result = new ArrayList<>();
+
+         for (Tag unique : uniques) {
+            result.add(new ResourceLocation(unique.getAsString()));
+         }
+
+         return result;
+      }
    }
 
    public static boolean handleLoot(LootContext context, List<ItemStack> loot) {
@@ -619,11 +707,12 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       }
    }
 
+   @Deprecated
    public static void addCapacity(ItemStack tool, int amount) {
       VaultGearData data = VaultGearData.read(tool);
-      if (data.has(ModGearAttributes.TOOL_MATERIAL) && data.has(ModGearAttributes.TOOL_CAPACITY)) {
+      if (data.hasAttribute(ModGearAttributes.TOOL_MATERIAL) && data.hasAttribute(ModGearAttributes.TOOL_CAPACITY)) {
          int capacity = data.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
-         data.updateAttribute(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity + amount));
+         data.createOrReplaceAttributeValue(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity + amount));
          data.write(tool);
       }
    }

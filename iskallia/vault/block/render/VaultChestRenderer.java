@@ -4,7 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import iskallia.vault.VaultMod;
+import iskallia.vault.block.VaultBarrelBlock;
 import iskallia.vault.block.VaultChestBlock;
+import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.block.model.VaultChestModel;
 import iskallia.vault.init.ModBlocks;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
@@ -12,14 +14,17 @@ import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
 import net.minecraft.client.renderer.blockentity.BrightnessCombiner;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
@@ -160,11 +165,17 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
 
    public void render(T blockEntity, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
       BlockState blockState = blockEntity.getBlockState();
-      VaultChestModel model = this.getModelMap(blockState).get(blockState.getBlock());
-      if (model != null) {
-         this.customRender(model, blockEntity, pPartialTick, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay);
-      } else {
-         super.render(blockEntity, pPartialTick, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay);
+      if (blockState.getBlock() instanceof VaultBarrelBlock) {
+         if (!((VaultChestTileEntity)blockEntity).isVaultChest()) {
+            this.renderFirstItem(blockEntity.getItem(0), blockState, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay);
+         }
+      } else if (!(blockState.getBlock() instanceof VaultChestBlock vaultChestBlock && !vaultChestBlock.hasDynamicRenderer())) {
+         VaultChestModel model = this.getModelMap(blockState).get(blockState.getBlock());
+         if (model != null) {
+            this.customRender(model, blockEntity, pPartialTick, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay);
+         } else {
+            super.render(blockEntity, pPartialTick, pPoseStack, pBufferSource, pPackedLight, pPackedOverlay);
+         }
       }
    }
 
@@ -195,5 +206,66 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       matrixStack.translate(-0.5, -0.5, -0.5);
       model.renderToBuffer(matrixStack, vb, combinedLidLight, combinedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
       matrixStack.popPose();
+   }
+
+   private void renderFirstItem(
+      ItemStack itemStack, BlockState blockState, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay
+   ) {
+      if (!itemStack.isEmpty()) {
+         poseStack.pushPose();
+         poseStack.translate(0.5, 0.5, 0.5);
+         Direction direction = (Direction)blockState.getValue(VaultBarrelBlock.DIRECTION);
+         label26:
+         switch (direction) {
+            case SOUTH:
+               poseStack.translate(0.0, 0.0, 0.5);
+               poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+               break;
+            case WEST:
+               poseStack.translate(-0.5, 0.0, 0.0);
+               poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
+               break;
+            case EAST:
+               poseStack.translate(0.5, 0.0, 0.0);
+               poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+               break;
+            case UP:
+               poseStack.translate(0.0, 0.5, 0.0);
+               poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+               switch ((Direction)blockState.getValue(VaultBarrelBlock.FACING)) {
+                  case SOUTH:
+                     poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+                     break label26;
+                  case WEST:
+                     poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0F));
+                     break label26;
+                  case EAST:
+                     poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
+                  default:
+                     break label26;
+               }
+            case DOWN:
+               poseStack.translate(0.0, -0.5, 0.0);
+               poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
+               switch ((Direction)blockState.getValue(VaultBarrelBlock.FACING)) {
+                  case SOUTH:
+                     poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+                     break label26;
+                  case WEST:
+                     poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
+                     break label26;
+                  case EAST:
+                     poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0F));
+                  default:
+                     break label26;
+               }
+            case NORTH:
+               poseStack.translate(0.0, 0.0, -0.5);
+         }
+
+         poseStack.scale(0.3F, 0.3F, 0.3F);
+         Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, TransformType.FIXED, combinedLight, combinedOverlay, poseStack, buffer, 0);
+         poseStack.popPose();
+      }
    }
 }

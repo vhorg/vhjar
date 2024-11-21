@@ -25,11 +25,11 @@ public class ToolItemRenderer extends SpecialItemRenderer {
       ToolMaterial material = data.get(ModGearAttributes.TOOL_MATERIAL, VaultGearAttributeTypeMerger.of(() -> null, (a, b) -> b));
       if (material == null) {
          int total = type == null ? 16 * ToolType.values().length : 16;
-         material = ToolMaterial.values()[(int)(ClientScheduler.INSTANCE.getTickCount() / total) % ToolMaterial.values().length];
+         material = ToolMaterial.values()[(int)(ClientScheduler.INSTANCE.getTick() / total) % ToolMaterial.values().length];
       }
 
       if (type == null) {
-         type = ToolType.values()[(int)(ClientScheduler.INSTANCE.getTickCount() >> 4) % ToolType.values().length];
+         type = ToolType.values()[(int)(ClientScheduler.INSTANCE.getTick() >> 4) % ToolType.values().length];
       }
 
       ModelResourceLocation head = new ModelResourceLocation("the_vault:tool/%s/head/%s#inventory".formatted(type.getId(), material.getId()));

@@ -2,11 +2,10 @@ package iskallia.vault.gear.crafting.recipe;
 
 import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
-import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.DataInitializationItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,12 +37,7 @@ public class JewelForgeRecipe extends VaultForgeRecipe {
    @Override
    public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       ItemStack jewelStack = new ItemStack(ModItems.JEWEL);
-      VaultGearData gearData = VaultGearData.read(jewelStack);
-      gearData.setItemLevel(vaultLevel);
-      gearData.write(jewelStack);
       jewelStack.getOrCreateTag().putString(ModGearAttributes.GEAR_ROLL_TYPE_POOL.getRegistryName().toString(), "jewel_crafted");
-      jewelStack = ModItems.JEWEL.convertStack(jewelStack, JavaRandom.ofNanoTime());
-      DataInitializationItem.doInitialize(jewelStack);
-      return jewelStack;
+      return LootInitialization.initializeVaultLoot(jewelStack, vaultLevel);
    }
 }

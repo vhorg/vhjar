@@ -19,6 +19,7 @@ import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.util.calc.AttributeLimitHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.CooldownHelper;
+import iskallia.vault.util.calc.DurabilityWearReductionHelper;
 import iskallia.vault.util.calc.GodAffinityHelper;
 import iskallia.vault.util.calc.LuckyHitHelper;
 import iskallia.vault.util.calc.SoulChanceHelper;
@@ -244,12 +245,19 @@ public class StatisticsElementContainerScreenData {
                CooldownHelper::getCooldownMultiplierUnlimited,
                AttributeLimitHelper::getCooldownReductionLimit
             ),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.EFFECT_DURATION),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.RESISTANCE, AttributeLimitHelper::getResistanceLimit),
             GearAttributeStatLabel.ofFloat(
                this.player, ModGearAttributes.BLOCK, BlockChanceHelper::getBlockChanceUnlimited, AttributeLimitHelper::getBlockChanceLimit
             ),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.CRITICAL_HIT_TAKEN_REDUCTION),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DURABILITY_WEAR_REDUCTION),
+            GearAttributeStatLabel.ofFloat(
+               this.player,
+               ModGearAttributes.DURABILITY_WEAR_REDUCTION,
+               DurabilityWearReductionHelper::getDurabilityWearReductionUnlimited,
+               AttributeLimitHelper::getDurabilityWearReductionLimit
+            ),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.AREA_OF_EFFECT),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE_FLAT),
             GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_CHAIN),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ON_HIT_STUN),
@@ -258,7 +266,7 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_QUANTITY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_RARITY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TRAP_DISARMING),
-            GearAttributeStatLabel.of(this.player, ModGearAttributes.SOUL_CHANCE, SoulChanceHelper::getSoulChance),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.SOUL_QUANTITY, SoulChanceHelper::getSoulChance),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.LUCKY_HIT_CHANCE, LuckyHitHelper::getLuckyHitChance),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COPIOUSLY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.MINING_SPEED),

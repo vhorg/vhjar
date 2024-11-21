@@ -16,7 +16,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class ThrowPotionGoal extends RangedAttackGoalBase implements IPersistentGoal {
+public class ThrowPotionGoal extends RangedAttackGoalBase {
    public static final String TYPE = "throw_potion";
    private final VaultBossBaseEntity boss;
    @Nullable
@@ -26,14 +26,22 @@ public class ThrowPotionGoal extends RangedAttackGoalBase implements IPersistent
    private boolean lingering;
 
    public ThrowPotionGoal(VaultBossBaseEntity boss) {
-      super(boss, 1.0, 100, 200, 10.0F);
+      super(boss, 1.0, 100, 200, 10.0F, true);
       this.boss = boss;
    }
 
    public ThrowPotionGoal setAttributes(
-      double speedModifier, int throwIntervalMin, int throwIntervalMax, float attackRadius, MobEffect mobEffect, int duration, int amplifier, boolean lingering
+      double speedModifier,
+      int throwIntervalMin,
+      int throwIntervalMax,
+      float attackRadius,
+      MobEffect mobEffect,
+      int duration,
+      int amplifier,
+      boolean lingering,
+      boolean attackWhenInMeleeRange
    ) {
-      this.setAttackAttributes(speedModifier, throwIntervalMin, throwIntervalMax, attackRadius);
+      this.setAttackAttributes(speedModifier, throwIntervalMin, throwIntervalMax, attackRadius, attackWhenInMeleeRange);
       this.mobEffect = mobEffect;
       this.duration = duration;
       this.amplifier = amplifier;
@@ -82,8 +90,8 @@ public class ThrowPotionGoal extends RangedAttackGoalBase implements IPersistent
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
-      super.deserializeNBT(nbt);
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
+      super.deserializeNBT(nbt, boss);
       if (nbt.contains("MobEffect")) {
          this.mobEffect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(nbt.getString("MobEffect")));
          this.duration = nbt.getInt("Duration");

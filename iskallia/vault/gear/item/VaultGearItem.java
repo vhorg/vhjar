@@ -12,6 +12,7 @@ import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.GearDataCache;
@@ -113,13 +114,13 @@ public interface VaultGearItem
    default void initializeVaultLoot(int vaultLevel, ItemStack stack, @Nullable BlockPos pos, @Nullable Vault vault) {
       VaultGearData data = VaultGearData.read(stack);
       data.setItemLevel(vaultLevel);
-      data.updateAttribute(ModGearAttributes.IS_LOOT, Boolean.valueOf(vault != null));
+      data.createOrReplaceAttributeValue(ModGearAttributes.IS_LOOT, Boolean.valueOf(vault != null));
       data.write(stack);
    }
 
    @Override
    default ItemStack convertStack(ItemStack stack, RandomSource random) {
-      EquipmentSlot slot = this.getIntendedSlot(stack);
+      EquipmentSlot slot = this.getGearType(stack).getEquipmentSlot();
       if (stack.hasTag() && slot != null) {
          CompoundTag tag = stack.getOrCreateTag();
          String modelAttrKey = ModGearAttributes.GEAR_MODEL.getRegistryName().toString();
@@ -128,7 +129,7 @@ public interface VaultGearItem
             if (modelStr.equalsIgnoreCase("random")) {
                Set<String> models = new HashSet<>();
                ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRolls(stack).forEach((rarity, modelList) -> {
-                  if (!rarity.equals(VaultGearRarity.UNIQUE.name()) && !rarity.equals("SPECIAL")) {
+                  if (!rarity.equals(VaultGearRarity.UNIQUE.name())) {
                      models.addAll(modelList);
                   }
                });
@@ -141,7 +142,7 @@ public interface VaultGearItem
                DynamicModel<?> randomModel = (DynamicModel<?>)(armorModelSet.isEmpty() ? null : armorModelSet.get(random.nextInt(armorModelSet.size())));
                if (randomModel != null) {
                   VaultGearData data = VaultGearData.read(stack);
-                  data.updateAttribute(ModGearAttributes.GEAR_MODEL, randomModel.getId());
+                  data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, randomModel.getId());
                   data.write(stack);
                }
 
@@ -198,11 +199,14 @@ public interface VaultGearItem
    @Nonnull
    VaultGearClassification getClassification(ItemStack var1);
 
+   @Deprecated(
+      forRemoval = true
+   )
    @Nonnull
    ProficiencyType getCraftingProficiencyType(ItemStack var1);
 
-   @Nullable
-   EquipmentSlot getIntendedSlot(ItemStack var1);
+   @Nonnull
+   VaultGearType getGearType(ItemStack var1);
 
    @Nullable
    ResourceLocation getRandomModel(ItemStack var1, Random var2);
@@ -216,7 +220,7 @@ public interface VaultGearItem
    }
 
    default boolean isIntendedForSlot(ItemStack stack, EquipmentSlot slotType) {
-      return this.getIntendedSlot(stack) == slotType;
+      return this.getGearType(stack).getEquipmentSlot() == slotType;
    }
 
    default void setDamage(ItemStack stack, int newDamage) {
@@ -244,12 +248,12 @@ public interface VaultGearItem
    }
 
    @Override
-   default void tickRoll(ItemStack stack, Player player) {
+   default void tickRoll(ItemStack stack, @Nullable Player player) {
       GearRollHelper.tickGearRoll(stack);
    }
 
    @Override
-   default void tickFinishRoll(ItemStack stack, Player player) {
+   default void tickFinishRoll(ItemStack stack, @Nullable Player player) {
       GearRollHelper.initializeAndDiscoverGear(stack, player);
    }
 }

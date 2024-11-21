@@ -6,10 +6,12 @@ import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.skill.ability.effect.spi.AbstractEmpowerAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -58,8 +60,13 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
       return this.chilledAmplifier;
    }
 
-   public int getChilledDuration() {
+   public int getChilledDurationUnmodified() {
       return this.chilledDuration;
+   }
+
+   public int getChilledDuration(LivingEntity entity) {
+      int duration = this.getChilledDurationUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    public float getAdditionalManaPerHit() {
@@ -117,8 +124,8 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
          AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
          abilities.getAll(EmpowerIceArmourAbility.class, Ability::isActive).stream().findFirst().ifPresent(ability -> {
             if (event.getSource().getEntity() instanceof LivingEntity attacker) {
-               attacker.addEffect(new MobEffectInstance(ModEffects.CHILLED, ability.getChilledDuration(), ability.getChilledAmplifier(), false, false));
-               if (Mana.decrease(player, ability.getAdditionalManaPerHit()) <= 0.0F) {
+               attacker.addEffect(new MobEffectInstance(ModEffects.CHILLED, ability.getChilledDuration(player), ability.getChilledAmplifier(), false, false));
+               if (Mana.decrease(player, ManaAction.PLAYER_ACTION, ability.getAdditionalManaPerHit()) <= 0.0F) {
                   player.removeEffect(ModEffects.SHELL);
                   ability.putOnCooldown(SkillContext.of(player));
                   ability.setActive(false);

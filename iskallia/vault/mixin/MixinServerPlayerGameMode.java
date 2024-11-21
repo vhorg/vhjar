@@ -23,6 +23,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -148,7 +149,7 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
 
             if (this.isCreative()) {
                if (this.hasHammer(this.player)) {
-                  this.computeHammerTiles(pos, facing, buildHeight);
+                  this.computeHammerTiles(this.level, pos, facing, buildHeight);
                }
 
                this.hammer.tiles.removeIf(tilex -> {
@@ -163,10 +164,11 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
             }
 
             if (this.hasHammer(this.player)) {
-               this.computeHammerTiles(pos, facing, buildHeight);
+               this.computeHammerTiles(this.level, pos, facing, buildHeight);
             }
 
-            float f1 = this.level.getBlockState(pos).getDestroyProgress(this.player, this.player.level, pos);
+            BlockState initialBlockState = this.level.getBlockState(pos);
+            float f1 = initialBlockState.getDestroyProgress(this.player, this.player.level, pos);
             this.hammer
                .tiles
                .removeIf(
@@ -217,9 +219,9 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
          } else if (action == Action.STOP_DESTROY_BLOCK) {
             if (pos.equals(this.destroyPos)) {
                int j = this.gameTicks - this.destroyProgressStart;
-               BlockState state2 = this.level.getBlockState(pos);
-               if (!state2.isAir()) {
-                  float f1 = state2.getDestroyProgress(this.player, this.player.level, pos) * (j + 1);
+               BlockState initialBlockState = this.level.getBlockState(pos);
+               if (!initialBlockState.isAir()) {
+                  float f1 = initialBlockState.getDestroyProgress(this.player, this.player.level, pos) * (j + 1);
                   if (f1 >= 0.7F) {
                      this.hammer
                         .tiles
@@ -227,8 +229,8 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
                            tilex -> {
                               tilex.isDestroyingBlock = false;
                               this.level.destroyBlockProgress(-1, tilex.destroyPos, -1);
-                              BlockState state3 = this.level.getBlockState(tilex.destroyPos);
-                              float f2 = state3.getDestroyProgress(this.player, this.player.level, tilex.destroyPos)
+                              BlockState blockState = this.level.getBlockState(tilex.destroyPos);
+                              float f2 = blockState.getDestroyProgress(this.player, this.player.level, tilex.destroyPos)
                                  * (this.gameTicks - tilex.destroyProgressStart + 1);
                               if (f2 >= f1) {
                                  this.destroyAndAck(tilex.destroyPos, action, "destroyed");
@@ -272,6 +274,16 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
       }
    }
 
+   @Redirect(
+      method = {"handleBlockBreakAction"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"
+      )
+   )
+   public void handleDestroyMismatchSuppress(Logger instance, String strFormat, Object arg1, Object arg2) {
+   }
+
    private boolean hasHammer(ServerPlayer player) {
       ItemStack stack = player.getMainHandItem();
       if (stack.getItem() != ModItems.TOOL) {
@@ -292,8 +304,8 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
       }
    }
 
-   private void computeHammerTiles(BlockPos pos, Direction facing, int buildHeight) {
-      ToolItem.getHammerPositions(this.player.getMainHandItem(), pos, facing, this.player).forEachRemaining(p -> {
+   private void computeHammerTiles(ServerLevel world, BlockPos pos, Direction facing, int buildHeight) {
+      ToolItem.getHammerPositions(world, this.player.getMainHandItem(), pos, facing, this.player).forEachRemaining(p -> {
          if (!p.equals(pos)) {
             this.hammer.tiles.add(new HammerTile(true, this.gameTicks, p, -1));
          }

@@ -91,7 +91,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
-         player.addEffect(new MobEffectInstance(ModEffects.STONEFALL_COLD, this.getDurationTicks(), 0, false, false, true));
+         player.addEffect(new MobEffectInstance(ModEffects.STONEFALL_COLD, this.getDurationTicks(player), 0, false, false, true));
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
    }

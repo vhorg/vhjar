@@ -98,7 +98,7 @@ public class DrillArrowEntity extends Arrow {
 
    private boolean destroyBlock(Level world, BlockPos pos, BlockState state, ServerPlayer player) {
       ItemStack miningItem = new ItemStack(Items.DIAMOND_PICKAXE);
-      Block.dropResources(world.getBlockState(pos), world, pos, world.getBlockEntity(pos), null, miningItem);
+      Block.dropResources(world.getBlockState(pos), world, pos, world.getBlockEntity(pos), player, miningItem);
       return state.onDestroyedByPlayer(world, pos, player, true, state.getFluidState());
    }
 

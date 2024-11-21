@@ -3,8 +3,11 @@
   "values": [
     "the_vault:god_token",
     "the_vault:phoenix_feather",
+    "the_vault:capstone_peaceful",
     "the_vault:eye_of_avarice",
     "the_vault:capstone_dungeon_hunter",
-    "the_vault:capstone_treasure_hunter"
+    "the_vault:capstone_pylon_hunter",
+    "the_vault:capstone_treasure_hunter",
+    "the_vault:capstone_vendoor_hunter"
   ]
 }

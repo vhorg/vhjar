@@ -4,7 +4,6 @@ import iskallia.vault.client.util.ColorizationHelper;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.init.ModEntities;
 import java.awt.Color;
-import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
@@ -88,19 +87,13 @@ public class FloatingItemEntity extends ItemEntity {
       int color1 = (Integer)this.getEntityData().get(COLOR1);
       int color2 = (Integer)this.getEntityData().get(COLOR2);
       if (color1 == 16777215 && color2 == 16777215) {
-         Optional<Color> override = ColorizationHelper.getCustomColorOverride(this.getItem());
-         if (override.isPresent()) {
-            color1 = override.get().getRGB();
-            color2 = color1;
-         } else {
-            color1 = ColorizationHelper.getColor(this.getItem()).map(Color::getRGB).orElse(16777215);
-            this.entityData.set(COLOR1, color1);
-            int r = Math.min((color1 >> 16 & 0xFF) * 2, 255);
-            int g = Math.min((color1 >> 8 & 0xFF) * 2, 255);
-            int b = Math.min((color1 >> 0 & 0xFF) * 2, 255);
-            color2 = r << 16 | g << 8 | b;
-            this.entityData.set(COLOR2, color2);
-         }
+         color1 = ColorizationHelper.getColor(this.getItem()).map(Color::getRGB).orElse(16777215);
+         this.entityData.set(COLOR1, color1);
+         int r = Math.min((color1 >> 16 & 0xFF) * 2, 255);
+         int g = Math.min((color1 >> 8 & 0xFF) * 2, 255);
+         int b = Math.min((color1 >> 0 & 0xFF) * 2, 255);
+         color2 = r << 16 | g << 8 | b;
+         this.entityData.set(COLOR2, color2);
       }
 
       if (this.random.nextInt(3) == 0) {

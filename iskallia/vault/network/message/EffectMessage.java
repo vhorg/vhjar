@@ -64,6 +64,7 @@ public class EffectMessage {
    }
 
    public static enum Type {
-      COLORED_FIREWORK;
+      COLORED_FIREWORK,
+      BLOCK_BREAK_EFFECT;
    }
 }

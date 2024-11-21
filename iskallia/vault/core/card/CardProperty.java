@@ -54,16 +54,22 @@ public abstract class CardProperty<C extends CardProperty.Config> implements ISe
       }
    }
 
+   public abstract boolean voidConfigIfPopulated();
+
    @Override
    public void writeBits(BitBuffer buffer) {
-      this.config.writeBits(buffer);
       Adapters.BOOLEAN.writeBits(this.populated, buffer);
+      if (!this.voidConfigIfPopulated() || !this.populated) {
+         this.config.writeBits(buffer);
+      }
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
-      this.config.readBits(buffer);
       this.populated = Adapters.BOOLEAN.readBits(buffer).orElseThrow();
+      if (!this.voidConfigIfPopulated() || !this.populated) {
+         this.config.readBits(buffer);
+      }
    }
 
    @Override
@@ -72,6 +78,8 @@ public abstract class CardProperty<C extends CardProperty.Config> implements ISe
          if (!this.populated) {
             CompoundTag other = this.config.writeNbt().orElseThrow();
             other.getAllKeys().forEach(key -> nbt.put(key, Objects.requireNonNull(other.get(key))));
+         } else if (this.voidConfigIfPopulated()) {
+            nbt.put("config", new CompoundTag());
          } else {
             nbt.put("config", (Tag)this.config.writeNbt().orElseThrow());
          }

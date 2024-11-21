@@ -103,11 +103,13 @@ public class ClassicListenersLogic extends ListenersLogic {
             if (stats != null) {
                Completion completion = stats.getCompletion();
                String objective = this.getVaultObjective(vault.get(Vault.OBJECTIVES).get(Objectives.KEY));
-
+               if (!objective.isEmpty()) {
+                  objective = objective + " ";
+               }
                TextComponent prefix = new TextComponent(switch (completion) {
-                  case COMPLETED -> " completed a " + objective + " Vault!";
-                  case BAILED -> " survived a " + objective + " Vault.";
-                  case FAILED -> " was defeated in a " + objective + " Vault.";
+                  case COMPLETED -> " completed a " + objective + "Vault!";
+                  case BAILED -> " survived a " + objective + "Vault.";
+                  case FAILED -> " was defeated in a " + objective + "Vault.";
                });
                prefix.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)));
                MutableComponent playerName = player.getDisplayName().copy();
@@ -176,7 +178,9 @@ public class ClassicListenersLogic extends ListenersLogic {
                .ifPresent(player -> player.displayClientMessage(new TextComponent("You cannot re-enter this vault.").withStyle(ChatFormatting.RED), true));
             return false;
          } else {
-            if (vault.has(Vault.OWNER) && world.getGameRules().getBoolean(ModGameRules.JOIN_REQUIRE_PARTY)) {
+            if (vault.has(Vault.OWNER)
+               && !vault.get(Vault.OWNER).equals(listener.get(Listener.ID))
+               && world.getGameRules().getBoolean(ModGameRules.JOIN_REQUIRE_PARTY)) {
                VaultPartyData.Party party = VaultPartyData.get(world).getParty(vault.get(Vault.OWNER)).orElse(null);
                if (party == null || !party.hasMember(listener.get(Listener.ID))) {
                   listener.getPlayer()
@@ -189,7 +193,10 @@ public class ClassicListenersLogic extends ListenersLogic {
                }
             }
 
-            vault.set(Vault.OWNER, listener.get(Listener.ID));
+            if (!vault.has(Vault.OWNER)) {
+               vault.set(Vault.OWNER, listener.get(Listener.ID));
+            }
+
             if (!this.has(ADDED_BONUS_TIME) && listener instanceof Runner) {
                this.set(ADDED_BONUS_TIME);
             }
@@ -247,7 +254,10 @@ public class ClassicListenersLogic extends ListenersLogic {
          ability.reduceCooldownBy(ability.getCooldownTicks());
          ability.setActive(false);
       });
-      player.removeAllEffects();
+      if (player.gameMode.isSurvival()) {
+         player.removeAllEffects();
+         player.setAbsorptionAmount(0.0F);
+      }
    }
 
    private void printJoinMessage(VirtualWorld world, Vault vault, ServerPlayer player) {
@@ -267,7 +277,11 @@ public class ClassicListenersLogic extends ListenersLogic {
 
       TextComponent prefix = new TextComponent(startsWithVowel.get() ? " entered an " : " entered a ");
       String objective = this.getVaultObjective(vault.get(Vault.OBJECTIVES).get(Objectives.KEY));
-      text.append(objective + " Vault").append("!");
+      if (!objective.isEmpty()) {
+         objective = objective + " ";
+      }
+
+      text.append(objective + "Vault").append("!");
       prefix.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)));
       text.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)));
       MutableComponent playerName = player.getDisplayName().copy();

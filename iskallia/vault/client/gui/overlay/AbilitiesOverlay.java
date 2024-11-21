@@ -23,6 +23,7 @@ import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.util.CooldownGuiOption;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -127,11 +128,22 @@ public class AbilitiesOverlay implements IIngameOverlay {
             minecraft.getProfiler().pop();
          }
 
+         List<AbilitiesOverlay.RemainingCooldownPositions> cooldownTimesToRender = new ArrayList<>();
          if (ABILITY_DATA.shouldRender) {
-            renderAbilities(matrix, player, ABILITY_DATA, atlas, spriteTrayCooldown, spriteTraySelected, spriteTraySelectedActive, spriteTraySelectedCooldown);
+            renderAbilities(
+               matrix,
+               player,
+               ABILITY_DATA,
+               atlas,
+               spriteTrayCooldown,
+               spriteTraySelected,
+               spriteTraySelectedActive,
+               spriteTraySelectedCooldown,
+               cooldownTimesToRender
+            );
          }
 
-         renderAbilitiesOnCooldown(matrix, player, ClientAbilityData.getLearnedAbilities(), atlas, spriteTrayCooldown);
+         renderAbilitiesOnCooldown(matrix, player, ClientAbilityData.getLearnedAbilities(), atlas, spriteTrayCooldown, cooldownTimesToRender);
          RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
          RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
@@ -142,10 +154,26 @@ public class AbilitiesOverlay implements IIngameOverlay {
             minecraft.getProfiler().pop();
          }
 
+         this.renderCooldownTimes(matrixStack, cooldownTimesToRender);
          RenderSystem.disableDepthTest();
          matrixStack.popPose();
          minecraft.getProfiler().pop();
       }
+   }
+
+   private void renderCooldownTimes(PoseStack matrixStack, List<AbilitiesOverlay.RemainingCooldownPositions> cooldownTimesToRender) {
+      cooldownTimesToRender.forEach(
+         cooldown -> renderCooldownTimes(matrixStack, cooldown.remainingTicks, cooldown.abilityIconX + 16, cooldown.abilityIconY + 8)
+      );
+   }
+
+   private static void renderCooldownTimes(PoseStack matrixStack, int remainingTicks, int x, int y) {
+      matrixStack.pushPose();
+      matrixStack.translate(0.0, 0.0, 100.0);
+      String text = String.valueOf((int)Math.ceil(remainingTicks / 20.0F));
+      float width = minecraft.font.width(text);
+      minecraft.font.draw(matrixStack, text, x - width, y, Color.WHITE.getRGB());
+      matrixStack.popPose();
    }
 
    private static void renderAbilities(
@@ -156,7 +184,8 @@ public class AbilitiesOverlay implements IIngameOverlay {
       TextureAtlasSprite spriteTrayCooldown,
       TextureAtlasSprite spriteTraySelected,
       TextureAtlasSprite spriteTraySelectedActive,
-      TextureAtlasSprite spriteTraySelectedCooldown
+      TextureAtlasSprite spriteTraySelectedCooldown,
+      List<AbilitiesOverlay.RemainingCooldownPositions> cooldownTimesToRender
    ) {
       TextureAtlasSprite spriteAbilityFocused = getAbilityNodeSprite(abilityData.selectAbilityNode.getParent(), atlas);
       TextureAtlasSprite spriteAbilityPrevious = getAbilityNodeSprite(abilityData.previousAbilityNode.getParent(), atlas);
@@ -164,13 +193,18 @@ public class AbilitiesOverlay implements IIngameOverlay {
       Cooldown selectedCooldown = abilityData.selectAbilityNode.getTreeCooldown().orElse(null);
       Cooldown previousCooldown = abilityData.previousAbilityNode.getTreeCooldown().orElse(null);
       Cooldown nextCooldown = abilityData.nextAbilityNode.getTreeCooldown().orElse(null);
-      renderAbilityCooldowns(matrix, spriteTrayCooldown, selectedCooldown, previousCooldown, nextCooldown);
+      renderAbilityCooldowns(matrix, spriteTrayCooldown, cooldownTimesToRender, selectedCooldown, previousCooldown, nextCooldown);
       renderAbilityIcons(matrix, spriteAbilityFocused, spriteAbilityPrevious, spriteAbilityNext, selectedCooldown, previousCooldown, nextCooldown);
       renderAbilitySelection(matrix, spriteTraySelected, spriteTraySelectedActive, spriteTraySelectedCooldown, selectedCooldown);
    }
 
    private static void renderAbilitiesOnCooldown(
-      Matrix4f matrix, Player player, List<TieredSkill> abilities, ITextureAtlas atlas, TextureAtlasSprite spriteTrayCooldown
+      Matrix4f matrix,
+      Player player,
+      List<TieredSkill> abilities,
+      ITextureAtlas atlas,
+      TextureAtlasSprite spriteTrayCooldown,
+      List<AbilitiesOverlay.RemainingCooldownPositions> cooldownTimesToRender
    ) {
       IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
       if (options.getCooldownGuiOption() != CooldownGuiOption.OFF) {
@@ -215,6 +249,7 @@ public class AbilitiesOverlay implements IIngameOverlay {
                   BUFFER.add(matrix, 3 + x, -20 + y + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
                   RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
                   renderAbilityIcon(matrix, spriteAbilityFocused, cooldown.getRemainingTicks() > 0, 3 + x, -20 + y, 2);
+                  cooldownTimesToRender.add(new AbilitiesOverlay.RemainingCooldownPositions(cooldown.getRemainingTicks(), 3 + x, -20 + y));
                   x += 18;
                   if (!centered) {
                      if (++count % 4 == 0) {
@@ -281,21 +316,29 @@ public class AbilitiesOverlay implements IIngameOverlay {
    }
 
    private static void renderAbilityCooldowns(
-      Matrix4f matrix, TextureAtlasSprite spriteTrayCooldown, Cooldown selectedCooldown, Cooldown previousCooldown, Cooldown nextCooldown
+      Matrix4f matrix,
+      TextureAtlasSprite spriteTrayCooldown,
+      List<AbilitiesOverlay.RemainingCooldownPositions> cooldownTimesToRender,
+      Cooldown selectedCooldown,
+      Cooldown previousCooldown,
+      Cooldown nextCooldown
    ) {
       if (selectedCooldown != null && selectedCooldown.getRemainingTicks() > 0) {
          int cooldownHeight = getCooldownHeight(selectedCooldown.getRemainingTicks(), selectedCooldown.getMaxTicks());
          BUFFER.add(matrix, 23, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
+         cooldownTimesToRender.add(new AbilitiesOverlay.RemainingCooldownPositions(selectedCooldown.getRemainingTicks(), 23, 17));
       }
 
       if (previousCooldown != null && previousCooldown.getRemainingTicks() > 0) {
          int cooldownHeight = getCooldownHeight(previousCooldown.getRemainingTicks(), previousCooldown.getMaxTicks());
          BUFFER.add(matrix, 43, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
+         cooldownTimesToRender.add(new AbilitiesOverlay.RemainingCooldownPositions(previousCooldown.getRemainingTicks(), 43, 17));
       }
 
       if (nextCooldown != null && nextCooldown.getRemainingTicks() > 0) {
          int cooldownHeight = getCooldownHeight(nextCooldown.getRemainingTicks(), nextCooldown.getMaxTicks());
          BUFFER.add(matrix, 3, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
+         cooldownTimesToRender.add(new AbilitiesOverlay.RemainingCooldownPositions(nextCooldown.getRemainingTicks(), 3, 17));
       }
    }
 
@@ -445,6 +488,9 @@ public class AbilitiesOverlay implements IIngameOverlay {
             }
          }
       }
+   }
+
+   private record RemainingCooldownPositions(int remainingTicks, int abilityIconX, int abilityIconY) {
    }
 
    private static enum TextRenderMode {

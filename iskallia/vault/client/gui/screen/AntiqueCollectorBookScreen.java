@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import com.mojang.datafixers.util.Either;
 import iskallia.vault.antique.Antique;
 import iskallia.vault.client.gui.framework.ScreenRenderers;
 import iskallia.vault.client.gui.framework.ScreenTextures;
@@ -15,16 +16,24 @@ import iskallia.vault.client.gui.framework.element.TextureAtlasElement;
 import iskallia.vault.client.gui.framework.element.spi.AbstractSpatialElement;
 import iskallia.vault.client.gui.framework.element.spi.IRenderedElement;
 import iskallia.vault.client.gui.framework.render.ScreenTooltipRenderer;
+import iskallia.vault.client.gui.framework.render.Tooltips;
 import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
+import iskallia.vault.client.gui.framework.render.spi.ITooltipRenderer;
 import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
+import iskallia.vault.config.AntiquesConfig;
 import iskallia.vault.container.inventory.AntiqueCollectorBookContainer;
 import iskallia.vault.init.ModDynamicModels;
-import iskallia.vault.world.data.PlayerStoredAntiquesData;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.AntiqueItem;
+import iskallia.vault.item.AntiqueStampCollectorBook;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -36,8 +45,15 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag.Default;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderTooltipEvent.GatherComponents;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import org.jetbrains.annotations.NotNull;
 
+@EventBusSubscriber({Dist.CLIENT})
 public class AntiqueCollectorBookScreen extends AbstractElementContainerScreen<AntiqueCollectorBookContainer> {
    private final ButtonElement<?> btnPrev;
    private final ButtonElement<?> btnNext;
@@ -73,7 +89,9 @@ public class AntiqueCollectorBookScreen extends AbstractElementContainerScreen<A
          .layout((screen, gui, parent, world) -> world.translateXY(gui));
       this.addElement(
          new AntiqueCollectorBookScreen.AntiqueTitleElement(
-               ((AntiqueCollectorBookContainer)this.getMenu()).getStoredAntiques(), ((AntiqueCollectorBookContainer)this.getMenu()).getAntiqueSlots()
+               this.getTooltipRenderer(),
+               ((AntiqueCollectorBookContainer)this.getMenu()).getStoredAntiquesSupplier(),
+               ((AntiqueCollectorBookContainer)this.getMenu()).getAntiqueSlots()
             )
             .layout((screen, gui, parent, world) -> world.positionXY(gui))
       );
@@ -100,16 +118,80 @@ public class AntiqueCollectorBookScreen extends AbstractElementContainerScreen<A
       }
    }
 
+   @SubscribeEvent
+   public static void gatherAntiqueTooltip(GatherComponents event) {
+      ItemStack stack = event.getItemStack();
+      if (stack.is(ModItems.ANTIQUE)) {
+         Antique antique = AntiqueItem.getAntique(stack);
+         if (antique != null) {
+            AntiquesConfig.Entry cfg = antique.getConfig();
+            if (cfg != null) {
+               if (Minecraft.getInstance().screen instanceof AntiqueCollectorBookScreen bookScreen) {
+                  if (bookScreen.hoveredSlot instanceof AntiqueCollectorBookContainer.AntiqueCollectorBookSlot) {
+                     AntiqueStampCollectorBook.StoredAntiques antiques = ((AntiqueCollectorBookContainer)bookScreen.getMenu())
+                        .getStoredAntiquesSupplier()
+                        .get();
+                     List<Component> discoveryClues = getAntiqueTooltipComponents(antiques, antique);
+                     if (!discoveryClues.isEmpty()) {
+                        event.getTooltipElements().add(Either.left(TextComponent.EMPTY));
+                        discoveryClues.forEach(element -> event.getTooltipElements().add(Either.left(element)));
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   public static List<Component> getAntiqueTooltipComponents(AntiqueStampCollectorBook.StoredAntiques antiques, Antique antique) {
+      AntiquesConfig.Entry cfg = antique.getConfig();
+      if (cfg == null) {
+         return Collections.emptyList();
+      } else {
+         AntiqueStampCollectorBook.StoredAntiqueInfo info = antiques.getInfo(antique);
+         if (!info.hasDiscoveredAntique()) {
+            return Collections.emptyList();
+         } else {
+            List<MutableComponent> displayLines = cfg.getCondition().collectConditionDisplay();
+            if (displayLines.isEmpty()) {
+               return Collections.emptyList();
+            } else {
+               List<Component> tooltip = new ArrayList<>();
+               Style style = Style.EMPTY.withColor(ChatFormatting.GRAY);
+               tooltip.add(new TextComponent("Discovery Clues:").withStyle(style));
+               int lines = info.getProgressRevealCount();
+
+               for (int displayIndex = 0; displayIndex < displayLines.size(); displayIndex++) {
+                  MutableComponent display = displayLines.get(displayIndex);
+                  if (displayIndex >= lines) {
+                     display = new TextComponent("- ").setStyle(style).append(new TextComponent("Unknown").setStyle(style.withObfuscated(true)));
+                  } else {
+                     display = new TextComponent("- ").setStyle(style).append(display.copy().setStyle(style));
+                  }
+
+                  tooltip.add(display);
+               }
+
+               return tooltip;
+            }
+         }
+      }
+   }
+
    public static class AntiqueTitleElement extends AbstractSpatialElement<AntiqueCollectorBookScreen.AntiqueTitleElement> implements IRenderedElement {
-      private final PlayerStoredAntiquesData.StoredAntiques storedAntiques;
+      private final ITooltipRenderer tooltipRenderer;
+      private final Supplier<AntiqueStampCollectorBook.StoredAntiques> storedAntiquesSupplier;
       private final List<AntiqueCollectorBookContainer.AntiqueCollectorBookSlot> antiqueSlots;
       private boolean visible = true;
 
       public AntiqueTitleElement(
-         PlayerStoredAntiquesData.StoredAntiques storedAntiques, List<AntiqueCollectorBookContainer.AntiqueCollectorBookSlot> antiqueSlots
+         ITooltipRenderer tooltipRenderer,
+         Supplier<AntiqueStampCollectorBook.StoredAntiques> storedAntiquesSupplier,
+         List<AntiqueCollectorBookContainer.AntiqueCollectorBookSlot> antiqueSlots
       ) {
          super(Spatials.zero());
-         this.storedAntiques = storedAntiques;
+         this.tooltipRenderer = tooltipRenderer;
+         this.storedAntiquesSupplier = storedAntiquesSupplier;
          this.antiqueSlots = antiqueSlots;
       }
 
@@ -131,12 +213,13 @@ public class AntiqueCollectorBookScreen extends AbstractElementContainerScreen<A
          int textWidth = 30;
          int xOffset = (textWidth - 16) / 2;
          int yOffset = 4;
+         AntiqueStampCollectorBook.StoredAntiques antiques = this.storedAntiquesSupplier.get();
 
          for (AntiqueCollectorBookContainer.AntiqueCollectorBookSlot slot : this.antiqueSlots) {
             if (slot.isActive()) {
-               boolean hasFoundAntique = this.storedAntiques.containsKey(slot.getAntique().getRegistryName());
+               AntiqueStampCollectorBook.StoredAntiqueInfo antiqueInfo = antiques.getInfo(slot.getAntique());
                ResourceLocation antiqueTexture = ModDynamicModels.Antiques.getItemTextureId(slot.getAntique());
-               if (!slot.hasItem() && hasFoundAntique) {
+               if (!slot.hasItem() && antiqueInfo.hasDiscoveredAntique()) {
                   TextureAtlasSprite tas = (TextureAtlasSprite)Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(antiqueTexture);
                   mgr.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
                   RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
@@ -152,6 +235,15 @@ public class AntiqueCollectorBookScreen extends AbstractElementContainerScreen<A
                         .tex(tas.getU0() + tasPxDim * 3.0F, tas.getV0() + tasPxDim * 3.0F, tasPxDim * 10.0F, tasPxDim * 10.0F)
                         .drawGrayscale(0.9F, 0.7F)
                   );
+                  if (slot.x + this.worldSpatial.x() <= mouseX
+                     && slot.x + this.worldSpatial.x() + 16 >= mouseX
+                     && slot.y + this.worldSpatial.y() <= mouseY
+                     && slot.y + this.worldSpatial.y() + 16 >= mouseY) {
+                     List<Component> discoveryClues = AntiqueCollectorBookScreen.getAntiqueTooltipComponents(antiques, slot.getAntique());
+                     if (!discoveryClues.isEmpty()) {
+                        Tooltips.multi(() -> discoveryClues).onHoverTooltip(this.tooltipRenderer, poseStack, mouseX, mouseY, Default.NORMAL);
+                     }
+                  }
                }
 
                Component text = Optional.of(slot.getAntique())
@@ -159,14 +251,14 @@ public class AntiqueCollectorBookScreen extends AbstractElementContainerScreen<A
                   .map(cfg -> cfg.getInfo().getName())
                   .<Component>map(TextComponent::new)
                   .orElse(new TextComponent(slot.getAntique().getRegistryName().getPath()));
-               Component var19 = new TextComponent("").append(text).withStyle(ChatFormatting.GRAY);
-               int lines = textStyle.calculateLines(var19, textWidth * 2);
+               Component var21 = new TextComponent("").append(text).withStyle(ChatFormatting.GRAY);
+               int lines = textStyle.calculateLines(var21, textWidth * 2);
                poseStack.pushPose();
                poseStack.translate(
                   slot.x + this.worldSpatial.x() - xOffset, slot.y + this.worldSpatial.y() - yOffset - lines * fontHeight, this.worldSpatial.z() + 1
                );
                poseStack.scale(0.5F, 0.5F, 0.5F);
-               textStyle.textBorder().render(renderer, poseStack, var19, textStyle.textWrap(), textStyle.textAlign(), 0, 0, 0, textWidth * 2);
+               textStyle.textBorder().render(renderer, poseStack, var21, textStyle.textWrap(), textStyle.textAlign(), 0, 0, 0, textWidth * 2);
                poseStack.popPose();
             }
          }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -65,7 +66,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
    private int vaultLevel;
    private int playerLevel;
    private SpiritExtractorTileEntity.RecoveryCost recoveryCost = new SpiritExtractorTileEntity.RecoveryCost();
-   private final OverSizedInventory paymentInventory = new OverSizedInventory(1, this::setChanged, player -> true) {
+   private final OverSizedInventory paymentInventory = new OverSizedInventory(1, stacks -> this.setChanged(), player -> true) {
       public boolean canPlaceItem(int pIndex, ItemStack pStack) {
          return SpiritExtractorTileEntity.this.getRecoveryCost().getTotalCost().getItem() == pStack.getItem();
       }

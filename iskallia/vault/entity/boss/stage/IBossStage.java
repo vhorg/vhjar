@@ -1,7 +1,7 @@
 package iskallia.vault.entity.boss.stage;
 
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
@@ -41,11 +41,11 @@ public interface IBossStage {
 
    Tuple<Integer, Integer> getBossBarTextureVs();
 
-   default WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   default WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return WeightedList.empty();
    }
 
-   default WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+   default WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks() {
       return WeightedList.empty();
    }
 

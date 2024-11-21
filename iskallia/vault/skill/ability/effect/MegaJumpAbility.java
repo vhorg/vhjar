@@ -3,10 +3,6 @@ package iskallia.vault.skill.ability.effect;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractMegaJumpAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
@@ -37,14 +33,7 @@ public class MegaJumpAbility extends AbstractMegaJumpAbility {
 
    public int getHeight(Player player) {
       int realHeight = this.getUnmodifiedHeight();
-
-      for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
-         player, MegaJumpVelocityModification.class
-      )) {
-         realHeight = mod.modification().adjustHeightConfig(mod.config(), realHeight);
-      }
-
-      return Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, realHeight));
+      return AreaOfEffectHelper.adjustAreaOfEffectRound(player, this, realHeight);
    }
 
    @Override

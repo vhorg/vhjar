@@ -6,11 +6,11 @@ import net.minecraft.Util;
 public enum ToolMaterial {
    CHROMATIC_IRON_INGOT("chromatic_iron_ingot", 0, 100, 9.0F, 4096, 1),
    CHROMATIC_STEEL_INGOT("chromatic_steel_ingot", 20, 150, 9.0F, 4096, 2),
-   VAULTERITE_INGOT("vaulterite_ingot", 35, 200, 9.0F, 4096, 3),
-   VAULT_ALLOY("vault_alloy", 50, 250, 9.0F, 4096, 4),
-   BLACK_CHROMATIC_STEEL_INGOT("black_chromatic_steel_ingot", 65, 300, 9.0F, 4096, 5),
-   ECHOING_INGOT("echoing_ingot", 80, 400, 9.0F, 4096, 6),
-   OMEGA_POG("omega_pog", 90, 600, 9.0F, 4096, 7);
+   VAULTERITE_INGOT("vaulterite_ingot", 50, 200, 9.0F, 4096, 3),
+   VAULT_ALLOY("vault_alloy", 50, 200, 9.0F, 4096, 4),
+   BLACK_CHROMATIC_STEEL_INGOT("black_chromatic_steel_ingot", 65, 250, 9.0F, 4096, 5),
+   ECHOING_INGOT("echoing_ingot", 80, 350, 9.0F, 4096, 5),
+   OMEGA_POG("omega_pog", 90, 500, 9.0F, 4096, 7);
 
    private final String id;
    private final String description;

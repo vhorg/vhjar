@@ -2,10 +2,10 @@ package iskallia.vault.gear.crafting.recipe;
 
 import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
-import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.InfusedCatalystItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,12 +31,11 @@ public class CatalystForgeRecipe extends VaultForgeRecipe {
    @Override
    public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       ItemStack stack = super.createOutput(consumed, crafter, vaultLevel);
-      if (stack.getItem() == ModItems.VAULT_CATALYST_INFUSED) {
+      if (stack.is(ModItems.VAULT_CATALYST_INFUSED)) {
          stack.removeTagKey("display");
          stack.removeTagKey("size");
          stack.removeTagKey("modifiers");
-         stack.getOrCreateTag().putInt("level", vaultLevel);
-         ModItems.VAULT_CATALYST_INFUSED.initialize(stack, JavaRandom.ofNanoTime());
+         stack = LootInitialization.initializeVaultLoot(stack, vaultLevel);
       }
 
       return stack;

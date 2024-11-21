@@ -3,10 +3,6 @@ package iskallia.vault.skill.ability.effect;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.BlockHelper;
@@ -44,33 +40,21 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
 
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
-      return context.getSource()
-         .as(ServerPlayer.class)
-         .map(
-            player -> {
-               int height = this.getHeight(player);
-
-               for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
-                  player, MegaJumpVelocityModification.class
-               )) {
-                  height = mod.modification().adjustHeightConfig(mod.config(), height);
-               }
-
-               if (height == 0) {
-                  this.breakBlocks(player.getLevel(), height, player);
-                  return Ability.ActionResult.successCooldownImmediate();
-               } else {
-                  double magnitude = height * 0.15;
-                  double addY = -Math.min(0.0, player.getDeltaMovement().y());
-                  player.push(0.0, -(addY + magnitude), 0.0);
-                  player.startFallFlying();
-                  player.hurtMarked = true;
-                  this.breakBlocks(player.getLevel(), height, player);
-                  return Ability.ActionResult.successCooldownImmediate();
-               }
-            }
-         )
-         .orElse(Ability.ActionResult.fail());
+      return context.getSource().as(ServerPlayer.class).map(player -> {
+         int height = this.getHeight(player);
+         if (height == 0) {
+            this.breakBlocks(player.getLevel(), height, player);
+            return Ability.ActionResult.successCooldownImmediate();
+         } else {
+            double magnitude = height * 0.15;
+            double addY = -Math.min(0.0, player.getDeltaMovement().y());
+            player.push(0.0, -(addY + magnitude), 0.0);
+            player.startFallFlying();
+            player.hurtMarked = true;
+            this.breakBlocks(player.getLevel(), height, player);
+            return Ability.ActionResult.successCooldownImmediate();
+         }
+      }).orElse(Ability.ActionResult.fail());
    }
 
    private void breakBlocks(ServerLevel world, int height, ServerPlayer player) {

@@ -67,11 +67,6 @@ public class DashWarpAbility extends InstantManaAbility {
    }
 
    @Override
-   public String getAbilityGroupName() {
-      return "Dash";
-   }
-
-   @Override
    protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(this::doAction).orElse(Ability.ActionResult.fail());
    }

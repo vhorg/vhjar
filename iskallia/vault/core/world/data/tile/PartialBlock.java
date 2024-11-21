@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
 import java.util.Optional;
@@ -133,6 +134,18 @@ public class PartialBlock implements TilePlacement<PartialBlock> {
    }
 
    public static class Adapter implements ISimpleAdapter<PartialBlock, Tag, JsonElement> {
+      public void writeBits(PartialBlock value, BitBuffer buffer) {
+         buffer.writeBoolean(value == null);
+         if (value != null) {
+            Adapters.IDENTIFIER.asNullable().writeBits(value.id, buffer);
+         }
+      }
+
+      @Override
+      public Optional<PartialBlock> readBits(BitBuffer buffer) {
+         return buffer.readBoolean() ? Optional.empty() : Optional.of(new PartialBlock(Adapters.IDENTIFIER.asNullable().readBits(buffer).orElse(null)));
+      }
+
       public Optional<Tag> writeNbt(@Nullable PartialBlock value) {
          return value == null ? Optional.empty() : Adapters.IDENTIFIER.writeNbt(value.id);
       }

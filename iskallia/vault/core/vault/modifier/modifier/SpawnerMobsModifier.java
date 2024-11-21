@@ -21,7 +21,14 @@ public class SpawnerMobsModifier extends VaultModifier<SpawnerMobsModifier.Prope
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.SURFACE_GENERATION.in(world).register(context.getUUID(), data -> data.getChunk().getBlockEntitiesPos().forEach(pos -> {
          if (ToolItem.SPAWNER_ID.equals(data.getGenRegion().getBlockState(pos).getBlock().getRegistryName())) {
-            CompoundTag nbt = data.getChunk().getBlockEntityNbt(pos);
+            BlockEntity entity = data.getChunk().getBlockEntity(pos);
+            CompoundTag nbt;
+            if (entity != null) {
+               nbt = entity.saveWithFullMetadata();
+            } else {
+               nbt = data.getChunk().getBlockEntityNbt(pos);
+            }
+
             if (nbt == null) {
                nbt = new CompoundTag();
                nbt.putInt("x", pos.getX());
@@ -30,19 +37,22 @@ public class SpawnerMobsModifier extends VaultModifier<SpawnerMobsModifier.Prope
                data.getChunk().setBlockEntityNbt(nbt);
             }
 
-            CompoundTag spawner = nbt.getCompound("Spawner");
-            CompoundTag manager = spawner.getCompound("Manager");
+            CompoundTag manager = nbt.getCompound("Manager");
             CompoundTag modifiers = manager.getCompound("AttemptModifiers");
             modifiers.putDouble(context.getUUID().toString(), this.properties.getIncrease());
             manager.put("AttemptModifiers", modifiers);
-            spawner.put("Manager", manager);
-            nbt.put("Spawner", spawner);
+            nbt.put("Manager", manager);
             BlockEntity existing = data.getGenRegion().getBlockEntity(pos);
             if (existing != null) {
                existing.load(nbt);
             }
          }
-      }));
+      }), -100);
+   }
+
+   @Override
+   public void releaseServer(ModifierContext context) {
+      CommonEvents.SURFACE_GENERATION.release(context.getUUID());
    }
 
    public static class Properties {

@@ -1,7 +1,7 @@
 package iskallia.vault.entity.boss.stage;
 
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -10,11 +10,15 @@ public class MeleeStageAttributes {
    private final int health;
    private final int baseAttackDamage;
    private final double baseSpeed;
-   private final WeightedList<MeleeAttacks.AttackData> meleeAttacks;
-   private final WeightedList<MeleeAttacks.AttackData> rageAttacks;
+   private final WeightedList<VaultBossBaseEntity.AttackData> meleeAttacks;
+   private final WeightedList<VaultBossBaseEntity.AttackData> rageAttacks;
 
    public MeleeStageAttributes(
-      int health, int baseAttackDamage, double baseSpeed, WeightedList<MeleeAttacks.AttackData> meleeAttacks, WeightedList<MeleeAttacks.AttackData> rageAttacks
+      int health,
+      int baseAttackDamage,
+      double baseSpeed,
+      WeightedList<VaultBossBaseEntity.AttackData> meleeAttacks,
+      WeightedList<VaultBossBaseEntity.AttackData> rageAttacks
    ) {
       this.health = health;
       this.baseAttackDamage = baseAttackDamage;
@@ -35,11 +39,11 @@ public class MeleeStageAttributes {
       return this.baseSpeed;
    }
 
-   public WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return this.meleeAttacks;
    }
 
-   public WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+   public WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks() {
       return this.rageAttacks;
    }
 
@@ -53,12 +57,12 @@ public class MeleeStageAttributes {
       );
    }
 
-   protected static WeightedList<MeleeAttacks.AttackData> deserializeAttacks(ListTag tag) {
-      WeightedList<MeleeAttacks.AttackData> weightedList = new WeightedList<>();
+   protected static WeightedList<VaultBossBaseEntity.AttackData> deserializeAttacks(ListTag tag) {
+      WeightedList<VaultBossBaseEntity.AttackData> weightedList = new WeightedList<>();
 
       for (Tag element : tag) {
          CompoundTag compoundTag = (CompoundTag)element;
-         weightedList.add(MeleeAttacks.AttackData.from(compoundTag), compoundTag.getDouble("Weight"));
+         weightedList.add(VaultBossBaseEntity.AttackData.from(compoundTag), compoundTag.getDouble("Weight"));
       }
 
       return weightedList;
@@ -74,7 +78,7 @@ public class MeleeStageAttributes {
       return tag;
    }
 
-   private ListTag serializeAttacks(WeightedList<MeleeAttacks.AttackData> attacks) {
+   private ListTag serializeAttacks(WeightedList<VaultBossBaseEntity.AttackData> attacks) {
       ListTag tag = new ListTag();
       attacks.forEach((attackData, weight) -> {
          CompoundTag compoundTag = new CompoundTag();

@@ -1,8 +1,10 @@
 package iskallia.vault.skill.ability.component;
 
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.mana.Mana;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.util.calc.AbilityPowerHelper;
+import iskallia.vault.util.calc.ThornsHelper;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
@@ -20,6 +22,9 @@ public final class AbilityLabelFactory {
    public static final String LEVEL = "level";
    public static final String DISTANCE = "distance";
    public static final String DAMAGE = "damage";
+   public static final String MANA_DAMAGE = "manaDamage";
+   public static final String ADDITIONAL_THORNS_DAMAGE = "additionalThornsDamage";
+   public static final String THORNS_DAMAGE = "thornsDamage";
    public static final String ABILITY_POWER = "ability_power";
    public static final String DURATION = "duration";
    public static final String DELAY = "delay";
@@ -75,6 +80,7 @@ public final class AbilityLabelFactory {
    public static final String LUCKY_HIT_PER_STACK = "luckyHitPerStack";
    public static final String MAX_GLACIAL_PRISON = "maxGlacialPrison";
    public static final String GLACIAL_CHANCE = "glacialChance";
+   public static final String BARRIER_POINTS = "healthPoints";
    private static final Map<String, AbilityLabelFactory.IAbilityComponentFactory> FACTORY_MAP = new HashMap<String, AbilityLabelFactory.IAbilityComponentFactory>() {
       {
          this.put("cooldown", context -> AbilityLabelFactory.label("\n Cooldown: ", AbilityLabelFactory.binding(context.config(), "cooldown"), "cooldown"));
@@ -96,7 +102,7 @@ public final class AbilityLabelFactory {
          this.put("distance", context -> AbilityLabelFactory.label("\n Distance: ", AbilityLabelFactory.binding(context.config(), "distance"), "distance"));
          this.put(
             "damage",
-            context -> AbilityLabelFactory.labelWithAbilityValue(
+            context -> AbilityLabelFactory.labelWithDamageValue(
                "\n Damage: ",
                AbilityLabelFactory.binding(context.config(), "damage"),
                "damage",
@@ -104,8 +110,32 @@ public final class AbilityLabelFactory {
             )
          );
          this.put(
+            "manaDamage",
+            context -> AbilityLabelFactory.labelWithDamageValue(
+               "\n Damage: ", AbilityLabelFactory.binding(context.config(), "manaDamage"), "damage", player != null ? Mana.get(player) : 0.0F
+            )
+         );
+         this.put(
+            "additionalThornsDamage",
+            context -> AbilityLabelFactory.labelWithAdditionalThornsDamageValue(
+               "\n Damage: ",
+               AbilityLabelFactory.binding(context.config(), "additional_thorns_damage"),
+               "damage",
+               player != null ? ThornsHelper.getAdditionalThornsFlatDamage(player) : 0.0F
+            )
+         );
+         this.put(
+            "thornsDamage",
+            context -> AbilityLabelFactory.labelWithThornsDamageValue(
+               "\n Damage: ",
+               AbilityLabelFactory.binding(context.config(), "thornsDamage"),
+               "damage",
+               player != null ? ThornsHelper.getAdditionalThornsFlatDamage(player) : 0.0F
+            )
+         );
+         this.put(
             "ability_power",
-            context -> AbilityLabelFactory.labelWithAbilityValue(
+            context -> AbilityLabelFactory.labelWithDamageValue(
                "\n Ability Power: ",
                AbilityLabelFactory.binding(context.config(), "ability_power"),
                "ability_power",
@@ -267,6 +297,10 @@ public final class AbilityLabelFactory {
             "glacialChance",
             context -> AbilityLabelFactory.label("\n Glacial Chance: ", AbilityLabelFactory.binding(context.config(), "glacialChance"), "glacialChance")
          );
+         this.put(
+            "healthPoints",
+            context -> AbilityLabelFactory.label("\n Barrier Points: ", AbilityLabelFactory.binding(context.config(), "barrierPoints"), "healthPoints")
+         );
       }
    };
 
@@ -283,11 +317,25 @@ public final class AbilityLabelFactory {
       return new TextComponent(label).withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("text"))).append(text(value, colorKey));
    }
 
-   private static MutableComponent labelWithAbilityValue(String label, String value, String colorKey, float abilityValue) {
+   private static MutableComponent labelWithDamageValue(String label, String value, String colorKey, float damageValue) {
       float result = Float.parseFloat(value.replace("%", "")) / 100.0F;
       return new TextComponent(label)
          .withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("text")))
-         .append(text(value, colorKey).append(text(" (" + String.format("%.0f", result * abilityValue) + ")", colorKey)));
+         .append(text(value, colorKey).append(text(" (" + String.format("%.0f", result * damageValue) + ")", colorKey)));
+   }
+
+   private static MutableComponent labelWithAdditionalThornsDamageValue(String label, String value, String colorKey, float damageValue) {
+      float result = Float.parseFloat(value.replace("%", "")) / 100.0F;
+      return new TextComponent(label)
+         .withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("text")))
+         .append(text(value, colorKey).append(text(" (" + String.format("%.0f", damageValue + result * damageValue) + ")", colorKey)));
+   }
+
+   private static MutableComponent labelWithThornsDamageValue(String label, String value, String colorKey, float damageValue) {
+      float result = Float.parseFloat(value.replace("%", "")) / 100.0F;
+      return new TextComponent(label)
+         .withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("text")))
+         .append(text(value, colorKey).append(text(" (" + String.format("%.0f", result * damageValue) + ")", colorKey)));
    }
 
    private static MutableComponent text(String text, String colorKey) {

@@ -1,8 +1,8 @@
 package iskallia.vault.core.world.generator;
 
 import iskallia.vault.core.util.RegionPos;
-import iskallia.vault.core.world.storage.IntLatch;
 import iskallia.vault.core.world.template.configured.ConfiguredTemplate;
+import iskallia.vault.core.world.threading.IntLatch;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;

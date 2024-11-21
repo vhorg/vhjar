@@ -7,9 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.DescriptionData;
-import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.quest.QuestState;
 import iskallia.vault.quest.type.AnvilQuest;
 import iskallia.vault.quest.type.BlockInteractionQuest;
@@ -25,6 +22,7 @@ import iskallia.vault.quest.type.MiningQuest;
 import iskallia.vault.quest.type.ModifyGearQuest;
 import iskallia.vault.quest.type.SurviveQuest;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.LootInitialization;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.QuestStatesData;
 import java.lang.reflect.Type;
@@ -334,12 +332,7 @@ public abstract class Quest implements Comparable<Quest> {
          PlayerVaultStatsData data = PlayerVaultStatsData.get(player.getLevel());
          int vaultLevel = data.getVaultStats(player).getVaultLevel();
          this.getItems().forEach(stack -> {
-            if (stack.getItem() instanceof VaultGearItem gearItem) {
-               gearItem.setItemLevel(stack, vaultLevel);
-            }
-
-            stack = DataTransferItem.doConvertStack(stack);
-            DataInitializationItem.doInitialize(stack);
+            stack = LootInitialization.initializeVaultLoot(stack, vaultLevel);
             EntityHelper.giveItem(player, stack);
          });
          data.addVaultExp(player, this.vaultExp);

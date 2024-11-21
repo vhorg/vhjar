@@ -76,6 +76,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
       Container inventoryContainer = this.tileEntity.getInventory();
       this.addSlot(
          (new OverSizedTabSlot(inventoryContainer, 0, 43, 64) {
+               @Override
                public void setChanged() {
                   ToolViseContainerMenu.this.slotsChanged(this.container);
                   super.setChanged();
@@ -86,6 +87,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
       );
       this.addSlot(
          (new OverSizedTabSlot(inventoryContainer, 1, 66, 64) {
+               @Override
                public void setChanged() {
                   ToolViseContainerMenu.this.slotsChanged(this.container);
                   super.setChanged();
@@ -96,6 +98,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
       );
       this.addSlot(
          (new OverSizedTabSlot(inventoryContainer, 2, 43, 86) {
+               @Override
                public void setChanged() {
                   ToolViseContainerMenu.this.tileEntity.setChanged();
                   ToolViseContainerMenu.this.slotsChanged(this.container);
@@ -107,6 +110,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
       );
       this.addSlot(
          (new OverSizedTabSlot(inventoryContainer, 3, 66, 86) {
+               @Override
                public void setChanged() {
                   ToolViseContainerMenu.this.slotsChanged(this.container);
                   super.setChanged();
@@ -117,6 +121,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
       );
       this.addSlot(
          (new OverSizedTabSlot(inventoryContainer, 4, 43, 108) {
+               @Override
                public void setChanged() {
                   ToolViseContainerMenu.this.slotsChanged(this.container);
                   super.setChanged();
@@ -127,6 +132,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
       );
       this.addSlot(
          (new OverSizedTabSlot(inventoryContainer, 5, 66, 108) {
+               @Override
                public void setChanged() {
                   ToolViseContainerMenu.this.slotsChanged(this.container);
                   super.setChanged();

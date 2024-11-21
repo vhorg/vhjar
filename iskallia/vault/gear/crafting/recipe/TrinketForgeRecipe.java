@@ -49,7 +49,7 @@ public class TrinketForgeRecipe extends VaultForgeRecipe {
       ItemStack trinket = TrinketItem.createRandomTrinket(this.effect);
       TrinketItem.setUses(trinket, this.effect.getTrinketConfig().getRandomCraftedUses());
       AttributeGearData data = AttributeGearData.read(trinket);
-      data.updateAttribute(ModGearAttributes.CRAFTED_BY, crafter.getName().getContents());
+      data.createOrReplaceAttributeValue(ModGearAttributes.CRAFTED_BY, crafter.getName().getContents());
       data.write(trinket);
       return trinket;
    }

@@ -2,6 +2,8 @@ package iskallia.vault.task.counter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
@@ -38,6 +40,10 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
       this.target = (T)target;
    }
 
+   public TaskCounterPredicate getPredicate() {
+      return this.getConfig().getPredicate();
+   }
+
    public T getBaseTarget() {
       return this.baseTarget;
    }
@@ -49,7 +55,7 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
 
    @Override
    public boolean isCompleted() {
-      return super.isCompleted() && this.isPopulated() && this.getGroup().getOrdering().compare(this.current, this.target) >= 0;
+      return super.isCompleted() && this.isPopulated() && this.getPredicate().test(this.current, this.target, this.getGroup());
    }
 
    @Override
@@ -81,6 +87,21 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
       super.onReset(context);
       this.current = this.getGroup().getIdentity();
       this.target = this.baseTarget;
+   }
+
+   @Override
+   public void onRepeat(TaskContext context) {
+      super.onRepeat(context);
+      if (this.getPredicate() != TaskCounterPredicate.GREATER_THAN && this.getPredicate() != TaskCounterPredicate.GREATER_OR_EQUAL_TO) {
+         this.current = this.getGroup().getIdentity();
+      } else {
+         T overflow = this.getGroup().getOperator().apply(this.current, this.getGroup().getInverse().apply(this.target));
+         if (this.getGroup().getOrdering().compare(overflow, this.getGroup().getIdentity()) < 0) {
+            this.current = this.getGroup().getIdentity();
+         } else {
+            this.current = overflow;
+         }
+      }
    }
 
    @Override
@@ -152,14 +173,27 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
    }
 
    public static class Config<T, G> extends TaskCounter.Config {
+      public static EnumAdapter<TaskCounterPredicate> PREDICATE = Adapters.ofEnum(TaskCounterPredicate.class, EnumAdapter.Mode.NAME);
       private G target;
+      private TaskCounterPredicate predicate;
       private final ISimpleAdapter<G, ? super Tag, ? super JsonElement> adapter;
       private final BiFunction<G, RandomSource, T> generator;
 
-      public Config(G target, ISimpleAdapter<G, ? super Tag, ? super JsonElement> adapter, BiFunction<G, RandomSource, T> generator) {
+      public Config(
+         G target, TaskCounterPredicate predicate, ISimpleAdapter<G, ? super Tag, ? super JsonElement> adapter, BiFunction<G, RandomSource, T> generator
+      ) {
          this.target = target;
+         this.predicate = predicate;
          this.adapter = adapter;
          this.generator = generator;
+      }
+
+      public G getTarget() {
+         return this.target;
+      }
+
+      public TaskCounterPredicate getPredicate() {
+         return this.predicate;
       }
 
       public T generateCount(RandomSource random) {
@@ -170,18 +204,21 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
       public void writeBits(BitBuffer buffer) {
          super.writeBits(buffer);
          this.adapter.writeBits(this.target, buffer);
+         PREDICATE.writeBits(this.predicate, buffer);
       }
 
       @Override
       public void readBits(BitBuffer buffer) {
          super.readBits(buffer);
          this.target = this.adapter.readBits(buffer).orElseThrow();
+         this.predicate = PREDICATE.readBits(buffer).orElseThrow();
       }
 
       @Override
       public Optional<CompoundTag> writeNbt() {
          return super.writeNbt().map(nbt -> {
             this.adapter.writeNbt(this.target).ifPresent(tag -> nbt.put("target", tag));
+            PREDICATE.writeNbt(this.predicate).ifPresent(tag -> nbt.put("predicate", tag));
             return (CompoundTag)nbt;
          });
       }
@@ -190,12 +227,14 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
       public void readNbt(CompoundTag nbt) {
          super.readNbt(nbt);
          this.target = this.adapter.readNbt(nbt.get("target")).orElseThrow();
+         this.predicate = PREDICATE.readNbt(nbt.get("predicate")).orElse(TaskCounterPredicate.GREATER_OR_EQUAL_TO);
       }
 
       @Override
       public Optional<JsonObject> writeJson() {
          return super.writeJson().map(json -> {
             this.adapter.writeJson(this.target).ifPresent(tag -> json.add("target", tag));
+            PREDICATE.writeJson(this.predicate).ifPresent(tag -> json.add("predicate", tag));
             return (JsonObject)json;
          });
       }
@@ -204,6 +243,7 @@ public class TargetTaskCounter<T, C extends TargetTaskCounter.Config<T, ?>> exte
       public void readJson(JsonObject json) {
          super.readJson(json);
          this.target = this.adapter.readJson(json.get("target")).orElseThrow();
+         this.predicate = PREDICATE.readJson(json.get("predicate")).orElse(TaskCounterPredicate.GREATER_OR_EQUAL_TO);
       }
    }
 }

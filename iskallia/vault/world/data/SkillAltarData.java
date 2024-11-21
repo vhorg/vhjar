@@ -357,8 +357,7 @@ public class SkillAltarData extends SavedData {
                abilities.specialize(specializationId, context);
             }
 
-            TalentTree talents = new TalentTree();
-            talents.mergeFrom(ModConfigs.TALENTS.get().orElse(null), context);
+            TalentTree talents = ModConfigs.TALENTS.get().map(Skill::copy).orElseGet(TalentTree::new);
 
             for (String talentString : talentsString) {
                String[] talentSplit = talentString.split(":");
@@ -380,7 +379,7 @@ public class SkillAltarData extends SavedData {
 
             SkillAltarData.SkillIcon icon;
             if (iconString.length == 2) {
-               icon = new SkillAltarData.SkillIcon(iconString[0], iconString[1].equals("1"));
+               icon = new SkillAltarData.SkillIcon(iconString[0], talents.getForId(iconString[1]).isPresent());
             } else {
                icon = new SkillAltarData.SkillIcon("", false);
             }

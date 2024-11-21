@@ -29,6 +29,8 @@ public enum PlayerStat {
    DURABILITY_DAMAGE,
    @SerializedName("durability_wear_reduction")
    DURABILITY_WEAR_REDUCTION,
+   @SerializedName("durability_wear_reduction_cap")
+   DURABILITY_WEAR_REDUCTION_CAP,
    @SerializedName("on_hit_chain")
    ON_HIT_CHAIN,
    @SerializedName("item_quantity")
@@ -58,5 +60,7 @@ public enum PlayerStat {
    @SerializedName("trap_disarm_chance")
    TRAP_DISARM_CHANCE,
    @SerializedName("stun_chance")
-   STUN_CHANCE;
+   STUN_CHANCE,
+   @SerializedName("ability_power_multiplier")
+   ABILITY_POWER_MULTIPLIER;
 }

@@ -1,0 +1,127 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.unknown",
+				"texture_width": 256,
+				"texture_height": 256,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "LeftElbow",
+					"pivot": [0, 1, 8],
+					"rotation": [-90, 0, -90],
+					"cubes": [
+						{
+							"origin": [-1, -12, 0],
+							"size": [8, 13, 16],
+							"uv": {
+								"north": {"uv": [73, 95], "uv_size": [-8, 13]},
+								"east": {"uv": [52, 51], "uv_size": [-16, 13]},
+								"south": {"uv": [82, 95], "uv_size": [-8, 13]},
+								"west": {"uv": [35, 51], "uv_size": [-16, 13]},
+								"up": {"uv": [86, 78], "uv_size": [-8, 16]},
+								"down": {"uv": [8, 95], "uv_size": [-8, -16]}
+							}
+						}
+					]
+				},
+				{
+					"name": "LeftFingerThumb",
+					"parent": "LeftElbow",
+					"pivot": [1, -5, 0],
+					"rotation": [-23.99057, -20.86302, 33.25642],
+					"cubes": [
+						{
+							"origin": [-2, -10, -2],
+							"size": [4, 6, 3],
+							"pivot": [0, -4, -0.5],
+							"rotation": [-4.9253, 20.74246, -26.52188],
+							"uv": {
+								"north": {"uv": [132, 55], "uv_size": [4, 6]},
+								"east": {"uv": [65, 82], "uv_size": [3, 6]},
+								"south": {"uv": [133, 24], "uv_size": [4, 6]},
+								"west": {"uv": [83, 95], "uv_size": [3, 6]},
+								"up": {"uv": [77, 50], "uv_size": [4, 3]},
+								"down": {"uv": [99, 93], "uv_size": [4, -3]}
+							}
+						}
+					]
+				},
+				{
+					"name": "LeftFingerMiddle",
+					"parent": "LeftElbow",
+					"pivot": [7, -12, 8],
+					"rotation": [0, 0, 22.5],
+					"cubes": [
+						{
+							"origin": [3, -18, 5.5],
+							"size": [4, 6, 5],
+							"inflate": 0.01,
+							"pivot": [7, -12, 8],
+							"rotation": [0, 0, 45],
+							"uv": {
+								"north": {"uv": [49, 133], "uv_size": [4, 6]},
+								"east": {"uv": [128, 107], "uv_size": [5, 6]},
+								"south": {"uv": [79, 133], "uv_size": [4, 6]},
+								"west": {"uv": [128, 114], "uv_size": [5, 6]},
+								"up": {"uv": [31, 135], "uv_size": [4, 5]},
+								"down": {"uv": [36, 140], "uv_size": [4, -5]}
+							}
+						}
+					]
+				},
+				{
+					"name": "LeftFingerFront",
+					"parent": "LeftElbow",
+					"pivot": [7, -12, 1.5],
+					"rotation": [0, 0, 22.5],
+					"cubes": [
+						{
+							"origin": [3, -18, 0],
+							"size": [4, 6, 5],
+							"inflate": 0.01,
+							"pivot": [7, -12, 1.5],
+							"rotation": [0, 0, 45],
+							"uv": {
+								"north": {"uv": [133, 81], "uv_size": [4, 6]},
+								"east": {"uv": [129, 5], "uv_size": [5, 6]},
+								"south": {"uv": [84, 133], "uv_size": [4, 6]},
+								"west": {"uv": [130, 34], "uv_size": [5, 6]},
+								"up": {"uv": [63, 135], "uv_size": [4, 5]},
+								"down": {"uv": [68, 140], "uv_size": [4, -5]}
+							}
+						}
+					]
+				},
+				{
+					"name": "LeftFingerBack",
+					"parent": "LeftElbow",
+					"pivot": [7, -12, 14.5],
+					"rotation": [0, 0, 22.5],
+					"cubes": [
+						{
+							"origin": [3, -18, 11],
+							"size": [4, 6, 5],
+							"inflate": 0.01,
+							"pivot": [7, -12, 14.5],
+							"rotation": [0, 0, 45],
+							"uv": {
+								"north": {"uv": [133, 127], "uv_size": [4, 6]},
+								"east": {"uv": [130, 67], "uv_size": [5, 6]},
+								"south": {"uv": [89, 134], "uv_size": [4, 6]},
+								"west": {"uv": [130, 98], "uv_size": [5, 6]},
+								"up": {"uv": [73, 135], "uv_size": [4, 5]},
+								"down": {"uv": [135, 93], "uv_size": [4, -5]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

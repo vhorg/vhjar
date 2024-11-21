@@ -3,6 +3,8 @@ package iskallia.vault.core.world.data.tile;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
 import java.util.HashMap;
@@ -211,6 +213,33 @@ public class PartialBlockProperties implements TilePlacement<PartialBlockPropert
    }
 
    public static class Adapter implements ISimpleAdapter<PartialBlockProperties, Tag, JsonElement> {
+      public void writeBits(PartialBlockProperties value, BitBuffer buffer) {
+         buffer.writeBoolean(value == null);
+         if (value != null) {
+            Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(value.properties.size()), buffer);
+            value.properties.forEach((k, v) -> {
+               Adapters.UTF_8.writeBits(k, buffer);
+               Adapters.UTF_8.writeBits(v, buffer);
+            });
+         }
+      }
+
+      @Override
+      public Optional<PartialBlockProperties> readBits(BitBuffer buffer) {
+         if (buffer.readBoolean()) {
+            return Optional.empty();
+         } else {
+            Map<String, String> properties = new HashMap<>();
+            int size = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+
+            for (int i = 0; i < size; i++) {
+               properties.put(Adapters.UTF_8.readBits(buffer).orElseThrow(), Adapters.UTF_8.readBits(buffer).orElseThrow());
+            }
+
+            return Optional.of(PartialBlockProperties.of(properties));
+         }
+      }
+
       public Optional<Tag> writeNbt(@Nullable PartialBlockProperties value) {
          if (value != null && !value.properties.isEmpty()) {
             CompoundTag nbt = new CompoundTag();

@@ -19,20 +19,27 @@ import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
 import iskallia.vault.core.event.common.OreLootGenerationEvent;
 import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.stat.ChestStat;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.gear.attribute.VaultGearAttribute;
+import iskallia.vault.gear.attribute.custom.loot.LootTriggerAttribute;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.AntiqueItem;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.TrapDisarmChanceHelper;
 import iskallia.vault.world.vault.chest.MobTrapEffect;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -72,6 +79,7 @@ public class ClassicLootLogic extends LootLogic {
       this.generateRunes(data, vault);
       this.generateAntiques(data.getLoot(), data.getTileEntity(), vault);
       this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
+      this.triggerLootAttributes(data.getTileEntity(), data.getRandom(), data.getPlayer());
    }
 
    @Override
@@ -81,6 +89,7 @@ public class ClassicLootLogic extends LootLogic {
    @Override
    protected void onBlockPostGenerate(VirtualWorld world, Vault vault, LootableBlockGenerationEvent.Data data) {
       this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
+      this.triggerLootAttributes(data.getTileEntity(), data.getRandom(), data.getPlayer());
    }
 
    @Override
@@ -108,6 +117,7 @@ public class ClassicLootLogic extends LootLogic {
       }
 
       this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
+      this.triggerLootAttributes(data.getTileEntity(), data.getRandom(), data.getPlayer());
    }
 
    @Override
@@ -117,16 +127,7 @@ public class ClassicLootLogic extends LootLogic {
    }
 
    protected boolean applyTrap(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
-      boolean canBeTrapped = data.getState().getBlock() == ModBlocks.WOODEN_CHEST
-         || data.getState().getBlock() == ModBlocks.GILDED_CHEST
-         || data.getState().getBlock() == ModBlocks.LIVING_CHEST
-         || data.getState().getBlock() == ModBlocks.ORNATE_CHEST
-         || data.getState().getBlock() == ModBlocks.HARDENED_CHEST
-         || data.getState().getBlock() == ModBlocks.FLESH_CHEST
-         || data.getState().getBlock() == ModBlocks.ENIGMA_CHEST
-         || data.getState().getBlock() == ModBlocks.GILDED_STRONGBOX
-         || data.getState().getBlock() == ModBlocks.ORNATE_STRONGBOX
-         || data.getState().getBlock() == ModBlocks.LIVING_STRONGBOX;
+      boolean canBeTrapped = data.getState().getBlock() instanceof VaultChestBlock;
       if (!canBeTrapped) {
          return false;
       } else {
@@ -161,6 +162,16 @@ public class ClassicLootLogic extends LootLogic {
             }
          }
       }
+   }
+
+   protected void triggerLootAttributes(BlockEntity tile, RandomSource random, ServerPlayer player) {
+      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(player);
+      ModGearAttributes.getLootTriggerAttributes()
+         .forEach(attr -> snapshot.getAttributeValueList((VaultGearAttribute<? extends LootTriggerAttribute>)attr).forEach(modifier -> {
+            if (modifier.shouldTrigger(tile)) {
+               modifier.trigger(tile, random, player);
+            }
+         }));
    }
 
    protected <T extends BlockEntity & TemplateTagContainer> void generateAntiques(List<ItemStack> loot, BlockEntity tile, Vault vault) {

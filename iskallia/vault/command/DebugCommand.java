@@ -10,12 +10,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import iskallia.vault.VaultMod;
 import iskallia.vault.altar.RequiredItems;
+import iskallia.vault.config.gear.VaultGearWorkbenchConfig;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.data.key.VersionedKey;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.Event;
 import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.influence.VaultGod;
@@ -29,9 +31,9 @@ import iskallia.vault.dump.GearModelDump;
 import iskallia.vault.dump.TranslationsDump;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
+import iskallia.vault.gear.VaultGearModifierHelper;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
-import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.TrinketEffect;
@@ -100,6 +102,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 public class DebugCommand extends Command {
+   private static final RandomSource rand = JavaRandom.ofNanoTime();
    private static final SuggestionProvider<CommandSourceStack> SUGGEST_LOOT_TABLE = (context, builder) -> SharedSuggestionProvider.suggestResource(
       VaultRegistry.LOOT_TABLE.getKeys().stream().map(VersionedKey::getId), builder
    );
@@ -135,6 +138,7 @@ public class DebugCommand extends Command {
          Commands.literal("damage_all_gear").then(Commands.argument("damageAmount", IntegerArgumentType.integer(1)).executes(this::damageInventoryGear))
       );
       builder.then(Commands.literal("vault_kick").then(Commands.argument("player", EntityArgument.player()).executes(this::kickFromVault)));
+      builder.then(Commands.literal("debug_config_files").executes(this::validateConfigFiles));
       builder.then(Commands.literal("corrupt_gear").executes(this::corruptGear));
       builder.then(Commands.literal("make_legendary").executes(this::setGearLegenary));
       builder.then(
@@ -148,7 +152,7 @@ public class DebugCommand extends Command {
       builder.then(Commands.literal("give_all_etchings").executes(this::testGiveAllEtchings));
       builder.then(Commands.literal("give_all_trinkets").executes(this::testGiveAllTrinkets));
       builder.then(Commands.literal("dev_world").executes(this::setupDevWorld));
-      builder.then(Commands.literal("reset_proficiencies").executes(this::resetProficiencies));
+      builder.then(Commands.literal("reset_proficiency").executes(this::resetProficiency));
       builder.then(
          Commands.literal("insert_loot")
             .then(
@@ -269,7 +273,7 @@ public class DebugCommand extends Command {
             player.sendMessage(new TextComponent("Item is corrupted"), Util.NIL_UUID);
             return 0;
          } else {
-            data.updateAttribute(ModGearAttributes.IS_LEGENDARY, Boolean.valueOf(true));
+            data.createOrReplaceAttributeValue(ModGearAttributes.IS_LEGENDARY, Boolean.valueOf(true));
             data.write(held);
             return 0;
          }
@@ -288,8 +292,7 @@ public class DebugCommand extends Command {
             player.sendMessage(new TextComponent("Item already corrupted"), Util.NIL_UUID);
             return 0;
          } else {
-            data.updateAttribute(ModGearAttributes.IS_CORRUPTED, Boolean.valueOf(true));
-            data.write(held);
+            VaultGearModifierHelper.setGearCorrupted(held);
             return 0;
          }
       } else {
@@ -341,14 +344,10 @@ public class DebugCommand extends Command {
       return 0;
    }
 
-   private int resetProficiencies(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+   private int resetProficiency(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
       PlayerProficiencyData data = PlayerProficiencyData.get(player.getLevel());
-
-      for (ProficiencyType type : ProficiencyType.values()) {
-         data.setProficiency(player.getUUID(), type, 0);
-      }
-
+      data.setAbsoluteProficiency(player.getUUID(), 0);
       data.sendProficiencyInformation(player);
       return 0;
    }
@@ -487,7 +486,7 @@ public class DebugCommand extends Command {
             return 0;
          } else {
             VaultGearData data = VaultGearData.read(held);
-            data.updateAttribute(ModGearAttributes.ETCHING, etchingSet);
+            data.createOrReplaceAttributeValue(ModGearAttributes.ETCHING, etchingSet);
             data.write(held);
             return 0;
          }
@@ -530,6 +529,46 @@ public class DebugCommand extends Command {
                   stats.set(StatCollector.COMPLETION, Completion.BAILED);
                });
             });
+         });
+      }
+
+      return 0;
+   }
+
+   private int validateConfigFiles(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      CommandSourceStack src = (CommandSourceStack)context.getSource();
+      src.sendSuccess(new TextComponent("Validating Workbench files..."), true);
+      Map<Item, List<VaultGearWorkbenchConfig.CraftableModifierConfig>> itemMissingTargets = new HashMap<>();
+      ModConfigs.VAULT_GEAR_WORKBENCH_CONFIG.forEach((item, cfg) -> cfg.getAllCraftableModifiers().forEach(modCfg -> {
+         if (modCfg.createModifier().isEmpty()) {
+            itemMissingTargets.computeIfAbsent(item, k -> new ArrayList<>()).add(modCfg);
+         }
+      }));
+      if (itemMissingTargets.isEmpty()) {
+         src.sendSuccess(new TextComponent("Workbench files are valid"), true);
+      } else {
+         itemMissingTargets.forEach((item, cfgs) -> {
+            src.sendSuccess(new TextComponent("Missing targets for: " + item.getRegistryName()), true);
+            cfgs.forEach(cfg -> src.sendSuccess(new TextComponent(cfg.getModifierIdentifier() + " - tier " + cfg.getModifierTier()), true));
+         });
+      }
+
+      src.sendSuccess(new TextComponent("Validating Card files..."), true);
+      Map<String, List<String>> packModifierMap = new HashMap<>();
+      ModConfigs.BOOSTER_PACK.getValues().forEach((id, entry) -> entry.getCard().forEach((cardCfg, weight) -> cardCfg.forEach(cardConfig -> {
+         String modifier = cardConfig.getModifier();
+         ModConfigs.CARD_MODIFIERS.getAll(modifier).forEach((modId, cfg) -> {
+            if (cfg == null) {
+               packModifierMap.computeIfAbsent(modId, k -> new ArrayList<>()).add(modifier);
+            }
+         });
+      })));
+      if (packModifierMap.isEmpty()) {
+         src.sendSuccess(new TextComponent("Card files are valid"), true);
+      } else {
+         packModifierMap.forEach((pack, modifiers) -> {
+            src.sendSuccess(new TextComponent("Missing modifiers for booster pack: " + pack), true);
+            modifiers.forEach(modifier -> src.sendSuccess(new TextComponent(modifier), true));
          });
       }
 

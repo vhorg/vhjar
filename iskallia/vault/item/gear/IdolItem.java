@@ -5,6 +5,7 @@ import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -62,10 +63,10 @@ public class IdolItem extends BasicItem implements VaultGearItem {
       };
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return EquipmentSlot.OFFHAND;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.IDOL;
    }
 
    @NotNull

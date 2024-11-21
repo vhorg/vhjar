@@ -10,6 +10,7 @@ import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class CardDeck implements ISerializable<CompoundTag, JsonObject> {
    }
 
    public Map<CardPos, Card> getCards() {
-      return this.cards;
+      return Collections.unmodifiableMap(this.cards);
    }
 
    public Optional<Card> getCard(CardPos pos) {

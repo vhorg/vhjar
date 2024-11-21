@@ -23,7 +23,6 @@ import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
 import iskallia.vault.skill.ability.effect.JavelinSightAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
-import iskallia.vault.skill.ability.effect.ManaShieldRetributionAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpBreakDownAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpBreakUpAbility;
@@ -36,6 +35,7 @@ import iskallia.vault.skill.ability.effect.RampageLeechAbility;
 import iskallia.vault.skill.ability.effect.ShellAbility;
 import iskallia.vault.skill.ability.effect.ShellPorcupineAbility;
 import iskallia.vault.skill.ability.effect.ShellQuillAbility;
+import iskallia.vault.skill.ability.effect.ShieldBashAbility;
 import iskallia.vault.skill.ability.effect.SmiteAbility;
 import iskallia.vault.skill.ability.effect.SmiteArchonAbility;
 import iskallia.vault.skill.ability.effect.SmiteThunderstormAbility;
@@ -230,12 +230,8 @@ public class AbilitiesConfig extends Config {
             spec(
                "Mana_Shield",
                "Mana Shield",
-               tier("Mana_Shield_Base", "Mana Shield", quintuple(new ManaShieldAbility(0, 1, 1, 10, 1.0F, 0.5F, 0.5F))),
-               tier(
-                  "Mana_Shield_Retribution",
-                  "Mana Shield: Retribution",
-                  quintuple(new ManaShieldRetributionAbility(0, 1, 1, 10, 1.0F, 0.5F, 0.5F, 10.0F, 0.5F))
-               )
+               tier("Mana_Shield_Base", "Mana Shield", quintuple(new ManaShieldAbility(0, 1, 1, 1200, 10, 60, 20))),
+               tier("Mana_Shield_Retribution", "Mana Shield: Retribution", quintuple(new ShieldBashAbility(0, 1, 1, 1200, 10, 10.0F, 0.5F)))
             )
          );
       this.tree

@@ -1,7 +1,6 @@
 package iskallia.vault.gear.modification;
 
 import iskallia.vault.container.VaultArtisanStationContainer;
-import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModGearAttributes;
 import java.util.Optional;
@@ -34,30 +33,32 @@ public record GearModificationAction(
          VaultGearData data = VaultGearData.read(gear);
          Optional<Integer> potential = data.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL);
          if (!potential.isEmpty()) {
-            Slot inSlot = this.getCorrespondingSlot(container);
-            if (inSlot != null) {
-               ItemStack input = inSlot.getItem();
-               ItemStack material = input.copy();
-               if (!player.isCreative()) {
-                  input.shrink(1);
-               }
+            Optional<Integer> maxPotential = data.getFirstValue(ModGearAttributes.MAX_CRAFTING_POTENTIAL);
+            if (!maxPotential.isEmpty()) {
+               Slot inSlot = this.getCorrespondingSlot(container);
+               if (inSlot != null) {
+                  ItemStack input = inSlot.getItem();
+                  ItemStack material = input.copy();
+                  if (!player.isCreative()) {
+                     input.shrink(1);
+                  }
 
-               inSlot.set(input);
-               String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
-               GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential.get(), this.modification());
-               ItemStack bronze = container.getBronzeSlot().getItem();
-               if (!player.isCreative()) {
-                  bronze.shrink(cost.costBronze());
-               }
+                  inSlot.set(input);
+                  GearModificationCost cost = GearModificationCost.getCost(potential.get(), maxPotential.get().intValue(), this.modification());
+                  ItemStack bronze = container.getBronzeSlot().getItem();
+                  if (!player.isCreative()) {
+                     bronze.shrink(cost.costBronze());
+                  }
 
-               container.getBronzeSlot().set(bronze);
-               ItemStack plating = container.getPlatingSlot().getItem();
-               if (!player.isCreative()) {
-                  plating.shrink(cost.costPlating());
-               }
+                  container.getBronzeSlot().set(bronze);
+                  ItemStack plating = container.getPlatingSlot().getItem();
+                  if (!player.isCreative()) {
+                     plating.shrink(cost.costPlating());
+                  }
 
-               container.getPlatingSlot().set(plating);
-               this.modification().apply(gear, material, player, rand);
+                  container.getPlatingSlot().set(plating);
+                  this.modification().apply(gear, material, player, rand);
+               }
             }
          }
       }
@@ -76,13 +77,17 @@ public record GearModificationAction(
             if (potential.isEmpty()) {
                return false;
             } else {
-               String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
-               GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential.get(), this.modification());
-               ItemStack bronze = container.getBronzeSlot().getItem();
-               ItemStack plating = container.getPlatingSlot().getItem();
-               return bronze.getCount() >= cost.costBronze() && plating.getCount() >= cost.costPlating()
-                  ? this.modification().canApply(gear, in, player, rand).success()
-                  : false;
+               Optional<Integer> maxPotential = data.getFirstValue(ModGearAttributes.MAX_CRAFTING_POTENTIAL);
+               if (maxPotential.isEmpty()) {
+                  return false;
+               } else {
+                  GearModificationCost cost = GearModificationCost.getCost(potential.get(), maxPotential.get().intValue(), this.modification());
+                  ItemStack bronze = container.getBronzeSlot().getItem();
+                  ItemStack plating = container.getPlatingSlot().getItem();
+                  return bronze.getCount() >= cost.costBronze() && plating.getCount() >= cost.costPlating()
+                     ? this.modification().canApply(gear, in, player, rand).success()
+                     : false;
+               }
             }
          } else {
             return false;

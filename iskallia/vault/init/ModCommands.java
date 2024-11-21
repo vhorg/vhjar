@@ -26,6 +26,7 @@ import iskallia.vault.command.ResearchTeamCommand;
 import iskallia.vault.command.ResetCommand;
 import iskallia.vault.command.SnapshotCommand;
 import iskallia.vault.command.SpiritCommand;
+import iskallia.vault.command.TeamTasksCommand;
 import iskallia.vault.command.VaultAltarCommand;
 import iskallia.vault.command.VaultGodSayCommand;
 import iskallia.vault.command.VaultLevelCommand;
@@ -61,6 +62,7 @@ public class ModCommands {
    public static OpenVaultSnapshotCommand OPEN_VAULT_SNAPSHOT;
    public static QuestCommand QUEST_COMMAND;
    public static ResetCommand RESET_COMMAND;
+   public static TeamTasksCommand TEAM_TASKS_COMMAND;
 
    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection env) {
       RELOAD_CONFIGS = registerCommand(ReloadConfigsCommand::new, dispatcher, env);
@@ -88,6 +90,7 @@ public class ModCommands {
       OPEN_VAULT_SNAPSHOT = registerCommand(OpenVaultSnapshotCommand::new, dispatcher, env);
       QUEST_COMMAND = registerCommand(QuestCommand::new, dispatcher, env);
       RESET_COMMAND = registerCommand(ResetCommand::new, dispatcher, env);
+      TEAM_TASKS_COMMAND = registerCommand(TeamTasksCommand::new, dispatcher, env);
    }
 
    public static void registerArgumentTypes() {

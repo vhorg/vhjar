@@ -1,7 +1,6 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.dynamodel.model.armor.ArmorModel;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
@@ -10,7 +9,6 @@ import iskallia.vault.dynamodel.registry.DynamicModelRegistry;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.item.gear.FocusItem;
 import iskallia.vault.item.gear.VaultArmorItem;
@@ -69,9 +67,7 @@ public class GearModelRollRaritiesConfig extends Config {
    }
 
    public ResourceLocation getRandomRoll(ItemStack stack, VaultGearData data, EquipmentSlot slot, Random random) {
-      return data.getRarity() == VaultGearRarity.UNIQUE
-         ? ModConfigs.UNIQUE_GEAR.getRandomEntry(null, JavaRandom.ofNanoTime()).orElseThrow().getModel()
-         : MiscUtils.getRandomEntry(this.getPossibleRolls(stack, data, slot), random);
+      return MiscUtils.getRandomEntry(this.getPossibleRolls(stack, data, slot), random);
    }
 
    private <G extends Item & VaultGearItem> Set<ResourceLocation> getPossibleRolls(ItemStack stack, VaultGearData data, EquipmentSlot slot) {

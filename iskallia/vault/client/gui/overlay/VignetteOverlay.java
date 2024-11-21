@@ -35,8 +35,6 @@ public class VignetteOverlay implements IIngameOverlay {
                this.render(ModConfigs.ABILITIES_VIGNETTE.EMPOWER_ICE_ARMOUR, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.SHELL_PORCUPINE)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.SHELL_PORCUPINE, matrixStack, width, height, VIGNETTE_LOCATION);
-            } else if (minecraft.player.hasEffect(ModEffects.EXECUTE)) {
-               this.render(ModConfigs.ABILITIES_VIGNETTE.EXECUTE, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.MANA_SHIELD)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.MANA_SHIELD, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.MANA_SHIELD_RETRIBUTION)) {

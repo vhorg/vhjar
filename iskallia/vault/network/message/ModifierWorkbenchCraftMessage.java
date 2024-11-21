@@ -64,6 +64,10 @@ public class ModifierWorkbenchCraftMessage {
                            return;
                         }
 
+                        if (!ModifierWorkbenchHelper.removeCraftedModifiers(inputCopy)) {
+                           return;
+                        }
+
                         cost.addAll(cfg.getCostRemoveCraftedModifiers());
                      } else {
                         VaultGearWorkbenchConfig.CraftableModifierConfig modifierConfig = cfg.getConfig(message.craftModifierIdentifier);
@@ -76,19 +80,33 @@ public class ModifierWorkbenchCraftMessage {
                         }
 
                         boolean hadCraftedModifiers = ModifierWorkbenchHelper.hasCraftedModifier(inputCopy);
-                        ModifierWorkbenchHelper.removeCraftedModifiers(inputCopy);
+                        if (hadCraftedModifiers && !ModifierWorkbenchHelper.removeCraftedModifiers(inputCopy)) {
+                           return;
+                        }
+
                         VaultGearData data = VaultGearData.read(inputCopy);
                         if (data.getItemLevel() < modifierConfig.getMinLevel()) {
                            return;
                         }
 
                         targetAffix = modifierConfig.getAffixGroup().getTargetAffixType();
-                        if (targetAffix == VaultGearModifier.AffixType.PREFIX) {
-                           if (!VaultGearModifierHelper.hasOpenPrefix(inputCopy)) {
-                              return;
-                           }
-                        } else if (!VaultGearModifierHelper.hasOpenSuffix(inputCopy)) {
+                        if (targetAffix == null) {
                            return;
+                        }
+
+                        switch (targetAffix) {
+                           case PREFIX:
+                              if (!VaultGearModifierHelper.hasOpenPrefix(inputCopy)) {
+                                 return;
+                              }
+                              break;
+                           case SUFFIX:
+                              if (!VaultGearModifierHelper.hasOpenSuffix(inputCopy)) {
+                                 return;
+                              }
+                              break;
+                           default:
+                              return;
                         }
 
                         createdModifier = modifierConfig.createModifier().orElse(null);

@@ -1,9 +1,9 @@
 package iskallia.vault.world.data;
 
 import iskallia.vault.VaultMod;
-import iskallia.vault.core.world.storage.ThreadPool;
-import iskallia.vault.core.world.storage.ThreadingMode;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.core.world.threading.ThreadPool;
+import iskallia.vault.core.world.threading.ThreadingMode;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.mixin.AccessorMinecraftServer;
 import iskallia.vault.nbt.VListNBT;

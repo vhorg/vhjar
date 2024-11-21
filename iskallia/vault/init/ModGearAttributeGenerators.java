@@ -74,6 +74,11 @@ public class ModGearAttributeGenerators {
          public Optional<T> getMaximumValue(List<C> configurations) {
             return Optional.empty();
          }
+
+         @Override
+         public Optional<Float> getRollPercentage(T value, List<C> configurations) {
+            return Optional.empty();
+         }
       };
    }
 }

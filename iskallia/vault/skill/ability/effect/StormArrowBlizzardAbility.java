@@ -72,11 +72,12 @@ public class StormArrowBlizzardAbility extends AbstractStormArrowAbility {
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
+         int duration = this.getDuration(player);
          VaultStormArrow arrow = new VaultStormArrow(player.level, player);
          arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.0F, 0.0F);
          arrow.pickup = Pickup.DISALLOWED;
-         arrow.setType("blizzard");
-         arrow.setDuration(this.getDuration());
+         arrow.setStormArrowType(VaultStormArrow.StormType.BLIZZARD);
+         arrow.setDuration(duration);
          arrow.setRadius(this.getRadius(player));
          arrow.setIntervalTicks(this.getIntervalTicks());
          arrow.setAbilityPowerPercent(this.getPercentAbilityPowerDealt());
@@ -87,7 +88,7 @@ public class StormArrowBlizzardAbility extends AbstractStormArrowAbility {
          arrow.setFrostbiteChance(this.getFrostbiteChance());
          player.level.addFreshEntity(arrow);
          player.level.playSound((Player)null, player, SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.25F);
-         return Ability.ActionResult.successCooldownDelayed(this.getDuration());
+         return Ability.ActionResult.successCooldownDelayed(duration);
       }).orElse(Ability.ActionResult.fail());
    }
 

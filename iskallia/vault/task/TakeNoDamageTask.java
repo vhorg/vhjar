@@ -12,7 +12,7 @@ public class TakeNoDamageTask extends NodeTask {
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.ENTITY_DAMAGE.register(this, event -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             if (context.getSource() instanceof EntityTaskSource entitySource) {
                if (entitySource.matches(event.getEntity())) {
                   for (ResettingTask child : this.getChildren(ResettingTask.class)) {

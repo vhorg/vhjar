@@ -1,7 +1,7 @@
 package iskallia.vault.etching.set;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
+import iskallia.vault.gear.attribute.custom.effect.EffectGearAttribute;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;

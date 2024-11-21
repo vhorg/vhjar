@@ -1,17 +1,19 @@
 package iskallia.vault.client;
 
 import iskallia.vault.gear.crafting.ProficiencyType;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ClientProficiencyData {
-   private static Map<ProficiencyType, Float> proficiencyPercentages = new HashMap<>();
+   private static int proficiency = 0;
 
-   public static float getProficiency(ProficiencyType type) {
-      return proficiencyPercentages.getOrDefault(type, 0.0F);
+   public static int getProficiency() {
+      return proficiency;
    }
 
-   public static void updateProficiencies(Map<ProficiencyType, Float> proficiencies) {
-      proficiencyPercentages = proficiencies;
+   public static float getProficiency(ProficiencyType type) {
+      return proficiency;
+   }
+
+   public static void updateProficiency(int proficiency) {
+      ClientProficiencyData.proficiency = proficiency;
    }
 }

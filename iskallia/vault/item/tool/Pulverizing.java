@@ -7,7 +7,6 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.world.loot.LootTable;
 import iskallia.vault.core.world.loot.entry.ItemLootEntry;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
-import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.data.VaultGearData;
@@ -123,8 +122,8 @@ public class Pulverizing {
                double weight = e.getValue();
                ItemStack min = new ItemStack(item.getItem());
                ItemStack max = new ItemStack(item.getItem());
-               min.setCount(IntRoll.getMin(item.getCount()));
-               max.setCount(IntRoll.getMax(item.getCount()));
+               min.setCount(item.getCount().getMin());
+               max.setCount(item.getCount().getMax());
                if (item.getNbt() != null) {
                   min.setTag(item.getNbt().copy());
                   max.setTag(item.getNbt().copy());

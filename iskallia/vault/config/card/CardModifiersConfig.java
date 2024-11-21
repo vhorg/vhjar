@@ -9,6 +9,7 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.init.ModGearAttributes;
 import java.io.File;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +36,26 @@ public class CardModifiersConfig extends Config {
          WeightedList<String> pool = this.pools.get(id.substring(1));
          return pool == null ? Optional.empty() : pool.getRandom(random).flatMap(s -> this.getRandom(s, random));
       } else {
-         return Optional.ofNullable(this.values.get(id).copy());
+         return Optional.ofNullable(this.values.get(id)).map(CardEntry.Config::copy);
+      }
+   }
+
+   public Map<String, CardEntry.Config> getAll(String id) {
+      if (id.startsWith("@")) {
+         WeightedList<String> pool = this.pools.get(id.substring(1));
+         if (pool == null) {
+            Map<String, CardEntry.Config> cfg = new HashMap<>();
+            cfg.put(id, null);
+            return cfg;
+         } else {
+            Map<String, CardEntry.Config> cfg = new HashMap<>();
+            pool.keySet().forEach(poolEntryId -> cfg.putAll(this.getAll(poolEntryId)));
+            return cfg;
+         }
+      } else {
+         Map<String, CardEntry.Config> cfg = new HashMap<>();
+         cfg.put(id, this.values.getOrDefault(id, null));
+         return cfg;
       }
    }
 

@@ -3,7 +3,9 @@ package iskallia.vault.init;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.InputConstants.Type;
+import iskallia.vault.skill.base.RemovedSkill;
 import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.KeyMapping;
@@ -30,6 +32,7 @@ public class ModKeybinds {
    public static KeyMapping openAchievements;
    public static KeyMapping openBingo;
    public static KeyMapping openCardDeck;
+   public static KeyMapping showRaidInfo;
    public static Map<String, KeyMapping> abilityQuickfireKey = new HashMap<>();
 
    public static void register(FMLClientSetupEvent event) {
@@ -44,10 +47,27 @@ public class ModKeybinds {
       openAchievements = mapping(name("open_achievements"), KeyConflictContext.IN_GAME);
       openBingo = mapping(name("open_bingo"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 258));
       openCardDeck = mapping(name("open_card_deck"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 59));
-      ModConfigs.ABILITIES.get().ifPresent(tree -> tree.iterate(SpecializedSkill.class, skill -> {
-         String name = "quickselect." + skill.getId().toLowerCase().replace(' ', '_');
-         abilityQuickfireKey.put(skill.getId(), mapping(name(name), KeyConflictContext.IN_GAME));
-      }));
+      showRaidInfo = mapping(name("show_raid_info"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 258));
+      ModConfigs.ABILITIES
+         .get()
+         .ifPresent(
+            tree -> tree.iterate(
+               SpecializedSkill.class,
+               skill -> {
+                  if (skill.getSpecializations()
+                     .stream()
+                     .anyMatch(
+                        specialization -> !(
+                           specialization instanceof TieredSkill tieredSkill
+                              && (tieredSkill.getMaxLearnableTier() <= 0 || tieredSkill.getChild(1) instanceof RemovedSkill)
+                        )
+                     )) {
+                     String name = "quickselect." + skill.getId().toLowerCase().replace(' ', '_');
+                     abilityQuickfireKey.put(skill.getId(), mapping(name(name), KeyConflictContext.IN_GAME));
+                  }
+               }
+            )
+         );
    }
 
    @NotNull

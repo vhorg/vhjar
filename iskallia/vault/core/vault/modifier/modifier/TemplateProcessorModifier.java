@@ -26,7 +26,9 @@ public class TemplateProcessorModifier extends VaultModifier<TemplateProcessorMo
          .at(TemplateGenerationEvent.Phase.PRE)
          .in(world)
          .register(this, data -> data.getTemplate().getSettings().addProcessor(TileProcessor.of((tile, ctx) -> {
-            if (this.properties.blacklist.test(tile)) {
+            if (this.properties.whitelist != null && !this.properties.whitelist.test(tile)) {
+               return tile;
+            } else if (this.properties.blacklist != null && this.properties.blacklist.test(tile)) {
                return tile;
             } else if (ctx.getRandom(tile.getPos()).nextFloat() >= this.properties.probability) {
                return tile;
@@ -58,13 +60,16 @@ public class TemplateProcessorModifier extends VaultModifier<TemplateProcessorMo
       @Expose
       private final TilePredicate blacklist;
       @Expose
+      private final TilePredicate whitelist;
+      @Expose
       private final List<TileProcessor> fullBlock;
       @Expose
       private final List<TileProcessor> partialBlock;
 
-      public Properties(float probability, TilePredicate blacklist) {
+      public Properties(float probability, TilePredicate blacklist, TilePredicate whitelist) {
          this.probability = probability;
          this.blacklist = blacklist;
+         this.whitelist = whitelist;
          this.fullBlock = new ArrayList<>();
          this.partialBlock = new ArrayList<>();
       }

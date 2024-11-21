@@ -370,7 +370,7 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
       }
    }
 
-   private static final class CountDownElement extends DynamicLabelElement<Component, ShardTradeScreen.CountDownElement> {
+   public static final class CountDownElement extends DynamicLabelElement<Component, ShardTradeScreen.CountDownElement> {
       private CountDownElement(IPosition position, ISize size, Supplier<Component> valueSupplier, LabelTextStyle.Builder labelTextStyle) {
          super(position, size, valueSupplier, labelTextStyle);
       }

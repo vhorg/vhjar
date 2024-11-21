@@ -46,7 +46,7 @@ public class PlayerPotionEffectHelper {
          if (!sPlayer.level.isClientSide) {
             if (!ServerVaults.get(sPlayer.level).isEmpty()) {
                MobEffect effect = event.getPotionEffect().getEffect();
-               if (effect.getCategory() == MobEffectCategory.HARMFUL && effect != ModEffects.BLEED) {
+               if (!isNoImmunityEffect(effect)) {
                   UUID uuid = sPlayer.getUUID();
                   Map<MobEffect, Integer> immunities = PLAYER_IMMUNITIES.computeIfAbsent(uuid, k -> new HashMap<>());
                   if (immunities.containsKey(event.getPotionEffect().getEffect())) {
@@ -58,5 +58,9 @@ public class PlayerPotionEffectHelper {
             }
          }
       }
+   }
+
+   private static boolean isNoImmunityEffect(MobEffect effect) {
+      return effect.getCategory() != MobEffectCategory.HARMFUL || effect == ModEffects.BLEED || effect == ModEffects.CORRUPTION;
    }
 }

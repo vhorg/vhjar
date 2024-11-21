@@ -3,10 +3,6 @@ package iskallia.vault.skill.ability.effect.spi;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.RampageDamageModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleManaAbility;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -28,20 +24,7 @@ public abstract class AbstractRampageAbility extends ToggleManaAbility {
    }
 
    public float getDamageIncrease(Player player) {
-      float incDamage = this.getUnmodifiedDamageIncrease();
-
-      for (ConfiguredModification<FloatValueConfig, RampageDamageModification> mod : SpecialAbilityModification.getModifications(
-         player, RampageDamageModification.class
-      )) {
-         incDamage = mod.modification().adjustDamageIncrease(mod.config(), incDamage);
-      }
-
-      return incDamage;
-   }
-
-   @Override
-   public String getAbilityGroupName() {
-      return "Rampage";
+      return this.getUnmodifiedDamageIncrease();
    }
 
    @Override

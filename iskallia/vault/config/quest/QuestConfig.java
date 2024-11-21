@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -267,7 +268,7 @@ public class QuestConfig extends Config {
    }
 
    @Override
-   protected void onLoad(Config oldConfigInstance) {
+   protected void onLoad(@Nullable Config oldConfigInstance) {
       Collections.sort(this.quests);
       MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
       if (server != null) {

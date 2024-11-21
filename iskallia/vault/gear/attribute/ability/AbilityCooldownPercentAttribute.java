@@ -15,7 +15,7 @@ public class AbilityCooldownPercentAttribute extends AbilityFloatValueAttribute 
       super(abilityKey, amount);
    }
 
-   public float adjustCooldown(String ability, float cooldown) {
+   public float adjustCooldown(@Nullable String ability, float cooldown) {
       return this.affectsAbility(ability) ? cooldown * Math.max(1.0F + this.getAmount(), 0.0F) : cooldown;
    }
 
@@ -46,18 +46,18 @@ public class AbilityCooldownPercentAttribute extends AbilityFloatValueAttribute 
          MutableComponent cooldownCmp = new TextComponent("Cooldown").withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("cooldown")));
          String cdInfo;
          if (positive) {
-            cdInfo = " increased ";
+            cdInfo = " more ";
          } else {
-            cdInfo = " reduced ";
+            cdInfo = " less ";
          }
 
          return new TextComponent("")
-            .append(type.getAffixPrefixComponent(positive).withStyle(this.getValueStyle()))
+            .append(type.getAffixPrefixComponent(true).withStyle(this.getValueStyle()))
             .append(valueDisplay.withStyle(this.getValueStyle()))
             .append(cdInfo)
             .append(cooldownCmp)
             .append(" of ")
-            .append(new TextComponent(attribute.getAbilityKey()).withStyle(this.getAbilityStyle()))
+            .append(this.formatAbilityName(attribute.getAbilityKey()))
             .setStyle(this.getColoredTextStyle());
       }
 
@@ -75,15 +75,15 @@ public class AbilityCooldownPercentAttribute extends AbilityFloatValueAttribute 
          boolean positive = attribute.getAmount() >= 0.0F;
          String cdInfo;
          if (positive) {
-            cdInfo = " increased Cooldown of ";
+            cdInfo = " more Cooldown of ";
          } else {
-            cdInfo = " reduced Cooldown of ";
+            cdInfo = " less Cooldown of ";
          }
 
-         out.add(type.getAffixPrefix(positive));
+         out.add(type.getAffixPrefix(true));
          out.add(valueDisplay.getString());
          out.add(cdInfo);
-         out.add(attribute.getAbilityKey());
+         out.add(this.formatAbilityName(attribute.getAbilityKey()).getString());
       }
 
       private TextComponent getValueComponent(float value) {

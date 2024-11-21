@@ -13,6 +13,7 @@ public class ModAttributes {
    public static Attribute TP_CHANCE;
    public static Attribute TP_INDIRECT_CHANCE;
    public static Attribute TP_RANGE;
+   public static Attribute DURABILITY_WEAR_REDUCTION_CAP;
    public static Attribute POTION_RESISTANCE;
    public static Attribute SIZE_SCALE;
    public static Attribute BREAK_ARMOR_CHANCE;
@@ -21,10 +22,12 @@ public class ModAttributes {
    public static Attribute HEALING_MAX;
    public static Attribute REACH;
    public static Attribute CROSSBOW_CHARGE_TIME;
+   public static Attribute BOW_CHARGE_TIME;
    public static Attribute THORNS_CHANCE;
    public static Attribute THORNS_DAMAGE;
    public static Attribute HEAL_RANGE;
    public static Attribute HEAL_AMOUNT;
+   public static Attribute MANA_SHIELD;
 
    public static void register(Register<Attribute> event) {
       Attributes.ATTACK_DAMAGE.setSyncable(true);
@@ -41,6 +44,12 @@ public class ModAttributes {
          )
          .setSyncable(true);
       TP_RANGE = register(event.getRegistry(), "generic.tp_range", new RangedAttribute("attribute.name.generic.tp_range", 32.0, 0.0, 1024.0)).setSyncable(true);
+      DURABILITY_WEAR_REDUCTION_CAP = register(
+            event.getRegistry(),
+            "generic.durability_wear_reduction_cap",
+            new RangedAttribute("attribute.name.generic.durability_wear_reduction_cap", 0.0, 0.0, 1.0)
+         )
+         .setSyncable(true);
       POTION_RESISTANCE = register(
             event.getRegistry(), "generic.potion_resistance", new RangedAttribute("attribute.name.generic.potion_resistance", 0.0, 0.0, 1.0)
          )
@@ -62,6 +71,10 @@ public class ModAttributes {
             event.getRegistry(), "generic.crossbow_charge_time", new RangedAttribute("attribute.name.generic.crossbow_charge_time", 0.0, 0.0, 512.0)
          )
          .setSyncable(true);
+      BOW_CHARGE_TIME = register(
+            event.getRegistry(), "generic.bow_charge_time", new RangedAttribute("attribute.name.generic.bow_charge_time", 20.0, 0.0, 512.0)
+         )
+         .setSyncable(true);
       THORNS_CHANCE = register(event.getRegistry(), "generic.thorns_chance", new RangedAttribute("attribute.name.generic.thorns_chance", 0.0, 0.0, 512.0))
          .setSyncable(true);
       THORNS_DAMAGE = register(event.getRegistry(), "generic.thorns_damage", new RangedAttribute("attribute.name.generic.thorns_damage", 0.0, 0.0, 512.0))
@@ -69,6 +82,8 @@ public class ModAttributes {
       HEAL_RANGE = register(event.getRegistry(), "generic.heal_range", new RangedAttribute("attribute.name.generic.heal_range", 0.0, 0.0, 512.0))
          .setSyncable(true);
       HEAL_AMOUNT = register(event.getRegistry(), "generic.heal_amount", new RangedAttribute("attribute.name.generic.heal_amount", 0.0, 0.0, 512.0))
+         .setSyncable(true);
+      MANA_SHIELD = register(event.getRegistry(), "generic.mana_shield", new RangedAttribute("attribute.name.generic.mana_shield", 0.0, 0.0, 512.0))
          .setSyncable(true);
    }
 

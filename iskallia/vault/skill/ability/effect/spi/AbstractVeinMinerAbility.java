@@ -4,10 +4,6 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.event.ActiveFlags;
-import iskallia.vault.gear.attribute.ability.special.VeinMinerAdditionalBlocksModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
@@ -71,19 +67,7 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
 
    public int getBlockLimit(Player player) {
       int blocks = this.getUnmodifiedBlockLimit();
-
-      for (ConfiguredModification<IntValueConfig, VeinMinerAdditionalBlocksModification> mod : SpecialAbilityModification.getModifications(
-         player, VeinMinerAdditionalBlocksModification.class
-      )) {
-         blocks = mod.modification().adjustBlockCount(mod.config(), blocks);
-      }
-
-      return Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, blocks));
-   }
-
-   @Override
-   public String getAbilityGroupName() {
-      return "Vein Miner";
+      return AreaOfEffectHelper.adjustAreaOfEffectRound(player, this, blocks);
    }
 
    @SubscribeEvent(
@@ -96,7 +80,7 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
          && event.getWorld() instanceof ServerLevel level) {
          if (event.getPlayer().getMainHandItem().getItem() instanceof ToolItem) {
             VaultGearData gearData = VaultGearData.read(event.getPlayer().getMainHandItem());
-            if (gearData.has(ModGearAttributes.HAMMERING)) {
+            if (gearData.hasAttribute(ModGearAttributes.HAMMERING)) {
                return;
             }
          }

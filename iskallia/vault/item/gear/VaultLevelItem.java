@@ -14,6 +14,12 @@ public interface VaultLevelItem {
       }
    }
 
+   static void doInitializeVaultLoot(ItemStack stack, int level) {
+      if (!stack.isEmpty() && stack.getItem() instanceof VaultLevelItem vaultLevelItem) {
+         vaultLevelItem.initializeVaultLoot(level, stack, null, null);
+      }
+   }
+
    default void initializeVaultLoot(ItemStack stack, @Nullable BlockPos pos, @Nullable Vault vault) {
       int level = Optional.ofNullable(vault).flatMap(v -> v.getOptional(Vault.LEVEL)).map(VaultLevel::get).orElse(0);
       this.initializeVaultLoot(level, stack, pos, vault);

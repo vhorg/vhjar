@@ -6,6 +6,7 @@ import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.data.adapter.basic.EnumAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.VaultGearRarity;
+import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.skill.base.LearnableSkill;
 import java.util.Arrays;
@@ -44,9 +45,12 @@ public class PuristTalent extends LearnableSkill {
       for (EquipmentSlot slot : this.slots) {
          ItemStack stack = entity.getItemBySlot(slot);
          if (VaultGearData.hasData(stack)) {
-            VaultGearData data = VaultGearData.read(stack);
-            if (this.rarities.contains(data.getRarity())) {
-               count++;
+            AttributeGearData data = AttributeGearData.read(stack);
+            if (data instanceof VaultGearData) {
+               VaultGearData gearData = (VaultGearData)data;
+               if (this.rarities.contains(gearData.getRarity())) {
+                  count++;
+               }
             }
          }
       }

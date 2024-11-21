@@ -180,53 +180,57 @@ public class InventoryUtil {
    public static boolean consumeInputs(
       List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory tileInv, boolean simulate, List<OverSizedItemStack> consumed
    ) {
-      boolean success = true;
+      if (playerInventory.player.isCreative()) {
+         return true;
+      } else {
+         boolean success = true;
 
-      for (ItemStack input : recipeInputs) {
-         int neededCount = input.getCount();
-         NonNullList<OverSizedItemStack> overSizedContents = tileInv.getOverSizedContents();
+         for (ItemStack input : recipeInputs) {
+            int neededCount = input.getCount();
+            NonNullList<OverSizedItemStack> overSizedContents = tileInv.getOverSizedContents();
 
-         for (int slot = 0; slot < overSizedContents.size(); slot++) {
-            OverSizedItemStack overSized = (OverSizedItemStack)overSizedContents.get(slot);
-            if (neededCount <= 0) {
-               break;
-            }
-
-            if (isEqualCrafting(input, overSized.stack())) {
-               int deductedAmount = Math.min(neededCount, overSized.amount());
-               if (!simulate) {
-                  tileInv.setOverSizedStack(slot, overSized.addCopy(-deductedAmount));
-                  consumed.add(overSized.copyAmount(deductedAmount));
+            for (int slot = 0; slot < overSizedContents.size(); slot++) {
+               OverSizedItemStack overSized = (OverSizedItemStack)overSizedContents.get(slot);
+               if (neededCount <= 0) {
+                  break;
                }
 
-               neededCount -= overSized.amount();
-            }
-         }
+               if (isEqualCrafting(input, overSized.stack())) {
+                  int deductedAmount = Math.min(neededCount, overSized.amount());
+                  if (!simulate) {
+                     tileInv.setOverSizedStack(slot, overSized.addCopy(-deductedAmount));
+                     consumed.add(overSized.copyAmount(deductedAmount));
+                  }
 
-         for (ItemStack plStack : playerInventory.items) {
-            if (neededCount <= 0) {
-               break;
+                  neededCount -= overSized.amount();
+               }
             }
 
-            if (isEqualCrafting(input, plStack)) {
-               int deductedAmount = Math.min(neededCount, plStack.getCount());
-               if (!simulate) {
-                  plStack.shrink(deductedAmount);
-                  ItemStack deducted = plStack.copy();
-                  deducted.setCount(deductedAmount);
-                  consumed.add(OverSizedItemStack.of(deducted));
+            for (ItemStack plStack : playerInventory.items) {
+               if (neededCount <= 0) {
+                  break;
                }
 
-               neededCount -= deductedAmount;
+               if (isEqualCrafting(input, plStack)) {
+                  int deductedAmount = Math.min(neededCount, plStack.getCount());
+                  if (!simulate) {
+                     plStack.shrink(deductedAmount);
+                     ItemStack deducted = plStack.copy();
+                     deducted.setCount(deductedAmount);
+                     consumed.add(OverSizedItemStack.of(deducted));
+                  }
+
+                  neededCount -= deductedAmount;
+               }
+            }
+
+            if (neededCount > 0) {
+               success = false;
             }
          }
 
-         if (neededCount > 0) {
-            success = false;
-         }
+         return success;
       }
-
-      return success;
    }
 
    private static boolean isEqualCrafting(ItemStack thisStack, ItemStack thatStack) {

@@ -3,10 +3,6 @@ package iskallia.vault.skill.ability.effect.spi;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.FarmerAdditionalRangeModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.HoldManaAbility;
 import iskallia.vault.skill.base.SkillContext;
@@ -62,18 +58,13 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
    }
 
    @Override
-   public String getAbilityGroupName() {
-      return "Farmer";
-   }
-
-   @Override
    public Ability.TickResult doActiveTick(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          if (this.tick > 0) {
             this.tick--;
             return super.doActiveTick(context);
          } else {
-            this.tick = CooldownHelper.adjustCooldown(player, "Farmer", this.getTickDelay());
+            this.tick = CooldownHelper.adjustCooldown(player, this, this.getTickDelay());
             Ability.TickResult result = super.doActiveTick(context);
             if (result != Ability.TickResult.COOLDOWN) {
                this.doGrow(player, (ServerLevel)player.level);
@@ -88,18 +79,8 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
       BlockPos playerPos = player.blockPosition();
       int originalHorizontalRange = this.getHorizontalRange();
       int originalVerticalRange = this.getVerticalRange();
-      int horizontalRange = originalHorizontalRange;
-      int verticalRange = originalVerticalRange;
-
-      for (ConfiguredModification<IntValueConfig, FarmerAdditionalRangeModification> mod : SpecialAbilityModification.getModifications(
-         player, FarmerAdditionalRangeModification.class
-      )) {
-         horizontalRange = mod.modification().addRange(mod.config(), horizontalRange);
-         verticalRange = mod.modification().addRange(mod.config(), verticalRange);
-      }
-
-      horizontalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, horizontalRange));
-      verticalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, verticalRange));
+      int horizontalRange = AreaOfEffectHelper.adjustAreaOfEffectRound(player, this, originalHorizontalRange);
+      int verticalRange = AreaOfEffectHelper.adjustAreaOfEffectRound(player, this, originalVerticalRange);
       MutableBlockPos mutableBlockPos = new MutableBlockPos();
       List<BlockPos> candidateList = new ArrayList<>();
 

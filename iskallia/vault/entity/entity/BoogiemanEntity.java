@@ -8,7 +8,6 @@ import iskallia.vault.entity.ai.TeleportRandomly;
 import iskallia.vault.entity.ai.ThrowProjectilesGoal;
 import iskallia.vault.init.ModSounds;
 import net.minecraft.server.level.ServerBossEvent;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent.BossBarColor;
@@ -85,19 +84,8 @@ public class BoogiemanEntity extends Zombie implements VaultBoss {
    public void tick() {
       super.tick();
       if (!this.level.isClientSide) {
-         this.bossInfo.setProgress(this.getHealth() / this.getMaxHealth());
          this.regenAfterAWhile.tick();
       }
-   }
-
-   public void startSeenByPlayer(ServerPlayer player) {
-      super.startSeenByPlayer(player);
-      this.bossInfo.addPlayer(player);
-   }
-
-   public void stopSeenByPlayer(ServerPlayer player) {
-      super.stopSeenByPlayer(player);
-      this.bossInfo.removePlayer(player);
    }
 
    public SoundSource getSoundSource() {

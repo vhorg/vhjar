@@ -12,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 
 public abstract class NodeTask extends Task {
    protected List<Task> children = new ArrayList<>();
-   private static final ArrayAdapter<Task> CHILDREN = Adapters.ofArray(Task[]::new, Adapters.TASK);
+   protected static final ArrayAdapter<Task> CHILDREN = Adapters.ofArray(Task[]::new, Adapters.TASK);
 
    @Override
    public Iterable<Task> getChildren() {

@@ -35,6 +35,10 @@ public abstract class ConfigurableAttributeGenerator<T, C> {
 
    public abstract Optional<T> getMaximumValue(List<C> var1);
 
+   public Optional<Float> getRollPercentage(T value, List<C> configurations) {
+      return Optional.of(1.0F);
+   }
+
    public interface CustomTierConfig {
       void deserializeAdditional(JsonObject var1, JsonDeserializationContext var2);
 

@@ -122,7 +122,7 @@ public abstract class NumberAdapter<N extends Number> implements ISimpleAdapter<
 
    public static Optional<Number> parse(String string) {
       try {
-         if (!string.contains(".") && !string.contains("e") && !string.contains("E")) {
+         if (!string.contains(".") && (!string.contains("e") && !string.contains("E") || string.startsWith("0x"))) {
             String exception = string.length() < 2 ? "" : string.substring(0, 2);
 
             return Optional.ofNullable(reduce(switch (exception) {

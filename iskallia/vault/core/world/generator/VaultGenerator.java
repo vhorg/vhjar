@@ -4,6 +4,7 @@ import iskallia.vault.core.data.DataObject;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.world.generator.layout.VaultLayout;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -27,4 +28,6 @@ public abstract class VaultGenerator extends DataObject<VaultGenerator> implemen
    }
 
    public abstract void generate(Vault var1, ServerLevelAccessor var2, ChunkPos var3);
+
+   public abstract VaultLayout getLayout();
 }

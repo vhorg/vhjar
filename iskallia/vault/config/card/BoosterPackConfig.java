@@ -152,6 +152,10 @@ public class BoosterPackConfig extends Config {
          this.color = color;
          this.card = card;
       }
+
+      public WeightedList<List<BoosterPackConfig.CardConfig>> getCard() {
+         return this.card;
+      }
    }
 
    public static class BoosterPackModel {
@@ -174,7 +178,7 @@ public class BoosterPackConfig extends Config {
       }
    }
 
-   private static class CardConfig {
+   public static class CardConfig {
       @Expose
       private String modifier;
       @Expose
@@ -195,6 +199,10 @@ public class BoosterPackConfig extends Config {
          this.scaler = scaler;
          this.condition = condition;
          this.probability = probability;
+      }
+
+      public String getModifier() {
+         return this.modifier;
       }
    }
 }

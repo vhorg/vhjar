@@ -18,6 +18,7 @@ public class ShulkerAttackGoal extends Goal implements ITrait {
    private int attackIntervalMax;
    private int attackIntervalMin;
    private int attackTime;
+   private int stackSize;
 
    public ShulkerAttackGoal(VaultBossBaseEntity boss) {
       this.boss = boss;
@@ -76,8 +77,8 @@ public class ShulkerAttackGoal extends Goal implements ITrait {
    @Override
    public void addStack(ITrait trait) {
       if (trait instanceof ShulkerAttackGoal shulkerAttackGoal) {
-         int stackSize = shulkerAttackGoal.attackIntervalMin / this.attackIntervalMin;
-         this.attackIntervalMin = shulkerAttackGoal.attackIntervalMin * ++stackSize;
+         this.stackSize++;
+         this.attackIntervalMin = shulkerAttackGoal.attackIntervalMin * this.stackSize;
       }
    }
 
@@ -86,12 +87,14 @@ public class ShulkerAttackGoal extends Goal implements ITrait {
       CompoundTag nbt = new CompoundTag();
       nbt.putInt("AttackIntervalMin", this.attackIntervalMin);
       nbt.putInt("AttackIntervalMax", this.attackIntervalMax);
+      nbt.putInt("StackSize", this.stackSize);
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.attackIntervalMin = nbt.getInt("AttackIntervalMin");
       this.attackIntervalMax = nbt.getInt("AttackIntervalMax");
+      this.stackSize = nbt.getInt("StackSize");
    }
 }

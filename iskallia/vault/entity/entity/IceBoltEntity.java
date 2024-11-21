@@ -142,7 +142,9 @@ public class IceBoltEntity extends AbstractArrow {
    }
 
    protected boolean canHitEntity(Entity entity) {
-      return entity instanceof LivingEntity && !(entity instanceof Player) && !(entity instanceof EternalEntity) ? super.canHitEntity(entity) : false;
+      return entity instanceof LivingEntity && (!(this.getOwner() instanceof Player) || !(entity instanceof Player) && !(entity instanceof EternalEntity))
+         ? super.canHitEntity(entity)
+         : false;
    }
 
    protected void handleNetherPortal() {

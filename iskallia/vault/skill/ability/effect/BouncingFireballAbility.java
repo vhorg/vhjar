@@ -7,12 +7,13 @@ import iskallia.vault.entity.entity.VaultFireball;
 import iskallia.vault.skill.ability.effect.spi.AbstractFireballAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 
 public class BouncingFireballAbility extends AbstractFireballAbility {
@@ -28,8 +29,13 @@ public class BouncingFireballAbility extends AbstractFireballAbility {
    public BouncingFireballAbility() {
    }
 
-   public int getDuration() {
+   public int getDurationUnmodified() {
       return this.duration;
+   }
+
+   public int getDuration(LivingEntity entity) {
+      int duration = this.getDurationUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    @Override
@@ -38,10 +44,10 @@ public class BouncingFireballAbility extends AbstractFireballAbility {
          VaultFireball fireball = new VaultFireball(player.level, player);
          fireball.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.0F, 0.0F);
          fireball.pickup = Pickup.DISALLOWED;
-         fireball.setType("bouncing");
-         fireball.setDuration(this.duration);
+         fireball.setType(VaultFireball.FireballType.BOUNCING);
+         fireball.setDuration(this.getDuration(player));
          player.level.addFreshEntity(fireball);
-         player.level.playSound((Player)null, player, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
+         player.level.playSound(null, player, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
    }

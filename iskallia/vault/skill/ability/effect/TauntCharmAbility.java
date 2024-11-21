@@ -123,7 +123,7 @@ public class TauntCharmAbility extends AbstractTauntAbility {
                      brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
                      brain.eraseMemory(MemoryModuleType.ANGRY_AT);
                      brain.eraseMemory(MemoryModuleType.UNIVERSAL_ANGER);
-                     mob.addEffect(new MobEffectInstance(ModEffects.TAUNT_CHARM, this.durationTicks, 0, false, true, false));
+                     mob.addEffect(new MobEffectInstance(ModEffects.TAUNT_CHARM, this.getDurationTicks(player), 0, false, true, false));
                      setAbilityData(mob, player.getUUID(), this.getPercentPlayerDamage());
                      applySpeedModifier(mob, 0.5F);
                      maxCharmedMobs--;

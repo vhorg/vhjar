@@ -5,6 +5,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.elite.EliteSkeletonModel;
 import javax.annotation.Nonnull;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,12 @@ public class EliteSkeletonRenderer extends HumanoidMobRenderer<Skeleton, EliteSk
    @Nonnull
    public ResourceLocation getTextureLocation(@Nonnull Skeleton entity) {
       return TEXTURE_LOCATION;
+   }
+
+   public void render(Skeleton skeleton, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
+      if (!skeleton.isInvisible()) {
+         super.render(skeleton, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+      }
    }
 
    protected void scale(@Nonnull Skeleton entity, @Nonnull PoseStack poseStack, float partialTickTime) {

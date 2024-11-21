@@ -4,16 +4,15 @@ import iskallia.vault.config.OmegaSoulShardConfig;
 import iskallia.vault.config.SoulShardConfig;
 import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.BlackMarketExpertise;
 import iskallia.vault.skill.tree.ExpertiseTree;
+import iskallia.vault.util.LootInitialization;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.NetcodeUtils;
+import iskallia.vault.util.SidedHelper;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -180,13 +179,7 @@ public class PlayerBlackMarketData extends SavedData {
 
             if (tradesUsed != null) {
                PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
-               if (trade.stack.is(ModItems.FACETED_FOCUS)) {
-                  int cost = trade.shardCost;
-                  ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
-                  DataInitializationItem.doInitialize(trade.stack);
-                  trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
-               }
-
+               trade = trade.initialize(playerLevel);
                this.trades.put(i, trade);
             }
          }
@@ -203,13 +196,7 @@ public class PlayerBlackMarketData extends SavedData {
 
          if (tradesUsed != null) {
             PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
-            if (trade.stack.is(ModItems.FACETED_FOCUS)) {
-               int cost = trade.shardCost;
-               ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
-               DataInitializationItem.doInitialize(trade.stack);
-               trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
-            }
-
+            trade = trade.initialize(playerLevel);
             this.trades.put(1, trade);
          }
 
@@ -227,7 +214,7 @@ public class PlayerBlackMarketData extends SavedData {
                i = 2;
             }
 
-            int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player).getVaultLevel();
+            int playerLevel = SidedHelper.getVaultLevel(player);
             Set<SoulShardConfig.Trades> tradesList = ModConfigs.SOUL_SHARD.getTrades();
             SoulShardConfig.Trades tradesUsed = null;
 
@@ -239,13 +226,7 @@ public class PlayerBlackMarketData extends SavedData {
 
             if (tradesUsed != null) {
                PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
-               if (trade.stack.is(ModItems.FACETED_FOCUS)) {
-                  int cost = trade.shardCost;
-                  ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
-                  DataInitializationItem.doInitialize(trade.stack);
-                  trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
-               }
-
+               trade = trade.initialize(playerLevel);
                this.trades.put(i, trade);
             }
          }
@@ -262,13 +243,7 @@ public class PlayerBlackMarketData extends SavedData {
 
          if (tradesUsed != null) {
             PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
-            if (trade.stack.is(ModItems.FACETED_FOCUS)) {
-               int cost = trade.shardCost;
-               ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
-               DataInitializationItem.doInitialize(trade.stack);
-               trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
-            }
-
+            trade = trade.initialize(playerLevel);
             this.trades.put(1, trade);
          }
 
@@ -418,6 +393,13 @@ public class PlayerBlackMarketData extends SavedData {
             this.stack = ItemStack.of(tag.getCompound("stack"));
             this.shardCost = tag.getInt("cost");
             this.isInfinite = tag.getBoolean("infinite");
+         }
+
+         public PlayerBlackMarketData.BlackMarket.SelectedTrade initialize(int level) {
+            ItemStack newStack = this.getStack().copy();
+            int cost = this.getShardCost();
+            newStack = LootInitialization.initializeVaultLoot(newStack, level);
+            return new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
          }
 
          public int getShardCost() {

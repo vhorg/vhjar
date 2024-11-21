@@ -15,7 +15,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
 
 public class VaultGuardianKillGoal extends InVaultDiscoveryGoal<VaultGuardianKillGoal> {
-   public static final Set<EntityType<?>> VALID_GUARDIANS = new LazySet<>(() -> List.of(ModEntities.ARBALIST_GUARDIAN, ModEntities.BRUISER_GUARDIAN));
+   public static final Set<EntityType<?>> VALID_GUARDIANS = new LazySet<>(
+      () -> List.of(ModEntities.BASIC_ARBALIST_GUARDIAN, ModEntities.BASIC_BRUISER_GUARDIAN)
+   );
 
    public VaultGuardianKillGoal(float targetProgress) {
       super(targetProgress);

@@ -39,6 +39,10 @@ public class EntityHelper {
    public static int TANK_COUNT = 10;
    public static int ASSASSIN_COUNT = 3;
    public static int HORDE_COUNT = 1;
+   public static final Predicate<Entity> VAULT_TARGET_SELECTOR = entity -> !(entity instanceof Player)
+      && entity instanceof LivingEntity livingEntity
+      && livingEntity.isAlive()
+      && !livingEntity.isInvulnerable();
 
    public static void changeHealth(LivingEntity entity, int healthChange) {
       float health = entity.getHealth();

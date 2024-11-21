@@ -21,7 +21,7 @@ public abstract class CoreCrystalModel extends CrystalModel {
       int light,
       int overlay
    ) {
-      float time = (float)ClientScheduler.INSTANCE.getTickCount();
+      float time = (float)ClientScheduler.INSTANCE.getTick();
       renderer.renderModel(this.getItemModel(), this.getItemColor(time), stack, transformType, matrices, buffer, light, overlay, null);
    }
 

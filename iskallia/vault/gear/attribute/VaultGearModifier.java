@@ -6,10 +6,12 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.config.gear.VaultGearTierConfig;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
+import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.data.GearDataVersion;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.tooltip.ModifierCategoryTooltip;
 import iskallia.vault.util.MiscUtils;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -45,6 +47,14 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
    public VaultGearModifier(VaultGearAttribute<T> attribute, T value) {
       super(attribute, value);
+   }
+
+   public static <T> VaultGearModifier<T> cast(VaultGearAttribute<T> attr, Object value) {
+      return new VaultGearModifier<>(attr, attr.getType().cast(value));
+   }
+
+   public static <T> VaultGearModifier<T> cast(VaultGearModifier<?> inst) {
+      return (VaultGearModifier<T>)inst;
    }
 
    public void setRolledTier(int rolledTier) {
@@ -124,28 +134,8 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    @Override
    public Optional<MutableComponent> getDisplay(VaultGearData data, VaultGearModifier.AffixType type, ItemStack stack, boolean displayDetail) {
       return super.getDisplay(data, type, stack, displayDetail)
-         .map(text -> {
-            for (VaultGearModifier.AffixCategory cat : this.categories) {
-               text = cat.getModifierFormatter().apply(text);
-            }
-
-            return (MutableComponent)text;
-         })
-         .map(displayText -> {
-            if (!this.hasGameTimeAdded()) {
-               return (MutableComponent)displayText;
-            } else {
-               int showDuration = 600;
-               long added = this.getGameTimeAdded();
-               Level currentWorld = Minecraft.getInstance().level;
-               if (currentWorld != null && currentWorld.getGameTime() - added <= showDuration) {
-                  displayText.append(new TextComponent(" [new]").withStyle(ChatFormatting.GOLD));
-                  return (MutableComponent)displayText;
-               } else {
-                  return (MutableComponent)displayText;
-               }
-            }
-         })
+         .map(this::modifyDisplayComponentCategoryFormatters)
+         .map(this::modifyDisplayComponentRecentlyChanged)
          .map(
             displayText -> {
                if (!displayDetail) {
@@ -203,11 +193,43 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
          );
    }
 
+   @OnlyIn(Dist.CLIENT)
+   public MutableComponent modifyDisplayComponentCategoryFormatters(MutableComponent displayText) {
+      for (VaultGearModifier.AffixCategory cat : this.categories) {
+         displayText = cat.getModifierFormatter().apply(displayText);
+      }
+
+      return displayText;
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public MutableComponent modifyDisplayComponentRecentlyChanged(MutableComponent displayText) {
+      if (!this.hasGameTimeAdded()) {
+         return displayText;
+      } else {
+         int showDuration = 600;
+         long added = this.getGameTimeAdded();
+         Level currentWorld = Minecraft.getInstance().level;
+         if (currentWorld != null && currentWorld.getGameTime() - added <= showDuration) {
+            displayText.append(new TextComponent(" [new]").withStyle(ChatFormatting.GOLD));
+            return displayText;
+         } else {
+            return displayText;
+         }
+      }
+   }
+
    public Optional<MutableComponent> getConfigDisplay(ItemStack stack) {
       return VaultGearTierConfig.getConfig(stack).map(tierCfg -> tierCfg.getTierConfig(this)).map(cfg -> {
          ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
          return configGen.getConfigDisplay(this.getAttribute().getReader(), cfg);
       });
+   }
+
+   @Nullable
+   public VaultGearModifier.ComparableModifier<T> getComparable() {
+      VaultGearAttributeComparator<T> attributeComparator = this.getAttribute().getAttributeComparator();
+      return attributeComparator == null ? null : new VaultGearModifier.ComparableModifier<>(this, attributeComparator.getComparator());
    }
 
    @Override
@@ -273,7 +295,9 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
       ABYSSAL("Abyssal", ModifierCategoryTooltip::modifyAbyssalTooltip),
       ABILITY_ENHANCEMENT("Enhancement", ModifierCategoryTooltip::modifyEnhancementTooltip),
       CRAFTED("Crafted", ModifierCategoryTooltip::modifyCraftedTooltip),
-      FROZEN("Frozen", ModifierCategoryTooltip::modifyFrozenTooltip);
+      FROZEN("Frozen", ModifierCategoryTooltip::modifyFrozenTooltip),
+      CORRUPTED("Corrupted", ModifierCategoryTooltip::modifyCorruptedTooltip, VaultMod.id("textures/item/gear/corrupted_overlay.png")),
+      GREATER("Greater", ModifierCategoryTooltip::modifyGreaterTooltip, VaultMod.id("textures/item/gear/greater_overlay.png"));
 
       private final String descriptor;
       private final Function<MutableComponent, MutableComponent> modifierFormatter;
@@ -317,6 +341,10 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
       public boolean cannotBeRolledByArtisanFoci() {
          return this == CRAFTED;
+      }
+
+      public boolean onlyDisplayCurrentTierInformation() {
+         return this == LEGENDARY || this == CORRUPTED || this == GREATER;
       }
 
       @Nullable
@@ -412,6 +440,49 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
       public static VaultGearModifier.AffixType[] explicits() {
          return EXPLICITS;
+      }
+   }
+
+   public static class ComparableModifier<T> implements Comparable<VaultGearModifier.ComparableModifier<T>> {
+      private final VaultGearModifier<T> modifier;
+      private final Comparator<T> comparator;
+
+      public ComparableModifier(VaultGearModifier<T> modifier, Comparator<T> comparator) {
+         this.modifier = modifier;
+         this.comparator = comparator;
+      }
+
+      public VaultGearModifier<T> getModifier() {
+         return this.modifier;
+      }
+
+      public int compareTo(@Nonnull VaultGearModifier.ComparableModifier<T> o) {
+         return this.comparator.compare(this.modifier.getValue(), o.modifier.getValue());
+      }
+   }
+
+   public static class Serializer implements VaultGearAttributeSerializer.AttributeInstanceSerializer<VaultGearModifier<?>> {
+      @Override
+      public boolean accepts(VaultGearAttributeInstance<?> instance) {
+         return instance instanceof VaultGearModifier;
+      }
+
+      @Nullable
+      public VaultGearModifier<?> deserialize(CompoundTag tag, GearDataVersion version) {
+         return this.deserializeInto(tag, version, VaultGearModifier::new);
+      }
+
+      @Nullable
+      public VaultGearModifier<?> deserialize(BitBuffer buf, GearDataVersion version) {
+         return this.deserializeInto(buf, version, VaultGearModifier::new);
+      }
+
+      public void serialize(VaultGearModifier<?> instance, CompoundTag tag) {
+         this.serializeInto(instance, tag);
+      }
+
+      public void serialize(VaultGearModifier<?> instance, BitBuffer buf) {
+         this.serializeInto(instance, buf);
       }
    }
 }

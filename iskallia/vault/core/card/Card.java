@@ -27,14 +27,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
 public class Card implements ISerializable<CompoundTag, JsonObject> {
    public static final SerializableAdapter<Card, CompoundTag, JsonObject> ADAPTER = Adapters.of(Card::new, true);
    public static Set<String> TYPES = new HashSet<>(Arrays.asList("Arcane", "Temporal", "Resource", "Evolution", "Stat", "Wild"));
-   private ItemStack delegate;
    private int tier;
    private List<CardEntry> entries;
    public static final ArrayAdapter<CardEntry> ENTRIES = Adapters.ofArray(CardEntry[]::new, Adapters.of(CardEntry::new, false));
@@ -47,14 +45,6 @@ public class Card implements ISerializable<CompoundTag, JsonObject> {
    public Card(int tier, List<CardEntry> entries) {
       this.tier = tier;
       this.entries = entries;
-   }
-
-   public ItemStack getDelegate() {
-      return this.delegate;
-   }
-
-   public void setDelegate(ItemStack delegate) {
-      this.delegate = delegate;
    }
 
    public int getTier() {

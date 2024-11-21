@@ -25,7 +25,7 @@ public class JewelAnvilRecipe extends VanillaAnvilRecipe {
       ItemStack secondary = context.getInput()[1];
       if (primary.getItem() == ModItems.TOOL && secondary.getItem() == ModItems.JEWEL) {
          ItemStack output = primary.copy();
-         if (!ToolItem.applyJewel(output, secondary)) {
+         if (!ToolItem.applyJewel(output, secondary, true)) {
             return false;
          } else {
             context.setOutput(output);
@@ -49,7 +49,7 @@ public class JewelAnvilRecipe extends VanillaAnvilRecipe {
          List<ItemStack> secondary = new ArrayList<>();
          List<ItemStack> output = new ArrayList<>();
          ItemStack jewel = JewelItem.create(data -> {
-            data.setRarity(VaultGearRarity.UNIQUE);
+            data.setRarity(VaultGearRarity.OMEGA);
             data.setState(VaultGearState.IDENTIFIED);
             data.addModifier(VaultGearModifier.AffixType.IMPLICIT, new VaultGearModifier<>(ModGearAttributes.JEWEL_SIZE, 10));
             data.addModifier(VaultGearModifier.AffixType.SUFFIX, modifier);
@@ -59,7 +59,7 @@ public class JewelAnvilRecipe extends VanillaAnvilRecipe {
             for (ToolMaterial material : ToolMaterial.values()) {
                ItemStack tool = ToolItem.create(material, type);
                ItemStack result = tool.copy();
-               if (ToolItem.applyJewel(result, jewel) && ToolType.of(tool) != ToolType.of(result)) {
+               if (ToolItem.applyJewel(result, jewel, true) && ToolType.of(tool) != ToolType.of(result)) {
                   primary.add(tool);
                   output.add(result);
                }

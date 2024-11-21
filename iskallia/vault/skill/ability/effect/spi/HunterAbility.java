@@ -12,10 +12,6 @@ import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePlacement;
 import iskallia.vault.core.world.data.tile.TilePredicate;
-import iskallia.vault.gear.attribute.ability.special.HunterRangeModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
@@ -26,6 +22,7 @@ import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,16 +102,8 @@ public class HunterAbility extends InstantManaAbility {
 
    public double getRadius(Entity attacker) {
       double realRadius = this.getUnmodifiedSearchRadius();
-      if (attacker instanceof Player player) {
-         for (ConfiguredModification<FloatValueConfig, HunterRangeModification> mod : SpecialAbilityModification.getModifications(
-            player, HunterRangeModification.class
-         )) {
-            realRadius = mod.modification().adjustRange(mod.config(), realRadius);
-         }
-      }
-
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, (float)realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, (float)realRadius);
       }
 
       return realRadius;
@@ -124,13 +113,13 @@ public class HunterAbility extends InstantManaAbility {
       return this.color;
    }
 
-   public int getDurationTicks() {
+   public int getUnmodifiedDurationTicks() {
       return this.durationTicks;
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Hunter";
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getUnmodifiedDurationTicks();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    @Override
@@ -147,7 +136,9 @@ public class HunterAbility extends InstantManaAbility {
                if (!(player.getCommandSenderWorld() instanceof ServerLevel serverWorld)) {
                   return Ability.ActionResult.fail();
                } else {
-                  for (int delay = 0; delay < this.getDurationTicks() / 5; delay++) {
+                  int duration = this.getDurationTicks(player);
+
+                  for (int delay = 0; delay < duration / 5; delay++) {
                      ServerScheduler.INSTANCE
                         .schedule(
                            delay * 5,
@@ -189,32 +180,41 @@ public class HunterAbility extends InstantManaAbility {
          );
    }
 
-   public static List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
-      return selectPositions(world, player, radius, tile -> getHighlightType(tile).map(type -> new HunterAbility.HighlightPosition(tile.getPos(), type, -1)));
+   public static List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, Player player, double radius) {
+      return selectPositions(world, player.blockPosition(), radius);
+   }
+
+   public static List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, BlockPos offset, double radius) {
+      return selectPositions(world, offset, radius, tile -> getHighlightType(tile).map(type -> new HunterAbility.HighlightPosition(tile.getPos(), type, -1)));
    }
 
    public static List<HunterAbility.HighlightPosition> selectPositions(
-      ServerLevel world, ServerPlayer player, double radius, Function<PartialTile, Optional<HunterAbility.HighlightPosition>> getHighlightPosition
+      ServerLevel world, Player player, double radius, Function<PartialTile, Optional<HunterAbility.HighlightPosition>> getHighlightPosition
+   ) {
+      return selectPositions(world, player.blockPosition(), radius, getHighlightPosition);
+   }
+
+   public static List<HunterAbility.HighlightPosition> selectPositions(
+      ServerLevel world, BlockPos offset, double radius, Function<PartialTile, Optional<HunterAbility.HighlightPosition>> getHighlightPosition
    ) {
       List<HunterAbility.HighlightPosition> result = new ArrayList<>();
-      forEachTile(world, player, radius, tile -> getHighlightPosition.apply(tile).ifPresent(result::add));
+      forEachTile(world, offset, radius, tile -> getHighlightPosition.apply(tile).ifPresent(result::add));
       return result;
    }
 
-   private static void forEachTile(Level world, Player player, double radius, Consumer<PartialTile> consumer) {
-      BlockPos playerOffset = player.blockPosition();
+   private static void forEachTile(Level world, BlockPos offset, double radius, Consumer<PartialTile> consumer) {
       double radiusSq = radius * radius;
       int iRadius = Mth.ceil(radius);
       Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);
-      ChunkPos posMin = new ChunkPos(player.blockPosition().subtract(radVec));
-      ChunkPos posMax = new ChunkPos(player.blockPosition().offset(radVec));
+      ChunkPos posMin = new ChunkPos(offset.subtract(radVec));
+      ChunkPos posMax = new ChunkPos(offset.offset(radVec));
 
       for (int xx = posMin.x; xx <= posMax.x; xx++) {
          for (int zz = posMin.z; zz <= posMax.z; zz++) {
             LevelChunk ch = world.getChunkSource().getChunkNow(xx, zz);
             if (ch != null) {
                ch.getBlockEntities().forEach((pos, tile) -> {
-                  if (tile != null && pos.distSqr(playerOffset) <= radiusSq) {
+                  if (tile != null && pos.distSqr(offset) <= radiusSq) {
                      consumer.accept(PartialTile.at(world, pos));
                   }
                });

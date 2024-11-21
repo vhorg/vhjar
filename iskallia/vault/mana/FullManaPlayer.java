@@ -9,7 +9,7 @@ public class FullManaPlayer implements ManaPlayer {
    }
 
    @Override
-   public float setMana(float amount) {
+   public float setMana(ManaAction action, float amount) {
       return Float.MAX_VALUE;
    }
 
@@ -24,12 +24,12 @@ public class FullManaPlayer implements ManaPlayer {
    }
 
    @Override
-   public float increaseMana(float amount) {
+   public float increaseMana(ManaAction action, float amount) {
       return Float.MAX_VALUE;
    }
 
    @Override
-   public float decreaseMana(float amount) {
+   public float decreaseMana(ManaAction action, float amount) {
       return Float.MAX_VALUE;
    }
 }

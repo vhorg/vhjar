@@ -3,8 +3,6 @@ package iskallia.vault.client.util;
 import iskallia.vault.VaultMod;
 import iskallia.vault.client.util.color.ColorThief;
 import iskallia.vault.client.util.color.ColorUtil;
-import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.init.ModBlocks;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -36,31 +34,17 @@ public class ColorizationHelper {
       if (stack.isEmpty()) {
          return Optional.empty();
       } else {
-         Optional<Color> override = getCustomColorOverride(stack);
-         if (override.isPresent()) {
-            return override;
-         } else {
-            Item i = stack.getItem();
-            if (!itemColors.containsKey(i)) {
-               TextureAtlasSprite tas = getParticleTexture(stack);
-               if (tas != null) {
-                  itemColors.put(i, getDominantColor(tas));
-               } else {
-                  itemColors.put(i, Optional.empty());
-               }
+         Item i = stack.getItem();
+         if (!itemColors.containsKey(i)) {
+            TextureAtlasSprite tas = getParticleTexture(stack);
+            if (tas != null) {
+               itemColors.put(i, getDominantColor(tas));
+            } else {
+               itemColors.put(i, Optional.empty());
             }
-
-            return itemColors.get(i).map(c -> ColorUtil.overlayColor(c, new Color(ColorUtil.getOverlayColor(stack))));
          }
-      }
-   }
 
-   public static Optional<Color> getCustomColorOverride(ItemStack stack) {
-      Item i = stack.getItem();
-      if (i == ModBlocks.VAULT_PLATINUM) {
-         return Optional.of(new Color(16705664));
-      } else {
-         return i instanceof VaultGearItem ? Optional.of(Color.getHSBColor(rand.nextFloat(), 1.0F, 1.0F)) : Optional.empty();
+         return itemColors.get(i).map(c -> ColorUtil.overlayColor(c, new Color(ColorUtil.getOverlayColor(stack))));
       }
    }
 

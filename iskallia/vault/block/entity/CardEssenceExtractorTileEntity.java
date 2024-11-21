@@ -1,8 +1,11 @@
 package iskallia.vault.block.entity;
 
+import iskallia.vault.config.CardEssenceExtractorConfig;
 import iskallia.vault.core.card.Card;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.CardDeckItem;
 import iskallia.vault.item.CardItem;
 import iskallia.vault.util.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
@@ -68,10 +71,18 @@ public class CardEssenceExtractorTileEntity extends BlockEntity {
 
    private void extractCardEssence() {
       ItemStack essenceInputStack = this.getEssenceInputStack();
-      if (!essenceInputStack.isEmpty() && essenceInputStack.getItem() instanceof CardItem) {
-         Card card = CardItem.getCard(essenceInputStack);
-         int tier = card.getTier();
-         ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(tier).ifPresent(cfg -> this.essence = this.essence + cfg.getEssencePerCard().getRandom());
+      if (!essenceInputStack.isEmpty()) {
+         if (essenceInputStack.is(ModItems.CARD)) {
+            Card card = CardItem.getCard(essenceInputStack);
+            int tier = card.getTier();
+            ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(tier).ifPresent(cfg -> this.essence = this.essence + cfg.getEssencePerCard().getRandom());
+         }
+
+         if (essenceInputStack.is(ModItems.CARD_DECK)) {
+            String id = CardDeckItem.getId(essenceInputStack);
+            ModConfigs.CARD_DECK.getEssence(id).ifPresent(essence -> this.essence = this.essence + essence);
+         }
+
          essenceInputStack.shrink(1);
          this.setEssenceInputStack(essenceInputStack);
          this.level
@@ -90,15 +101,24 @@ public class CardEssenceExtractorTileEntity extends BlockEntity {
 
    public void startExtract() {
       ItemStack essenceInputStack = this.getEssenceInputStack();
-      if (!essenceInputStack.isEmpty() && essenceInputStack.getItem() instanceof CardItem) {
-         if (this.extractWorkTick < 0) {
-            Card card = CardItem.getCard(essenceInputStack);
-            int tier = card.getTier();
-            ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(tier).ifPresent(cfg -> {
-               this.extractWorkTick = cfg.getExtractTickTime();
-               this.maxExtractWorkTick = cfg.getExtractTickTime();
-               this.sendUpdates();
-            });
+      if (!essenceInputStack.isEmpty()) {
+         if (essenceInputStack.is(ModItems.CARD) || essenceInputStack.is(ModItems.CARD_DECK)) {
+            if (this.extractWorkTick < 0) {
+               int extractTime = -1;
+               if (essenceInputStack.is(ModItems.CARD)) {
+                  Card card = CardItem.getCard(essenceInputStack);
+                  int tier = card.getTier();
+                  extractTime = ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(tier).map(CardEssenceExtractorConfig.TierConfig::getExtractTickTime).orElse(-1);
+               } else if (essenceInputStack.is(ModItems.CARD_DECK)) {
+                  extractTime = ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(1).map(CardEssenceExtractorConfig.TierConfig::getExtractTickTime).orElse(-1);
+               }
+
+               if (extractTime > 0) {
+                  this.extractWorkTick = extractTime;
+                  this.maxExtractWorkTick = extractTime;
+                  this.sendUpdates();
+               }
+            }
          }
       }
    }

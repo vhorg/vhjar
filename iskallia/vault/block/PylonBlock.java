@@ -6,7 +6,7 @@ import iskallia.vault.effect.PylonEffect;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.network.message.PylonConsumeParticleMessage;
+import iskallia.vault.network.message.AbsorbingParticleMessage;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerPylons;
 import iskallia.vault.world.data.ServerVaults;
@@ -84,8 +84,8 @@ public class PylonBlock extends Block implements EntityBlock {
             world.playSound(null, pos, SoundEvents.CONDUIT_ACTIVATE, SoundSource.BLOCKS, 1.0F, 2.0F);
             ModNetwork.CHANNEL
                .send(
-                  PacketDistributor.ALL.noArg(),
-                  new PylonConsumeParticleMessage(new Vec3(pos.getX(), pos.getY(), pos.getZ()), player.getId(), pylon.config.getColor())
+                  PacketDistributor.DIMENSION.with(world::dimension),
+                  new AbsorbingParticleMessage(new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), player, pylon.config.getColor())
                );
             PylonEffect effect;
             if (player.hasEffect(ModEffects.PYLON)) {

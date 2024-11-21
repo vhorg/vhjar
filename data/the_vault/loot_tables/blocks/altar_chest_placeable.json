@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "the_vault:altar_chest_placeable"
+          "name": "the_vault:altar_chest"
         }
       ],
       "conditions": [

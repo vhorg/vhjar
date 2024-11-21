@@ -1,6 +1,5 @@
 package iskallia.vault.client.gui.screen.block.base;
 
-import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import iskallia.vault.block.entity.base.ForgeRecipeTileEntity;
@@ -18,8 +17,10 @@ import iskallia.vault.client.gui.framework.render.ScreenTooltipRenderer;
 import iskallia.vault.client.gui.framework.render.TooltipDirection;
 import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
+import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.overlay.VaultBarOverlay;
+import iskallia.vault.container.slot.RecipeOutputSlot;
 import iskallia.vault.container.spi.ForgeRecipeContainer;
 import iskallia.vault.gear.crafting.recipe.VaultForgeRecipe;
 import iskallia.vault.init.ModConfigs;
@@ -30,8 +31,10 @@ import iskallia.vault.util.function.ObservableSupplier;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -43,11 +46,11 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity, T extends ForgeRecipeContainer<V>> extends AbstractElementContainerScreen<T> {
-   private final ButtonElement<?> craftButton;
-   private final Inventory playerInventory;
-   private final CraftingSelectorElement<?> craftingSelectorElement;
-   private final TextInputElement<?> levelInput;
-   private VaultForgeRecipe selectedRecipe = null;
+   protected final ButtonElement<?> craftButton;
+   protected final Inventory playerInventory;
+   protected final CraftingSelectorElement<?> craftingSelectorElement;
+   protected final TextInputElement<?> levelInput;
+   protected VaultForgeRecipe selectedRecipe = null;
 
    public ForgeRecipeContainerScreen(T container, Inventory inventory, Component title, int height) {
       this(container, inventory, title, height, 176);
@@ -80,29 +83,34 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
                )
                .layout((screen, gui, parent, world) -> world.translateXY(gui))
          );
-         List<Slot> normalSlots = ((ForgeRecipeContainer)this.getMenu()).slots;
+         List<Slot> allSlots = ((ForgeRecipeContainer)this.getMenu()).slots;
+         List<Slot> normalSlots = allSlots.stream().filter(slot -> !(slot instanceof RecipeOutputSlot)).collect(Collectors.toList());
          this.addElement(
-            (SlotsElement)new SlotsElement(Spatials.zero(), normalSlots.subList(0, normalSlots.size() - 1), ScreenTextures.INSET_ITEM_SLOT_BACKGROUND)
+            (SlotsElement)new SlotsElement(Spatials.zero(), normalSlots, ScreenTextures.INSET_ITEM_SLOT_BACKGROUND)
                .layout((screen, gui, parent, world) -> world.positionXY(gui))
          );
-         this.addElement(
-            (OutputSlotElement)new OutputSlotElement(
-                  Spatials.zero(), (Slot)Iterables.getLast(normalSlots), ScreenTextures.INSET_CRAFTING_RESULT_SLOT_BACKGROUND
-               )
-               .layout((screen, gui, parent, world) -> world.positionXY(gui))
+         allSlots.forEach(
+            slot -> {
+               if (slot instanceof RecipeOutputSlot) {
+                  this.addElement(
+                     (OutputSlotElement)new OutputSlotElement(Spatials.zero(), slot, ScreenTextures.INSET_CRAFTING_RESULT_SLOT_BACKGROUND)
+                        .layout((screen, gui, parent, world) -> world.positionXY(gui))
+                  );
+               }
+            }
          );
          this.craftingSelectorElement = this.addElement(this.createCraftingSelector());
          int offsetX = ((ForgeRecipeContainer)this.getMenu()).getOffset().x;
          int offsetY = ((ForgeRecipeContainer)this.getMenu()).getOffset().y;
          this.addElement(
             this.craftButton = new ButtonElement(
-                  Spatials.positionXY(this.craftingSelectorElement.right() + 3, height - 133), ScreenTextures.BUTTON_CRAFT_TEXTURES, this::onCraftClick
+                  Spatials.positionXY(this.craftingSelectorElement.right() + 3, offsetY + 17), ScreenTextures.BUTTON_CRAFT_TEXTURES, this::onCraftClick
                )
                .layout((screen, gui, parent, world) -> world.translateXY(gui))
          );
          this.craftButton.setDisabled(true);
          this.levelInput = ((TextInputElement)this.addElement(
-               (TextInputElement)new TextInputElement(Spatials.positionXY(143, offsetY - 1).size(26, 12), Minecraft.getInstance().font)
+               (TextInputElement)new TextInputElement(Spatials.copy(this.getLevelInputOffset()).size(26, 12), Minecraft.getInstance().font)
                   .layout((screen, gui, parent, world) -> world.translateXY(gui))
             ))
             .adjustEditBox(editBox -> {
@@ -134,6 +142,11 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
             }
          });
       }
+   }
+
+   protected ISpatial getLevelInputOffset() {
+      int offsetY = ((ForgeRecipeContainer)this.getMenu()).getOffset().y;
+      return Spatials.positionXY(143, offsetY - 1);
    }
 
    protected void addBackgroundElement() {
@@ -199,8 +212,9 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
          }
 
          int offsetX = ((ForgeRecipeContainer)this.getMenu()).getOffset().x;
+         int offsetY = ((ForgeRecipeContainer)this.getMenu()).getOffset().y;
          return new CraftingSelectorElement(
-               Spatials.positionXY(offsetX + slotWidth * 18 + 3, this.imageHeight - 151).height(54),
+               Spatials.positionXY(offsetX + slotWidth * 18 + 3, offsetY - 1).height(54),
                3,
                recipes,
                discoveredRecipes,
@@ -217,7 +231,7 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
 
    private void onCraftClick() {
       if (this.selectedRecipe != null) {
-         ModNetwork.CHANNEL.sendToServer(new VaultForgeRequestCraftMessage(this.selectedRecipe.getId(), this.getCraftedLevel()));
+         ModNetwork.CHANNEL.sendToServer(new VaultForgeRequestCraftMessage(this.selectedRecipe.getId(), this.getCraftedLevel(), Screen.hasShiftDown()));
       }
    }
 

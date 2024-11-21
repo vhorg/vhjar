@@ -152,8 +152,12 @@ public class VaultStormEntity extends Entity {
       return this.frostbiteChance;
    }
 
-   public void setIdType(int type) {
-      this.entityData.set(ID_TYPE, type);
+   public void setStormArrowType(VaultStormArrow.StormType type) {
+      this.entityData.set(ID_TYPE, type.ordinal());
+   }
+
+   public VaultStormArrow.StormType getStormArrowType() {
+      return VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE));
    }
 
    public int getDuration() {
@@ -196,6 +200,7 @@ public class VaultStormEntity extends Entity {
 
    public void tick() {
       super.tick();
+      VaultStormArrow.StormType stormArrowType = this.getStormArrowType();
       if (this.level.isClientSide()) {
          for (int i = 0; i < 6.0F * this.entityData.get(RADIUS); i++) {
             Vec3 vec3 = generatePointInCircle(this.position(), (Float)this.entityData.get(RADIUS) + 0.5F, this.tickCount / 50.0F, this.random, false);
@@ -203,7 +208,7 @@ public class VaultStormEntity extends Entity {
             Particle particle = pm.createParticle(
                (ParticleOptions)ModParticles.STORM_CLOUD.get(), vec3.x(), vec3.y() + this.random.nextDouble() * 0.4F, vec3.z(), 0.0, 0.0, 0.0
             );
-            if (VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE)) == VaultStormArrow.StormType.BLIZZARD && particle != null) {
+            if (stormArrowType == VaultStormArrow.StormType.BLIZZARD && particle != null) {
                float f = this.random.nextFloat() * 0.1F;
                particle.setColor(0.6F + f, 0.7F + f, 0.9F + f);
             }
@@ -211,9 +216,9 @@ public class VaultStormEntity extends Entity {
 
          for (int ix = 0; ix < this.entityData.get(RADIUS) / 4.0F; ix++) {
             Vec3 vec3 = generatePointInCircle(this.position(), (Float)this.entityData.get(RADIUS) + 0.5F, this.tickCount / 50.0F, this.random, true);
-            if (VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE)) == VaultStormArrow.StormType.BASE) {
+            if (stormArrowType == VaultStormArrow.StormType.BASE) {
                this.level.addParticle(ParticleTypes.FALLING_WATER, vec3.x(), vec3.y() + this.random.nextDouble() * 0.4F, vec3.z(), 0.0, 0.0, 0.0);
-            } else if (VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE)) == VaultStormArrow.StormType.BLIZZARD) {
+            } else if (stormArrowType == VaultStormArrow.StormType.BLIZZARD) {
                this.level.addParticle(ParticleTypes.SNOWFLAKE, vec3.x(), vec3.y() + this.random.nextDouble() * 0.4F, vec3.z(), 0.0, 0.0, 0.0);
             }
          }
@@ -221,7 +226,7 @@ public class VaultStormEntity extends Entity {
          if (this.intervalTicks > 0) {
             this.intervalTicks--;
          } else if (this.getOwner() instanceof Player player) {
-            if (VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE)) == VaultStormArrow.StormType.BASE) {
+            if (stormArrowType == VaultStormArrow.StormType.BASE) {
                DamageSource srcPlayerAttack = DamageSource.playerAttack(player);
                ArrayList<LivingEntity> result = new ArrayList<>();
                getEntitiesInRange(player.level, this.position(), this.radius, ENTITY_PREDICATE, result, 14.0F);
@@ -255,7 +260,7 @@ public class VaultStormEntity extends Entity {
                         1.0F + Mth.randomBetween(livingEntity.getRandom(), -0.2F, 0.2F)
                      );
                }
-            } else if (VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE)) == VaultStormArrow.StormType.BLIZZARD) {
+            } else if (stormArrowType == VaultStormArrow.StormType.BLIZZARD) {
                ArrayList<LivingEntity> result = new ArrayList<>();
                getEntitiesInRange(player.level, this.position(), this.radius, ENTITY_PREDICATE, result, 14.0F);
                result.removeIf(entity -> entity instanceof EternalEntity);

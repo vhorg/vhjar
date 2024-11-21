@@ -24,7 +24,9 @@ public class AbsorptionBottleEffect extends BottleEffect {
 
    @Override
    public void trigger(ServerPlayer player) {
-      player.setAbsorptionAmount(player.getAbsorptionAmount() + this.amount);
+      if (player.getAbsorptionAmount() < this.amount) {
+         player.setAbsorptionAmount(this.amount);
+      }
    }
 
    @Override

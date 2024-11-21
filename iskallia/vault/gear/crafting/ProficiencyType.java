@@ -10,6 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 
+@Deprecated
 public enum ProficiencyType {
    HELMET(() -> ModItems.HELMET.defaultItem()),
    CHESTPLATE(() -> ModItems.CHESTPLATE.defaultItem()),

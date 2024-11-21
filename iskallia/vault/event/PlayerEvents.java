@@ -5,6 +5,9 @@ import iskallia.vault.block.AnimatrixBlock;
 import iskallia.vault.block.CoinPileDecorBlock;
 import iskallia.vault.block.entity.AnimatrixTileEntity;
 import iskallia.vault.block.entity.VaultChestTileEntity;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.world.storage.IZonedWorld;
+import iskallia.vault.core.world.storage.WorldZone;
 import iskallia.vault.entity.entity.AncientCopperConduitItemEntity;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.FighterEntity;
@@ -22,6 +25,7 @@ import iskallia.vault.item.AnimalJarItem;
 import iskallia.vault.item.gear.CharmItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.network.message.FighterSizeMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
 import iskallia.vault.patreon.PatreonManager;
@@ -338,7 +342,7 @@ public class PlayerEvents {
       if (event.side == LogicalSide.SERVER && event.phase == Phase.START) {
          event.player.getAttribute(ModAttributes.MANA_MAX).setBaseValue(ModConfigs.MANA.getManaMax());
          event.player.getAttribute(ModAttributes.MANA_REGEN).setBaseValue(ModConfigs.MANA.getManaRegenPerSecond());
-         Mana.increase(event.player, Mana.getRegenPerSecond(event.player) * 0.05F);
+         Mana.increase(event.player, ManaAction.MANA_REGENERATION, Mana.getRegenPerSecond(event.player) * 0.05F);
       }
    }
 
@@ -387,7 +391,38 @@ public class PlayerEvents {
    @SubscribeEvent
    public static void on(Clone event) {
       if (event.getPlayer() instanceof ServerPlayer player && !event.isWasDeath()) {
-         Mana.set(player, Mana.get(event.getOriginal()));
+         Mana.set(player, ManaAction.SYSTEM, Mana.get(event.getOriginal()));
       }
+   }
+
+   static {
+      CommonEvents.PLAYER_MINE.register(PlayerEvents.class, event -> {
+         IZonedWorld proxy = IZonedWorld.of(event.getWorld()).orElse(null);
+         if (proxy != null) {
+            List<WorldZone> zones = proxy.getZones().get(event.getPos());
+            if (!zones.isEmpty()) {
+               for (WorldZone zone : zones) {
+                  if (zone.canModify() == Boolean.FALSE) {
+                     event.setCanceled(true);
+                     return;
+                  }
+               }
+            }
+         }
+      });
+      CommonEvents.ENTITY_PLACE.register(PlayerEvents.class, event -> {
+         IZonedWorld proxy = IZonedWorld.of(event.getWorld()).orElse(null);
+         if (proxy != null) {
+            List<WorldZone> zones = proxy.getZones().get(event.getPos());
+            if (!zones.isEmpty()) {
+               for (WorldZone zone : zones) {
+                  if (zone.canModify() == Boolean.FALSE) {
+                     event.setCanceled(true);
+                     return;
+                  }
+               }
+            }
+         }
+      });
    }
 }

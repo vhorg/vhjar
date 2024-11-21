@@ -9,6 +9,7 @@ import iskallia.vault.block.entity.hologram.RootHologramElement;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.DirectAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.TemplatePoolKey;
@@ -25,6 +26,7 @@ import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.VaultGenerator;
 import iskallia.vault.core.world.generator.layout.ArchitectRoomEntry;
 import iskallia.vault.core.world.generator.layout.ClassicInfiniteLayout;
+import iskallia.vault.core.world.generator.layout.VaultGridLayout;
 import iskallia.vault.core.world.generator.layout.VaultLayout;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
@@ -59,6 +61,18 @@ public class ArchitectObjective extends Objective {
       .register(FIELDS);
    public static final FieldKey<StructurePreset> PRESET = FieldKey.of("preset", StructurePreset.class)
       .with(Version.v1_26, Adapters.of(StructurePreset::new, true), DISK.all())
+      .with(
+         Version.v1_30,
+         new DirectAdapter<>(
+            (value, buffer, context) -> Adapters.COMPOUND_NBT.asNullable().writeBits(value == null ? null : value.writeNbt().orElse(null), buffer),
+            (buffer, context) -> Adapters.COMPOUND_NBT.asNullable().readBits(buffer).map(nbt -> {
+               StructurePreset preset = new StructurePreset();
+               preset.readNbt(nbt);
+               return preset;
+            })
+         ),
+         DISK.all()
+      )
       .register(FIELDS);
 
    protected ArchitectObjective() {
@@ -84,7 +98,7 @@ public class ArchitectObjective extends Objective {
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
       VaultGenerator generator = vault.get(Vault.WORLD).get(WorldManager.GENERATOR);
-      VaultLayout layout = generator instanceof GridGenerator grid ? (grid.get(GridGenerator.LAYOUT) instanceof VaultLayout l ? l : null) : null;
+      VaultGridLayout layout = generator instanceof GridGenerator grid ? (grid.get(GridGenerator.LAYOUT) instanceof VaultGridLayout l ? l : null) : null;
       List<TemplatePoolKey> entries = this.get(ROOM_ENTRIES).flatten(layout);
       JavaRandom random = JavaRandom.ofScrambled(vault.get(Vault.SEED));
       Collections.shuffle(entries, random.asRandomView());
@@ -136,10 +150,15 @@ public class ArchitectObjective extends Objective {
             }
 
             weightedRings.getRandom(random).ifPresent(ringIndex -> {
-               List<RegionPos> ring = new ArrayList<>(rings.get(ringIndex));
-               preset.put(ring.remove(random.nextInt(ring.size())), new PoolKeyTemplatePreset(entry));
-               if (ring.isEmpty()) {
-                  rings.remove(ringIndex);
+               Set<RegionPos> ring = rings.get(ringIndex);
+               int randomEntry = random.nextInt(ring.size());
+               RegionPos randomPos = ring.stream().skip(randomEntry).findFirst().orElse(null);
+               if (randomPos != null) {
+                  ring.remove(randomPos);
+                  preset.put(randomPos, new PoolKeyTemplatePreset(entry));
+                  if (ring.isEmpty()) {
+                     rings.remove(ringIndex);
+                  }
                }
             });
             entries.remove(ix);

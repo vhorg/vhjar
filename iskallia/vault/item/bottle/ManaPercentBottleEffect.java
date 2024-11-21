@@ -1,6 +1,7 @@
 package iskallia.vault.item.bottle;
 
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -27,7 +28,7 @@ public class ManaPercentBottleEffect extends BottleEffect {
    public void trigger(ServerPlayer player) {
       float current = Mana.get(player);
       float total = Mana.getMax(player);
-      Mana.set(player, Math.min(total, this.amount * total + current));
+      Mana.set(player, ManaAction.PLAYER_ACTION, Math.min(total, this.amount * total + current));
    }
 
    @Override

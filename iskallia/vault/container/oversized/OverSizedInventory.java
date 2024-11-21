@@ -1,7 +1,9 @@
 package iskallia.vault.container.oversized;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -12,17 +14,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class OverSizedInventory implements Container {
-   public static final OverSizedInventory EMPTY = new OverSizedInventory(0, () -> {}, player -> false);
+   public static final OverSizedInventory EMPTY = new OverSizedInventory(0, stacks -> {}, player -> false);
    private final NonNullList<OverSizedItemStack> contents;
-   private final Runnable onChange;
+   private final Consumer<NonNullList<OverSizedItemStack>> onChange;
    private final Predicate<Player> stillValid;
 
    public OverSizedInventory(int size, BlockEntity tile) {
-      this(size, tile::setChanged, player -> stillValidTile().test(tile, player));
+      this(size, stacks -> tile.setChanged(), player -> stillValidTile().test(tile, player));
    }
 
-   public OverSizedInventory(int size, Runnable onChange, Predicate<Player> stillValid) {
-      this.contents = NonNullList.withSize(size, OverSizedItemStack.EMPTY);
+   public OverSizedInventory(int size, Consumer<NonNullList<OverSizedItemStack>> onChange, Predicate<Player> stillValid) {
+      this(NonNullList.withSize(size, OverSizedItemStack.EMPTY), onChange, stillValid);
+   }
+
+   public OverSizedInventory(NonNullList<OverSizedItemStack> contents, Consumer<NonNullList<OverSizedItemStack>> onChange, Predicate<Player> stillValid) {
+      this.contents = contents;
       this.onChange = onChange;
       this.stillValid = stillValid;
    }
@@ -41,6 +47,13 @@ public class OverSizedInventory implements Container {
          : player.distanceToSqr(tile.getBlockPos().getX() + 0.5, tile.getBlockPos().getY() + 0.5, tile.getBlockPos().getZ() + 0.5) <= 64.0;
    }
 
+   public static Predicate<Player> stillValidInventorySlot(int invSlot, Predicate<ItemStack> stackPredicate) {
+      return player -> {
+         ItemStack stack = player.getInventory().getItem(invSlot);
+         return stackPredicate.test(stack);
+      };
+   }
+
    public void load(CompoundTag tag) {
       this.load("items", tag);
    }
@@ -54,6 +67,25 @@ public class OverSizedInventory implements Container {
          int slot = stackTag.getInt("slot");
          this.contents.set(slot, OverSizedItemStack.deserialize(stackTag.getCompound("stack")));
       }
+   }
+
+   public static List<OverSizedItemStack> loadContents(CompoundTag tag) {
+      return loadContents("items", tag);
+   }
+
+   public static List<OverSizedItemStack> loadContents(String key, CompoundTag tag) {
+      List<OverSizedItemStack> stacks = new ArrayList<>();
+      ListTag items = tag.getList(key, 10);
+
+      for (int i = 0; i < items.size(); i++) {
+         CompoundTag stackTag = items.getCompound(i);
+         OverSizedItemStack stack = OverSizedItemStack.deserialize(stackTag.getCompound("stack"));
+         if (stack.amount() > 0) {
+            stacks.add(stack);
+         }
+      }
+
+      return stacks;
    }
 
    public void save(CompoundTag tag) {
@@ -120,7 +152,7 @@ public class OverSizedInventory implements Container {
    }
 
    public void setChanged() {
-      this.onChange.run();
+      this.onChange.accept(this.getOverSizedContents());
    }
 
    public boolean stillValid(Player pPlayer) {
@@ -139,7 +171,9 @@ public class OverSizedInventory implements Container {
          this.canInsert = canInsert;
       }
 
-      public FilteredInsert(int size, Runnable onChange, Predicate<Player> stillValid, BiPredicate<Integer, ItemStack> canInsert) {
+      public FilteredInsert(
+         int size, Consumer<NonNullList<OverSizedItemStack>> onChange, Predicate<Player> stillValid, BiPredicate<Integer, ItemStack> canInsert
+      ) {
          super(size, onChange, stillValid);
          this.canInsert = canInsert;
       }

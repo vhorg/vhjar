@@ -117,10 +117,17 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
                      }
                   }
 
-                  String affix = this.modifier.getAffixGroup().getTargetAffixType().getSingular();
-                  MutableComponent cmp = new TextComponent("Item has no open " + affix).withStyle(ChatFormatting.RED);
-                  tooltipRenderer.renderTooltip(poseStack, cmp, mouseX, mouseY, TooltipDirection.RIGHT);
-                  return true;
+                  VaultGearModifier.AffixType affixType = this.modifier.getAffixGroup().getTargetAffixType();
+                  if (affixType == null) {
+                     MutableComponent cmp = new TextComponent("This modifier cannot be applied.").withStyle(ChatFormatting.RED);
+                     tooltipRenderer.renderTooltip(poseStack, cmp, mouseX, mouseY, TooltipDirection.RIGHT);
+                     return true;
+                  } else {
+                     String affix = affixType.getSingular();
+                     MutableComponent cmp = new TextComponent("Item has no open " + affix).withStyle(ChatFormatting.RED);
+                     tooltipRenderer.renderTooltip(poseStack, cmp, mouseX, mouseY, TooltipDirection.RIGHT);
+                     return true;
+                  }
                }
             }
          });
@@ -171,9 +178,13 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
          ItemStack inputCopy = this.gearStack.copy();
          ModifierWorkbenchHelper.removeCraftedModifiers(inputCopy);
          VaultGearModifier.AffixType affixType = this.modifier.getAffixGroup().getTargetAffixType();
-         return affixType == VaultGearModifier.AffixType.PREFIX
-            ? VaultGearModifierHelper.hasOpenPrefix(inputCopy)
-            : VaultGearModifierHelper.hasOpenSuffix(inputCopy);
+         if (affixType == null) {
+            return false;
+         } else {
+            return affixType == VaultGearModifier.AffixType.PREFIX
+               ? VaultGearModifierHelper.hasOpenPrefix(inputCopy)
+               : VaultGearModifierHelper.hasOpenSuffix(inputCopy);
+         }
       }
 
       private boolean hasGroupApplied() {
@@ -194,6 +205,7 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
             && !this.gearStack.isEmpty()
             && this.modifier.hasPrerequisites(player)
             && VaultGearData.read(this.gearStack).getItemLevel() >= this.modifier.getMinLevel()
+            && (!ModifierWorkbenchHelper.hasCraftedModifier(this.gearStack) || ModifierWorkbenchHelper.removeCraftedModifiers(this.gearStack.copy()))
             && !this.hasGroupApplied()
             && this.hasAffixSpace();
       }
@@ -379,7 +391,9 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
       }
 
       private boolean canCraft() {
-         return !this.gearStack.isEmpty() && ModifierWorkbenchHelper.hasCraftedModifier(this.gearStack);
+         return !this.gearStack.isEmpty()
+            && ModifierWorkbenchHelper.hasCraftedModifier(this.gearStack)
+            && ModifierWorkbenchHelper.removeCraftedModifiers(this.gearStack.copy());
       }
    }
 }

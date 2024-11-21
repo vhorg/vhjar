@@ -189,7 +189,7 @@ public class GearDataCache {
    }
 
    public boolean hasAttribute(VaultGearAttribute<?> attr) {
-      return this.queryBooleanCache("present" + attr.getRegistryName(), false, stack -> AttributeGearData.<AttributeGearData>read(stack).has(attr));
+      return this.queryBooleanCache("present" + attr.getRegistryName(), false, stack -> AttributeGearData.<AttributeGearData>read(stack).hasAttribute(attr));
    }
 
    @Nullable

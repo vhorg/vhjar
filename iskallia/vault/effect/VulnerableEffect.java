@@ -31,7 +31,6 @@ public class VulnerableEffect extends MobEffect {
    }
 
    public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
-      super.applyEffectTick(pLivingEntity, pAmplifier);
    }
 
    @SubscribeEvent(

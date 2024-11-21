@@ -22,11 +22,6 @@ public abstract class AbstractHealAbility extends InstantManaAbility {
    }
 
    @Override
-   public String getAbilityGroupName() {
-      return "Heal";
-   }
-
-   @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.flatLifeHealed), buffer);

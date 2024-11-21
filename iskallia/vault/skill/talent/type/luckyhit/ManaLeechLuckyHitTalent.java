@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.mana.ManaPlayer;
 import iskallia.vault.network.message.LuckyHitManaParticleMessage;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class ManaLeechLuckyHitTalent extends LuckyHitTalent {
    @Override
    public void onLuckyHit(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof ManaPlayer mana) {
-         mana.increaseMana(mana.getManaMax() * this.maxManaPercentage);
+         mana.increaseMana(ManaAction.PLAYER_ACTION, mana.getManaMax() * this.maxManaPercentage);
          ModNetwork.CHANNEL
             .send(
                PacketDistributor.ALL.noArg(),

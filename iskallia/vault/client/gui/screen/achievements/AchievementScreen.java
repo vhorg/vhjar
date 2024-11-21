@@ -16,7 +16,7 @@ public class AchievementScreen extends BaseScreen {
 
    public AchievementScreen() {
       super(new TranslatableComponent("screen.the_vault.achievements.title"), 410, 230);
-      Task task = AchievementData.CLIENT_ACHIEVEMENTS;
+      Task task = AchievementData.CLIENT;
       this.clientAchievements = task != null ? task.copy() : null;
    }
 

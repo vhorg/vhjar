@@ -18,11 +18,19 @@ public class InfiniteDurationEffect extends MobEffect {
    }
 
    public MobEffectInstance instance(int amplifier) {
-      return new MobEffectInstance(this, 32767, amplifier, false, false, true);
+      return this.instance(amplifier, false);
    }
 
    public MobEffectInstance instance(int amplifier, boolean visible) {
       return new MobEffectInstance(this, 32767, amplifier, false, visible, true);
+   }
+
+   public MobEffectInstance timedInstance(int amplifier, int duration) {
+      return this.timedInstance(amplifier, duration, false);
+   }
+
+   public MobEffectInstance timedInstance(int amplifier, int duration, boolean visible) {
+      return new MobEffectInstance(this, duration, amplifier, false, visible, true);
    }
 
    public boolean isDurationEffectTick(int duration, int amplifier) {

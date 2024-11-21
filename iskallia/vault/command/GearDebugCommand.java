@@ -13,12 +13,17 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.util.LootInitialization;
 import java.util.Random;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -45,6 +50,19 @@ public class GearDebugCommand extends Command {
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
       builder.then(Commands.literal("setLevel").then(Commands.argument("level", IntegerArgumentType.integer(0, 100)).executes(this::setLevel)));
       builder.then(Commands.literal("rollType").then(Commands.argument("rollType", StringArgumentType.string()).executes(this::setRollType)));
+      builder.then(
+         Commands.literal("give_unique_item")
+            .then(
+               Commands.argument("item", ItemArgument.item())
+                  .then(
+                     Commands.argument("level", IntegerArgumentType.integer(0, 100))
+                        .then(
+                           Commands.argument("gearRollType", StringArgumentType.string())
+                              .then(Commands.argument("uniquePool", ResourceLocationArgument.id()).executes(this::giveUniqueItem))
+                        )
+                  )
+            )
+      );
       builder.then(Commands.literal("addModifier").executes(this::addModifier));
       builder.then(Commands.literal("removeModifier").executes(this::removeModifier));
       builder.then(Commands.literal("rerollAll").executes(this::rerollAllModifiers));
@@ -136,8 +154,32 @@ public class GearDebugCommand extends Command {
          return 0;
       } else {
          VaultGearData data = VaultGearData.read(gear);
-         data.updateAttribute(ModGearAttributes.GEAR_ROLL_TYPE, rollType);
+         data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_ROLL_TYPE, rollType);
          data.write(gear);
+         return 0;
+      }
+   }
+
+   private int giveUniqueItem(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      ItemStack gearStack = ItemArgument.getItem(ctx, "item").createItemStack(1, false);
+      int level = IntegerArgumentType.getInteger(ctx, "level");
+      String gearRollType = StringArgumentType.getString(ctx, "gearRollType");
+      ResourceLocation uniquePoolId = ResourceLocationArgument.getId(ctx, "uniquePool");
+      if (ModConfigs.VAULT_GEAR_TYPE_CONFIG.getRollPool(gearRollType).isEmpty()) {
+         player.sendMessage(new TextComponent("Unknown roll type: " + gearRollType).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+         return 0;
+      } else if (!ModConfigs.UNIQUE_GEAR.hasPool(uniquePoolId)) {
+         player.sendMessage(new TextComponent("Unknown unique pool: " + uniquePoolId).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+         return 0;
+      } else {
+         VaultGearData data = VaultGearData.read(gearStack);
+         data.setItemLevel(level);
+         data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_ROLL_TYPE, gearRollType);
+         data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_UNIQUE_POOL, uniquePoolId);
+         data.write(gearStack);
+         gearStack = LootInitialization.initializeVaultLoot(gearStack, level);
+         player.getInventory().add(gearStack);
          return 0;
       }
    }

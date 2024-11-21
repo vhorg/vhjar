@@ -14,11 +14,6 @@ public abstract class AbstractMegaJumpAbility extends InstantManaAbility {
    protected AbstractMegaJumpAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Mega Jump";
-   }
-
    protected boolean canBreakBlock(BlockState state) {
       return !state.isAir()
          && (!state.requiresCorrectToolForDrops() || TierSortingRegistry.isCorrectTierForDrops(Tiers.IRON, state))

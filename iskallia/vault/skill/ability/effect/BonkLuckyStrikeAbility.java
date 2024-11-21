@@ -75,14 +75,14 @@ public class BonkLuckyStrikeAbility extends AbstractBonkAbility {
 
                if (count > 0) {
                   MobEffectInstance battleCryEffect = new MobEffectInstance(
-                     ModEffects.BATTLE_CRY_LUCKY_STRIKE, this.getStackDuration(), Math.min(count, this.getMaxStacksTotal()) - 1, false, false, true
+                     ModEffects.BATTLE_CRY_LUCKY_STRIKE, this.getStackDuration(player), Math.min(count, this.getMaxStacksTotal()) - 1, false, false, true
                   );
                   if (player.hasEffect(ModEffects.BATTLE_CRY_LUCKY_STRIKE)) {
                      MobEffectInstance effectInstance = player.getEffect(ModEffects.BATTLE_CRY_LUCKY_STRIKE);
                      if (effectInstance != null) {
                         battleCryEffect = new MobEffectInstance(
                            ModEffects.BATTLE_CRY_LUCKY_STRIKE,
-                           this.getStackDuration(),
+                           this.getStackDuration(player),
                            Math.min(effectInstance.getAmplifier() + 1 + count, this.getMaxStacksTotal()) - 1,
                            false,
                            false,

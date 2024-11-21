@@ -25,11 +25,6 @@ public abstract class AbstractFireballAbility extends InstantManaAbility {
    protected AbstractFireballAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Fireball";
-   }
-
    public float getPercentAbilityPowerDealt() {
       return this.percentAbilityPowerDealt;
    }

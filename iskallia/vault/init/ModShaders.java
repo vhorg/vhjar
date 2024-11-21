@@ -6,16 +6,23 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.client.shader.ClipPositionTexShader;
 import iskallia.vault.client.shader.ColorizePositionTexShader;
 import iskallia.vault.client.shader.GrayscalePositionTexShader;
+import iskallia.vault.client.shader.ShaderChain;
+import iskallia.vault.client.shader.glsl.NativeGrayscaleShader;
 import java.io.IOException;
 import java.util.function.Consumer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 
+@OnlyIn(Dist.CLIENT)
 public class ModShaders {
    private static ClipPositionTexShader clipPositionTexShader;
    private static GrayscalePositionTexShader grayscalePositionTexShader;
    private static ColorizePositionTexShader colorizePositionTexShader;
+   private static NativeGrayscaleShader nativeGrayscaleShader;
+   private static ShaderChain grayscaleShaderChain;
 
    public static ClipPositionTexShader getClipPositionTexShader() {
       return clipPositionTexShader;
@@ -27,6 +34,14 @@ public class ModShaders {
 
    public static ColorizePositionTexShader getColorizePositionTexShader() {
       return colorizePositionTexShader;
+   }
+
+   public static NativeGrayscaleShader getNativeGrayscaleShader() {
+      return nativeGrayscaleShader;
+   }
+
+   public static ShaderChain getGrayscaleShaderChain() {
+      return grayscaleShaderChain;
    }
 
    public static void register(RegisterShadersEvent event) {
@@ -48,6 +63,16 @@ public class ModShaders {
          DefaultVertexFormat.POSITION_TEX,
          shaderInstance -> colorizePositionTexShader = new ColorizePositionTexShader(shaderInstance)
       );
+      if (nativeGrayscaleShader != null) {
+         nativeGrayscaleShader.destroy();
+      }
+
+      nativeGrayscaleShader = new NativeGrayscaleShader(event.getResourceManager()).withGrayscale(0.9F).withBrightness(0.7F);
+      if (grayscaleShaderChain != null) {
+         grayscaleShaderChain.destroy();
+      }
+
+      grayscaleShaderChain = ShaderChain.builder().addShader(nativeGrayscaleShader).build();
    }
 
    private static void registerShader(

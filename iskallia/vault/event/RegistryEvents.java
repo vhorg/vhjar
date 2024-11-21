@@ -16,7 +16,6 @@ import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.gear.modification.GearModificationRegistry;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
-import iskallia.vault.init.ModAbilities;
 import iskallia.vault.init.ModAntiques;
 import iskallia.vault.init.ModArchetypes;
 import iskallia.vault.init.ModAttributes;
@@ -90,7 +89,6 @@ public class RegistryEvents {
       ModDynamicModels.initItemAssociations();
       ModDynamicModels.initCauldronWashables();
       ModBlocks.registerBlockItems(event);
-      ModAbilities.init();
    }
 
    @SubscribeEvent
@@ -168,7 +166,7 @@ public class RegistryEvents {
    @SubscribeEvent
    public static void onGearAttributeRegistry(Register<VaultGearAttribute<?>> event) {
       ModGearAttributes.init(event);
-      ModGearAttributes.registerVanillaAssociations();
+      ModGearAttributes.registerAssociations();
    }
 
    @SubscribeEvent

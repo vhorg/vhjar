@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "#s#",
+      "#a#",
+      "#s#"
+    ],
+    "key": {
+      "#": {
+        "item": "the_vault:driftwood_planks"
+      },
+      "a": {
+          "item": "the_vault:wooden_chest_scroll"
+      },
+      "s": {
+        "item": "the_vault:driftwood_slab"
+      }
+    },
+    "result": {
+      "item": "the_vault:wooden_barrel",
+      "count": 1
+    }
+}

@@ -3,6 +3,11 @@ package iskallia.vault.skill.ability.effect;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.gear.attribute.ability.special.EntropyPoisonModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.config.IntRangeConfig;
+import iskallia.vault.gear.attribute.ability.special.base.template.value.IntValue;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractEmpowerAbility;
@@ -68,7 +73,7 @@ public class EmpowerSlownessAuraAbility extends AbstractEmpowerAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
@@ -127,6 +132,15 @@ public class EmpowerSlownessAuraAbility extends AbstractEmpowerAbility {
    public static void on(LivingUpdateEvent event) {
       if (event.getEntityLiving() instanceof ServerPlayer player && player.hasEffect(ModEffects.EMPOWER_SLOWNESS_AURA)) {
          AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
+         int poisonAmplifier = -1;
+
+         for (ConfiguredModification<EntropyPoisonModification, IntRangeConfig, IntValue> mod : SpecialAbilityModification.getModifications(
+            player, EntropyPoisonModification.class
+         )) {
+            poisonAmplifier += mod.value().getValue();
+         }
+
+         int poisonAmplifierSum = poisonAmplifier;
 
          for (EmpowerSlownessAuraAbility ability : abilities.getAll(EmpowerSlownessAuraAbility.class, Skill::isUnlocked)) {
             float radius = ability.getRadius(player);
@@ -139,6 +153,10 @@ public class EmpowerSlownessAuraAbility extends AbstractEmpowerAbility {
                   if (!mob.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)
                      || mob.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() < ability.getSlownessAmplifier()) {
                      mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, ability.getSlownessAmplifier(), false, true, true));
+                  }
+
+                  if (poisonAmplifierSum >= 0 && (!mob.hasEffect(ModEffects.POISON_OVERRIDE) || mob.getEffect(ModEffects.POISON_OVERRIDE).getDuration() <= 7)) {
+                     mob.addEffect(new MobEffectInstance(ModEffects.POISON_OVERRIDE, 40, poisonAmplifierSum, false, true, true));
                   }
                }
             );

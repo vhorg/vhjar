@@ -10,11 +10,13 @@ public class FireballRangedAttackGoal extends RangedAttackGoalBase {
    private double maxInaccuracy = 0.5;
 
    public FireballRangedAttackGoal(VaultBossBaseEntity boss) {
-      super(boss, 1.0, 20, 25.0F);
+      super(boss, 1.0, 20, 25.0F, true);
    }
 
-   public FireballRangedAttackGoal setAttributes(double speedModifier, int attackIntervalMin, int attackIntervalMax, float attackRadius, double maxInaccuracy) {
-      this.setAttackAttributes(speedModifier, attackIntervalMin, attackIntervalMax, attackRadius);
+   public FireballRangedAttackGoal setAttributes(
+      double speedModifier, int attackIntervalMin, int attackIntervalMax, float attackRadius, double maxInaccuracy, boolean attackWhenInMeleeRange
+   ) {
+      this.setAttackAttributes(speedModifier, attackIntervalMin, attackIntervalMax, attackRadius, attackWhenInMeleeRange);
       this.maxInaccuracy = maxInaccuracy;
       return this;
    }
@@ -50,8 +52,8 @@ public class FireballRangedAttackGoal extends RangedAttackGoalBase {
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
-      super.deserializeNBT(nbt);
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
+      super.deserializeNBT(nbt, boss);
       this.maxInaccuracy = nbt.getDouble("MaxInaccuracy");
    }
 }

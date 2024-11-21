@@ -45,7 +45,7 @@ public class TransmogRewardRenderer {
                      ItemStack stack = gearItem.defaultItem();
                      VaultGearData gearData = VaultGearData.read(stack);
                      gearData.setState(VaultGearState.IDENTIFIED);
-                     gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, transmog);
+                     gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, transmog);
                      gearData.write(stack);
                      context.renderStack(stack, 0, 0, 1.0F, true, false);
                      if (this.isMouseOver(task, context)) {

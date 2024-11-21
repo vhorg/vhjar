@@ -18,6 +18,7 @@ import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.util.damage.AttackScaleHelper;
 import iskallia.vault.util.damage.CritHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
@@ -27,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -56,8 +58,22 @@ public class EffectOnHitTalent extends EntityFilterTalent {
    public EffectOnHitTalent() {
    }
 
-   public MobEffectInstance toEffect() {
-      return new MobEffectInstance(this.effect, this.duration, this.amplifier, false, false, true);
+   public int getUnmodifiedDuration() {
+      return this.duration;
+   }
+
+   public MobEffect getEffect() {
+      return this.effect;
+   }
+
+   public int getDuration(LivingEntity entity) {
+      int duration = this.getUnmodifiedDuration();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
+   }
+
+   public MobEffectInstance makeEffectInstance(LivingEntity caster) {
+      int duration = this.getDuration(caster);
+      return new MobEffectInstance(this.effect, duration, this.amplifier, false, false, true);
    }
 
    @SubscribeEvent
@@ -91,7 +107,7 @@ public class EffectOnHitTalent extends EntityFilterTalent {
                                  for (EffectOnHitTalent talent : talents.getAll(EffectOnHitTalent.class, Skill::isUnlocked)) {
                                     if (talent.isValid(event.getEntity())) {
                                        int chances = 1;
-                                       if (hasConduct && talent.toEffect().getEffect() == ModEffects.GLACIAL_SHATTER) {
+                                       if (hasConduct && talent.getEffect() == ModEffects.GLACIAL_SHATTER) {
                                           for (AbstractJavelinAbility javelinAbility : abilities.getAll(AbstractJavelinAbility.class, Skill::isUnlocked)) {
                                              if (javelinAbility instanceof JavelinScatterAbility scatterAbility) {
                                                 chances = scatterAbility.getPiercing() * scatterAbility.getNumberOfJavelins();
@@ -110,14 +126,14 @@ public class EffectOnHitTalent extends EntityFilterTalent {
                                              return;
                                           }
 
-                                          event.getEntityLiving().addEffect(talent.toEffect());
+                                          event.getEntityLiving().addEffect(talent.makeEffectInstance(player));
                                        }
 
                                        if (player.getLevel().getRandom().nextFloat() >= talent.probability / Math.max(1, chances / 2)) {
                                           return;
                                        }
 
-                                       event.getEntityLiving().addEffect(talent.toEffect());
+                                       event.getEntityLiving().addEffect(talent.makeEffectInstance(player));
                                     }
                                  }
                               }

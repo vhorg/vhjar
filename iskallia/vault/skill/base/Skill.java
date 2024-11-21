@@ -30,13 +30,12 @@ import iskallia.vault.skill.ability.effect.HealEffectAbility;
 import iskallia.vault.skill.ability.effect.HealGroupAbility;
 import iskallia.vault.skill.ability.effect.IceBoltArrowAbility;
 import iskallia.vault.skill.ability.effect.IceBoltChunkAbility;
+import iskallia.vault.skill.ability.effect.ImplodeAbility;
 import iskallia.vault.skill.ability.effect.JavelinAbility;
 import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
 import iskallia.vault.skill.ability.effect.JavelinSightAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
-import iskallia.vault.skill.ability.effect.ManaShieldImplodeAbility;
-import iskallia.vault.skill.ability.effect.ManaShieldRetributionAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpBreakDownAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpBreakUpAbility;
@@ -49,6 +48,8 @@ import iskallia.vault.skill.ability.effect.RampageLeechAbility;
 import iskallia.vault.skill.ability.effect.ShellAbility;
 import iskallia.vault.skill.ability.effect.ShellPorcupineAbility;
 import iskallia.vault.skill.ability.effect.ShellQuillAbility;
+import iskallia.vault.skill.ability.effect.ShieldBashAbility;
+import iskallia.vault.skill.ability.effect.ShieldBashRetributionAbility;
 import iskallia.vault.skill.ability.effect.SmiteAbility;
 import iskallia.vault.skill.ability.effect.SmiteArchonAbility;
 import iskallia.vault.skill.ability.effect.SmiteThunderstormAbility;
@@ -122,8 +123,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 
 public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
@@ -132,6 +135,7 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
    protected String name;
    protected boolean present = false;
 
+   @Nullable
    public Skill getParent() {
       return this.parent;
    }
@@ -197,6 +201,25 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
       if (type.isAssignableFrom(this.getClass())) {
          action.accept((T)this);
       }
+   }
+
+   public void up(Consumer<Skill> action) {
+      this.up((skill, val) -> {
+         action.accept(skill);
+         return null;
+      }, null);
+   }
+
+   public <T> T up(BiFunction<Skill, T, T> action, T initial) {
+      Skill skill = this;
+      T value = initial;
+
+      do {
+         value = action.apply(skill, value);
+         skill = skill.getParent();
+      } while (skill != null);
+
+      return value;
    }
 
    public <T> List<T> getAll(Class<T> type, Predicate<T> predicate) {
@@ -321,9 +344,6 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("empower_speed", EmpowerAbility.class, EmpowerAbility::new);
          this.register("empower_ice_armor", EmpowerIceArmourAbility.class, EmpowerIceArmourAbility::new);
          this.register("empower_slowness_aura", EmpowerSlownessAuraAbility.class, EmpowerSlownessAuraAbility::new);
-         this.register("mana_shield", ManaShieldAbility.class, ManaShieldAbility::new);
-         this.register("mana_shield_retribution", ManaShieldRetributionAbility.class, ManaShieldRetributionAbility::new);
-         this.register("mana_shield_implode", ManaShieldImplodeAbility.class, ManaShieldImplodeAbility::new);
          this.register("rampage_damage", RampageAbility.class, RampageAbility::new);
          this.register("rampage_chain", RampageChainAbility.class, RampageChainAbility::new);
          this.register("rampage_leech", RampageLeechAbility.class, RampageLeechAbility::new);
@@ -382,7 +402,13 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("battle_cry_lucky_strike", BonkLuckyStrikeAbility.class, BonkLuckyStrikeAbility::new);
          this.register("ice_bolt_arrow", IceBoltArrowAbility.class, IceBoltArrowAbility::new);
          this.register("ice_bolt_chunk", IceBoltChunkAbility.class, IceBoltChunkAbility::new);
+         this.register("mana_shield", ManaShieldAbility.class, ManaShieldAbility::new);
+         this.register("implode", ImplodeAbility.class, ImplodeAbility::new);
+         this.register("shield_bash", ShieldBashAbility.class, ShieldBashAbility::new);
+         this.register("shield_bash_retribution", ShieldBashRetributionAbility.class, ShieldBashRetributionAbility::new);
          this.register("empower_porcupine", RemovedSkill.class, () -> new RemovedSkill("empower_porcupine"));
+         this.register("mana_shield_implode", RemovedSkill.class, () -> new RemovedSkill("mana_shield_implode"));
+         this.register("mana_shield_retribution", RemovedSkill.class, () -> new RemovedSkill("mana_shield_retribution"));
       }
 
       public String getType(Skill value) {

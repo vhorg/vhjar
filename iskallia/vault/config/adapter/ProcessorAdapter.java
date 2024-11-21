@@ -43,7 +43,20 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
       if (typeOfT == TileProcessor.class) {
          switch (type) {
             case "reference":
-               return new ReferenceTileProcessor(new ResourceLocation(object.get("id").getAsString()));
+               if (object.has("id")) {
+                  return new ReferenceTileProcessor(new WeightedList<ResourceLocation>().add(new ResourceLocation(object.get("id").getAsString()), 1.0));
+               } else if (object.has("pool")) {
+                  JsonObject pool = object.getAsJsonObject("pool");
+                  ReferenceTileProcessor processorxx = new ReferenceTileProcessor(new WeightedList<>());
+
+                  for (String s : pool.keySet()) {
+                     processorxx.getPool().add(new ResourceLocation(s), pool.get(s).getAsDouble());
+                  }
+
+                  return processorxx;
+               }
+            default:
+               return TileProcessor.ofIdentity();
             case "weighted_target":
                WeightedTileProcessor processorx = new WeightedTileProcessor();
                JsonElement thing = object.get("target");
@@ -195,8 +208,6 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
             case "filter":
                JsonElement target = object.get("target");
                return new FilterTileProcessor(target.getAsString());
-            default:
-               return TileProcessor.ofIdentity();
          }
       } else {
          if (typeOfT == EntityProcessor.class) {

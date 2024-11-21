@@ -4,10 +4,6 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.entity.Targeting;
-import iskallia.vault.gear.attribute.ability.special.GhostWalkDurationModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
@@ -52,11 +48,6 @@ public class GhostWalkAbility extends InstantManaAbility {
    public GhostWalkAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Ghost Walk";
-   }
-
    protected MobEffect getEffect() {
       return ModEffects.GHOST_WALK;
    }
@@ -67,28 +58,16 @@ public class GhostWalkAbility extends InstantManaAbility {
 
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
-      return context.getSource()
-         .as(ServerPlayer.class)
-         .map(
-            player -> {
-               if (player.hasEffect(this.getEffect())) {
-                  return Ability.ActionResult.fail();
-               } else {
-                  int duration = this.getDurationTicks();
-
-                  for (ConfiguredModification<IntValueConfig, GhostWalkDurationModification> mod : SpecialAbilityModification.getModifications(
-                     player, GhostWalkDurationModification.class
-                  )) {
-                     duration = mod.modification().addDuration(mod.config(), duration);
-                  }
-
-                  MobEffectInstance newEffect = new MobEffectInstance(this.getEffect(), duration, 0, false, false, true);
-                  player.addEffect(newEffect);
-                  return Ability.ActionResult.successCooldownDeferred();
-               }
-            }
-         )
-         .orElse(Ability.ActionResult.fail());
+      return context.getSource().as(ServerPlayer.class).map(player -> {
+         if (player.hasEffect(this.getEffect())) {
+            return Ability.ActionResult.fail();
+         } else {
+            int duration = this.getDurationTicks();
+            MobEffectInstance newEffect = new MobEffectInstance(this.getEffect(), duration, 0, false, false, true);
+            player.addEffect(newEffect);
+            return Ability.ActionResult.successCooldownDeferred();
+         }
+      }).orElse(Ability.ActionResult.fail());
    }
 
    @Override

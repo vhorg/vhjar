@@ -7,6 +7,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class VaultJewelApplicationStationMessage {
+   public static final VaultJewelApplicationStationMessage INSTANCE = new VaultJewelApplicationStationMessage();
+
+   private VaultJewelApplicationStationMessage() {
+   }
+
    public static void encode(VaultJewelApplicationStationMessage message, FriendlyByteBuf buffer) {
    }
 

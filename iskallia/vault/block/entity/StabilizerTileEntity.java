@@ -72,7 +72,9 @@ public class StabilizerTileEntity extends BlockEntity {
                0.0,
                0.0
             );
-            this.particleReferences.add(p);
+            if (p != null) {
+               this.particleReferences.add(p);
+            }
          }
       }
 
@@ -85,7 +87,9 @@ public class StabilizerTileEntity extends BlockEntity {
          SimpleAnimatedParticle p = (SimpleAnimatedParticle)mgr.createParticle(
             ParticleTypes.FIREWORK, particlePos.x, particlePos.y, particlePos.z, 0.0, 0.0, 0.0
          );
-         p.setColor(301982);
+         if (p != null) {
+            p.setColor(301982);
+         }
       }
    }
 

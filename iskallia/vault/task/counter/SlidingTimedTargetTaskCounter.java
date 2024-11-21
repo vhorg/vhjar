@@ -166,7 +166,7 @@ public class SlidingTimedTargetTaskCounter<T, C extends SlidingTimedTargetTaskCo
       protected IntRoll window;
 
       public Config(G target, ISimpleAdapter<G, ? super Tag, ? super JsonElement> adapter, BiFunction<G, RandomSource, T> generator, IntRoll window) {
-         super(target, adapter, generator);
+         super(target, TaskCounterPredicate.GREATER_OR_EQUAL_TO, adapter, generator);
          this.window = window;
       }
 

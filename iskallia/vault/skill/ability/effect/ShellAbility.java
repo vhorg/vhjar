@@ -9,7 +9,9 @@ import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.network.message.StunnedParticleMessage;
+import iskallia.vault.skill.ability.effect.spi.AbstractShellAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
@@ -115,7 +117,7 @@ public class ShellAbility extends AbstractShellAbility {
                            }
                         );
                         CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, attacker));
-                        if (Mana.decrease(player, ability.additionalManaPerHit) <= 0.0F) {
+                        if (Mana.decrease(player, ManaAction.PLAYER_ACTION, ability.additionalManaPerHit) <= 0.0F) {
                            player.removeEffect(ModEffects.SHELL);
                            ability.putOnCooldown(SkillContext.of(player));
                            ability.setActive(false);

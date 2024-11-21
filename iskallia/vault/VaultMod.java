@@ -11,6 +11,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModFeatures;
 import iskallia.vault.init.ModFluids;
+import iskallia.vault.init.ModLootConditions;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.init.ModPotions;
 import iskallia.vault.integration.IntegrationCurios;
@@ -114,6 +115,7 @@ public class VaultMod {
       ModFluids.REGISTRY.register(modEventBus);
       ModPotions.REGISTRY.register(modEventBus);
       ModEntities.ENTITY_DATA_SERIALIZERS.register(modEventBus);
+      ModLootConditions.LOOT_CONDITION_TYPES.register(modEventBus);
    }
 
    public void onCommandRegister(RegisterCommandsEvent event) {
@@ -165,6 +167,7 @@ public class VaultMod {
       ModConfigs.TOOL_RECIPES.syncTo(ModConfigs.TOOL_RECIPES, player);
       ModConfigs.INSCRIPTION_RECIPES.syncTo(ModConfigs.INSCRIPTION_RECIPES, player);
       ModConfigs.CATALYST_RECIPES.syncTo(ModConfigs.CATALYST_RECIPES, player);
+      ModConfigs.JEWEL_CRAFTING_RECIPES.syncTo(ModConfigs.JEWEL_CRAFTING_RECIPES, player);
       DiscoveredModelsData.get(serverWorld).ensureResearchDiscoverables(player);
    }
 

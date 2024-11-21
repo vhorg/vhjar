@@ -52,6 +52,10 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
       }
    }
 
+   public int getItemStackLimit(ItemStack stack) {
+      return getModifierTag(stack) == null ? 1 : super.getItemStackLimit(stack);
+   }
+
    @Override
    public ItemStack convertStack(ItemStack stack, RandomSource random) {
       ItemStack result = DataTransferItem.super.convertStack(stack, random);
@@ -108,7 +112,7 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
 
    private static Map<VaultGearAttribute<?>, List<Item>> getAttributes(VaultGearTagConfig.ModTagGroup tagGroup) {
       Map<VaultGearAttribute<?>, List<Item>> attributes = new LinkedHashMap<>();
-      ModConfigs.VAULT_GEAR_CONFIG.forEach((item, config) -> tagGroup.getTags().forEach(tag -> config.getGroupsWithModifierTag(tag).forEach(tpl -> {
+      ModConfigs.VAULT_GEAR_CONFIG.forEach((item, config) -> tagGroup.getTags().forEach(tag -> config.getGenericGroupsWithModifierTag(tag).forEach(tpl -> {
          VaultGearAttribute<?> attribute = VaultGearAttributeRegistry.getAttribute(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getAttribute());
          ForgeRegistries.ITEMS.getHolder(item).ifPresent(holder -> attributes.computeIfAbsent(attribute, a -> new ArrayList<>()).add((Item)holder.value()));
       })));

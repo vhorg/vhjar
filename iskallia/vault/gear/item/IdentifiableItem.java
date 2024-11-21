@@ -6,6 +6,7 @@ import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +23,7 @@ public interface IdentifiableItem {
          gearData.setState(state);
          gearData.write(stack);
       } else {
-         data.updateAttribute(ModGearAttributes.STATE, state);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, state);
          data.write(stack);
       }
    }
@@ -45,14 +46,21 @@ public interface IdentifiableItem {
       }
    }
 
-   default void instantIdentify(Player player, ItemStack stack) {
+   default void instantIdentify(@Nullable Player player, ItemStack stack) {
       if (this.getState(stack) == VaultGearState.UNIDENTIFIED) {
          this.tickRoll(stack, player);
          this.tickFinishRoll(stack, player);
       }
    }
 
-   void tickRoll(ItemStack var1, Player var2);
+   default void onIdentify(ItemStack stack) {
+   }
 
-   void tickFinishRoll(ItemStack var1, Player var2);
+   default boolean canIdentify(Player player, ItemStack stack) {
+      return stack.getCount() == 1;
+   }
+
+   void tickRoll(ItemStack var1, @Nullable Player var2);
+
+   void tickFinishRoll(ItemStack var1, @Nullable Player var2);
 }

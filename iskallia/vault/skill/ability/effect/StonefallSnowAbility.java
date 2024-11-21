@@ -73,7 +73,7 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
    protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          player.clearFire();
-         player.addEffect(new MobEffectInstance(ModEffects.STONEFALL_SHOCKWAVE, this.getDurationTicks(), 0, false, false, true));
+         player.addEffect(new MobEffectInstance(ModEffects.STONEFALL_SHOCKWAVE, this.getDurationTicks(player), 0, false, false, true));
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
    }

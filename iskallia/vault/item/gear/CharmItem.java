@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -266,12 +267,12 @@ public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem
    }
 
    @Override
-   public void tickRoll(ItemStack stack, Player player) {
+   public void tickRoll(ItemStack stack, @Nullable Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       if (stack.getItem() instanceof CharmItem charmItem) {
          CharmEffect<?> randomTrinket = ModConfigs.CHARM.getRandomTrinketSet(charmItem.size);
          if (randomTrinket != null) {
-            data.updateAttribute(ModGearAttributes.CHARM_EFFECT, randomTrinket);
+            data.createOrReplaceAttributeValue(ModGearAttributes.CHARM_EFFECT, randomTrinket);
          }
 
          data.write(stack);
@@ -279,16 +280,16 @@ public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem
    }
 
    @Override
-   public void tickFinishRoll(ItemStack stack, Player player) {
+   public void tickFinishRoll(ItemStack stack, @Nullable Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       Optional<CharmEffect<?>> optCharmEffect = data.getFirstValue(ModGearAttributes.CHARM_EFFECT);
       if (optCharmEffect.isPresent()) {
          CharmEffect<?> trinketEffect = optCharmEffect.get();
          setUses(stack, trinketEffect.getCharmConfig().getRandomUses());
          setValue(stack, trinketEffect.getCharmConfig().getRandomAffinity() / 100.0F);
-         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
       } else {
-         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
       }
 
       data.write(stack);

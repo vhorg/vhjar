@@ -2,12 +2,11 @@ package iskallia.vault.gear.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import iskallia.vault.core.card.CardDeck;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
-import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
+import iskallia.vault.gear.attribute.VaultGearAttributeSerializer;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -15,11 +14,13 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.CardDeckItem;
 import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.tool.JewelItem;
 import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.item.tool.ToolMaterial;
 import iskallia.vault.util.data.BitSerializers;
 import iskallia.vault.util.data.LazyHolder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -53,12 +55,12 @@ public class AttributeGearData {
    }
 
    public List<VaultGearAttributeInstance<?>> getAttributes() {
-      return this.attributes;
+      return Collections.unmodifiableList(this.attributes);
    }
 
    public static boolean hasData(ItemStack stack) {
-      if (stack.getItem() instanceof CardDeckItem && CardDeckItem.getCardDeck(stack).isPresent()) {
-         return true;
+      if (stack.getItem() instanceof CardDeckItem && !CardDeckItem.hasCardDeck(stack)) {
+         return false;
       } else {
          CompoundTag tag = stack.getTag();
          return tag != null && tag.contains("vaultGearData", 12);
@@ -79,6 +81,8 @@ public class AttributeGearData {
    public static <T extends AttributeGearData> T read(ItemStack stack) {
       if (stack.getItem() == ModItems.MAGNET && MagnetItem.isLegacy(stack)) {
          return (T)(new VaultGearData());
+      } else if (stack.getItem() instanceof JewelItem) {
+         return read(stack, (Function<BitBuffer, T>)(JewelGearData::new), (Supplier<T>)(JewelGearData::new));
       } else if (stack.getItem() instanceof ToolItem) {
          CompoundTag tag = stack.getTag();
          if (tag != null && tag.contains("version")) {
@@ -93,7 +97,7 @@ public class AttributeGearData {
          return read(stack, (Function<BitBuffer, T>)(VaultGearData::new), (Supplier<T>)(VaultGearData::new));
       } else {
          return stack.getItem() instanceof CardDeckItem
-            ? read(stack, buf -> (T)(new CardDeckGearData(buf, stack)), () -> (T)(new CardDeckGearData(stack)))
+            ? read(stack, (Function<BitBuffer, T>)(CardDeckGearData::new), () -> (T)CardDeckGearData.newDeck(stack))
             : read(stack, (Function<BitBuffer, T>)(AttributeGearData::new), (Supplier<T>)(AttributeGearData::new));
       }
    }
@@ -101,8 +105,6 @@ public class AttributeGearData {
    public static Optional<UUID> readUUID(ItemStack stack) {
       if (!hasData(stack)) {
          return Optional.empty();
-      } else if (stack.getItem() instanceof CardDeckItem) {
-         return CardDeckItem.getCardDeck(stack).map(CardDeck::getUuid);
       } else {
          BitBuffer buf = ArrayBitBuffer.backing(stack.getOrCreateTag().getLongArray("vaultGearData"), 0);
          buf.readEnum(GearDataVersion.class);
@@ -160,7 +162,11 @@ public class AttributeGearData {
       return merged;
    }
 
-   public boolean has(VaultGearAttribute<?> attribute) {
+   public <T> Stream<VaultGearAttributeInstance<T>> getAttributes(VaultGearAttribute<T> attribute) {
+      return this.attributes.stream().filter(instance -> instance.getAttribute().equals(attribute)).map(VaultGearAttributeInstance::cast);
+   }
+
+   public boolean hasAttribute(VaultGearAttribute<?> attribute) {
       for (VaultGearAttributeInstance<?> instance : this.attributes) {
          if (instance.getAttribute().equals(attribute)) {
             return true;
@@ -170,8 +176,22 @@ public class AttributeGearData {
       return false;
    }
 
+   public VaultGearAttributeInstance<?> removeAttribute(VaultGearAttribute<?> attribute) {
+      Iterator<VaultGearAttributeInstance<?>> iterator = this.attributes.iterator();
+
+      while (iterator.hasNext()) {
+         VaultGearAttributeInstance<?> instance = iterator.next();
+         if (instance.getAttribute().equals(attribute)) {
+            iterator.remove();
+            return instance;
+         }
+      }
+
+      return null;
+   }
+
    @Nullable
-   public <T> T updateAttribute(VaultGearAttribute<T> attribute, T value) {
+   public <T> T createOrReplaceAttributeValue(VaultGearAttribute<T> attribute, @Nonnull T value) {
       if (!this.isModifiable()) {
          return null;
       } else {
@@ -198,6 +218,31 @@ public class AttributeGearData {
       }
    }
 
+   public <T> T createOrReplaceAttribute(VaultGearAttributeInstance<?> instance) {
+      if (!this.isModifiable()) {
+         return null;
+      } else {
+         T prevValue = null;
+         Iterator<VaultGearAttributeInstance<?>> iterator = this.attributes.iterator();
+
+         while (iterator.hasNext()) {
+            VaultGearAttributeInstance<?> existing = iterator.next();
+            if (existing.getAttribute().equals(instance.getAttribute())) {
+               prevValue = (T)existing.getValue();
+               iterator.remove();
+               break;
+            }
+         }
+
+         this.addAttribute(instance);
+         return prevValue;
+      }
+   }
+
+   public boolean addAttribute(VaultGearAttributeInstance<?> instance) {
+      return !this.isModifiable() ? false : this.attributes.add(instance);
+   }
+
    public boolean isModifiable() {
       return !this.get(ModGearAttributes.IS_CORRUPTED, VaultGearAttributeTypeMerger.anyTrue());
    }
@@ -209,13 +254,13 @@ public class AttributeGearData {
    protected void write(BitBuffer buf) {
       buf.writeEnum(GearDataVersion.current());
       this.identifier.write(buf);
-      buf.writeCollection(this.attributes, VaultGearAttributeRegistry::writeAttributeInstance);
+      buf.writeCollection(this.attributes, VaultGearAttributeSerializer::serialize);
    }
 
    protected void read(BitBuffer buf) {
       this.version = buf.readEnum(GearDataVersion.class);
       this.identifier.read(buf);
-      this.attributes = buf.readCollection(ArrayList::new, this.versioned(VaultGearAttributeRegistry::readAttributeInstance));
+      this.attributes = buf.readCollection(ArrayList::new, this.readVersionedAttribute(VaultGearAttributeSerializer::deserialize));
       this.attributes.removeIf(Objects::isNull);
    }
 
@@ -223,7 +268,7 @@ public class AttributeGearData {
       CompoundTag tag = new CompoundTag();
       tag.putInt("version", this.version.ordinal());
       ListTag attributes = new ListTag();
-      this.attributes.stream().map(VaultGearAttributeRegistry::serializeAttributeInstance).forEach(attributes::add);
+      this.attributes.stream().map(VaultGearAttributeSerializer::serializeTag).forEach(attributes::add);
       tag.put("attributes", attributes);
       return tag;
    }
@@ -235,7 +280,11 @@ public class AttributeGearData {
 
       for (int i = 0; i < attributes.size(); i++) {
          CompoundTag attrData = attributes.getCompound(i);
-         VaultGearAttributeInstance<?> inst = VaultGearAttributeRegistry.deserializeAttributeInstance(attrData, version);
+         if (GearDataVersion.V0_6.isLaterThan(version)) {
+            attrData.putInt("type", 0);
+         }
+
+         VaultGearAttributeInstance<?> inst = VaultGearAttributeSerializer.deserializeTag(attrData, version);
          if (inst != null) {
             this.attributes.add(inst);
          }
@@ -253,7 +302,19 @@ public class AttributeGearData {
       return obj;
    }
 
-   public <T> Function<BitBuffer, T> versioned(BiFunction<BitBuffer, GearDataVersion, T> fn) {
+   protected <T> Function<BitBuffer, T> readVersionedAttribute(BiFunction<BitBuffer, GearDataVersion, T> fn) {
+      return GearDataVersion.V0_6.isLaterThan(this.version)
+         ? buf -> (T)VaultGearAttributeSerializer.INSTANCE_SERIALIZER.deserialize(buf, this.version)
+         : this.versioned(fn);
+   }
+
+   protected <T> Function<BitBuffer, T> readVersionedModifier(BiFunction<BitBuffer, GearDataVersion, T> fn) {
+      return GearDataVersion.V0_6.isLaterThan(this.version)
+         ? buf -> (T)VaultGearAttributeSerializer.MODIFIER_SERIALIZER.deserialize(buf, this.version)
+         : this.versioned(fn);
+   }
+
+   protected <T> Function<BitBuffer, T> versioned(BiFunction<BitBuffer, GearDataVersion, T> fn) {
       return buf -> fn.apply(buf, this.version);
    }
 }

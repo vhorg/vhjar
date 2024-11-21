@@ -9,13 +9,13 @@ import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.AntiqueItem;
 import iskallia.vault.item.AntiqueStampCollectorBook;
-import iskallia.vault.world.data.PlayerStoredAntiquesData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -27,26 +27,24 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 public class AntiqueCollectorBookContainer extends OverSizedSlotContainer {
    private final Inventory inventory;
    private final int bookSlot;
-   private final PlayerStoredAntiquesData.StoredAntiques storedAntiques;
    private int activePage = 0;
    private final List<Runnable> slotListeners = new ArrayList<>();
    private final List<AntiqueCollectorBookContainer.AntiqueCollectorBookSlot> antiqueSlots = new ArrayList<>();
    private final Map<Integer, List<AntiqueCollectorBookContainer.AntiqueCollectorBookSlot>> pageAntiqueSlots = new HashMap<>();
 
-   public AntiqueCollectorBookContainer(int id, Inventory playerInventory, int bookSlot, PlayerStoredAntiquesData.StoredAntiques storedAntiques) {
+   public AntiqueCollectorBookContainer(int id, Inventory playerInventory, int bookSlot) {
       super(ModContainers.ANTIQUE_COLLECTOR_BOOK_CONTAINER, id, playerInventory.player);
       this.inventory = playerInventory;
       this.bookSlot = bookSlot;
-      this.storedAntiques = storedAntiques;
       if (!playerInventory.player.level.isClientSide) {
          this.slotListeners.add(this::updateAntiques);
       }
 
-      playerInventory.player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(inv -> {
-         InvWrapper invWrapper = new InvWrapper(AntiqueStampCollectorBook.getAntiqueStorage(storedAntiques, this::stillValid));
+      this.getBookStack().ifPresent(bookStack -> playerInventory.player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(inv -> {
+         InvWrapper invWrapper = new InvWrapper(AntiqueStampCollectorBook.getAntiqueContainer(bookStack, this::stillValid));
          this.initPlayerSlots(inv);
          this.initAntiqueSlots(invWrapper);
-      });
+      }));
       this.setActivePage(0);
    }
 
@@ -105,10 +103,6 @@ public class AntiqueCollectorBookContainer extends OverSizedSlotContainer {
       return this.antiqueSlots;
    }
 
-   public PlayerStoredAntiquesData.StoredAntiques getStoredAntiques() {
-      return this.storedAntiques;
-   }
-
    public boolean stillValid(@Nonnull Player player) {
       return this.hasBook();
    }
@@ -122,21 +116,27 @@ public class AntiqueCollectorBookContainer extends OverSizedSlotContainer {
       return !book.isEmpty() && book.getItem() instanceof AntiqueStampCollectorBook;
    }
 
+   public Optional<ItemStack> getBookStack() {
+      return !this.hasBook() ? Optional.empty() : Optional.of(this.inventory.getItem(this.bookSlot));
+   }
+
+   public Supplier<AntiqueStampCollectorBook.StoredAntiques> getStoredAntiquesSupplier() {
+      return () -> this.getBookStack().map(AntiqueStampCollectorBook::getStoredAntiques).orElse(new AntiqueStampCollectorBook.StoredAntiques());
+   }
+
    private void updateAntiques() {
-      if (this.getPlayer() instanceof ServerPlayer sPlayer) {
-         PlayerStoredAntiquesData.StoredAntiques var8 = new PlayerStoredAntiquesData.StoredAntiques();
+      this.getBookStack().ifPresent(book -> {
+         AntiqueStampCollectorBook.StoredAntiques antiques = this.getStoredAntiquesSupplier().get();
 
          for (AntiqueCollectorBookContainer.AntiqueCollectorBookSlot slot : this.antiqueSlots) {
             Antique antique = slot.getAntique();
             ItemStack stack = slot.getItem();
             int count = stack.getCount();
-            if (!stack.isEmpty() || this.storedAntiques.containsKey(antique.getRegistryName())) {
-               var8.put(antique.getRegistryName(), Integer.valueOf(count));
-            }
+            antiques.getInfo(antique).setCount(count);
          }
 
-         PlayerStoredAntiquesData.get(sPlayer.getLevel()).setStoredAntiques(sPlayer, var8);
-      }
+         AntiqueStampCollectorBook.setStoredAntiques(book, antiques);
+      });
    }
 
    public ItemStack quickMoveStack(Player playerIn, int index) {

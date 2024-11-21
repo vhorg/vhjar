@@ -92,6 +92,6 @@ public class PartialItemTag implements ItemPlacement<PartialItemTag> {
    }
 
    protected static boolean isCharValid(char c) {
-      return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-';
+      return ResourceLocation.isAllowedInResourceLocation(c);
    }
 }

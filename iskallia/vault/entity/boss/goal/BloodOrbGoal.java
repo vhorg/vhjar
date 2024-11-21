@@ -33,6 +33,7 @@ public class BloodOrbGoal extends Goal implements ITrait {
    private Set<UUID> bloodOrbs = new HashSet<>();
    private int bloodOrbSpawnTimer = 0;
    private int bleedEffectTimer = 0;
+   private int stackSize = 1;
 
    public BloodOrbGoal(VaultBossBaseEntity boss) {
       this.boss = boss;
@@ -59,9 +60,9 @@ public class BloodOrbGoal extends Goal implements ITrait {
    @Override
    public void addStack(ITrait trait) {
       if (trait instanceof BloodOrbGoal bloodOrbGoal) {
-         int stackSize = bloodOrbGoal.bloodOrbSpawnIntervalMin / this.bloodOrbSpawnIntervalMin;
-         this.bloodOrbSpawnIntervalMin = bloodOrbGoal.bloodOrbSpawnIntervalMin * ++stackSize;
-         this.bloodOrbSpawnIntervalMax = bloodOrbGoal.bloodOrbSpawnIntervalMax * stackSize;
+         this.stackSize++;
+         this.bloodOrbSpawnIntervalMin = bloodOrbGoal.bloodOrbSpawnIntervalMin * this.stackSize;
+         this.bloodOrbSpawnIntervalMax = bloodOrbGoal.bloodOrbSpawnIntervalMax * this.stackSize;
       }
    }
 
@@ -162,6 +163,7 @@ public class BloodOrbGoal extends Goal implements ITrait {
       nbt.putInt("BloodOrbSpawnRadius", this.bloodOrbSpawnRadius);
       nbt.putInt("MaxBloodOrbs", this.maxBloodOrbs);
       nbt.put("BloodOrbs", this.serializeBloodOrbs(this.bloodOrbs));
+      nbt.putInt("StackSize", this.stackSize);
       return nbt;
    }
 
@@ -176,7 +178,7 @@ public class BloodOrbGoal extends Goal implements ITrait {
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.bloodOrbSpawnIntervalMin = nbt.getInt("BloodOrbSpawnIntervalMin");
       this.bloodOrbSpawnIntervalMax = nbt.getInt("BloodOrbSpawnIntervalMax");
       this.bloodOrbSpawnRadius = nbt.getInt("BloodOrbSpawnRadius");
@@ -184,6 +186,8 @@ public class BloodOrbGoal extends Goal implements ITrait {
       if (nbt.contains("BloodOrbs", 9)) {
          this.bloodOrbs = this.deserializeBloodOrbs(nbt.getList("BloodOrbs", 11));
       }
+
+      this.stackSize = nbt.getInt("StackSize");
    }
 
    private Set<UUID> deserializeBloodOrbs(ListTag bloodOrbList) {

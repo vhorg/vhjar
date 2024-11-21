@@ -19,6 +19,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class EntityTaskSource extends TaskSource {
@@ -108,6 +109,17 @@ public class EntityTaskSource extends TaskSource {
    }
 
    public boolean matches(Entity entity) {
+      if (entity instanceof Player player) {
+         if (entity.getServer() == null) {
+            return false;
+         }
+
+         ServerPlayer existing = entity.getServer().getPlayerList().getPlayer(entity.getUUID());
+         if (existing != player) {
+            return false;
+         }
+      }
+
       return this.uuids.contains(entity.getUUID());
    }
 

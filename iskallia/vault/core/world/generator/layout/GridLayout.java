@@ -11,7 +11,7 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.core.world.template.PlacementSettings;
 import iskallia.vault.core.world.template.Template;
 
-public abstract class GridLayout extends DataObject<GridLayout> implements ISupplierKey<GridLayout> {
+public abstract class GridLayout extends DataObject<GridLayout> implements ISupplierKey<GridLayout>, VaultLayout {
    public static final FieldRegistry FIELDS = new FieldRegistry();
 
    @Override

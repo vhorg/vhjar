@@ -2,6 +2,7 @@ package iskallia.vault.gear.attribute.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import iskallia.vault.util.MiscUtils;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,10 @@ public class FloatAttributeGenerator extends NumberRangeGenerator<Float, FloatAt
    @Override
    public Optional<Float> getMaximumValue(List<FloatAttributeGenerator.Range> configurations) {
       return configurations.stream().map(FloatAttributeGenerator.Range::generateMaximumNumber).min(Double::compare);
+   }
+
+   public Optional<Float> getRollPercentage(Float value, List<FloatAttributeGenerator.Range> configurations) {
+      return MiscUtils.getFloatValueRange(value, this.getMinimumValue(configurations), this.getMaximumValue(configurations), f -> f);
    }
 
    public static class Range extends NumberRangeGenerator.NumberRange<Float> {

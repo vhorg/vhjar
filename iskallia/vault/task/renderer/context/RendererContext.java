@@ -65,7 +65,7 @@ public class RendererContext {
    private PoseStack matrices;
    private float tickDelta;
    private final BufferSource bufferSource;
-   private final Font font;
+   protected final Font font;
    private final Stack<Vec2d> mouse = new Stack<>();
    private static final List<RendererContext.TooltipRender> tooltips = new ArrayList<>();
 
@@ -86,7 +86,7 @@ public class RendererContext {
    }
 
    public long getTick() {
-      return ClientScheduler.INSTANCE.getTickCount();
+      return ClientScheduler.INSTANCE.getTick();
    }
 
    public double getPartialTick() {
@@ -282,6 +282,23 @@ public class RendererContext {
       this.pop();
    }
 
+   public void renderInWorldStack(ItemStack stack, int x, int y, float scale, int packedLight, int packedOverlay) {
+      Minecraft minecraft = Minecraft.getInstance();
+      minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
+      int previous = this.setShaderTexture(TextureAtlas.LOCATION_BLOCKS);
+      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      ItemRenderer itemRenderer = minecraft.getItemRenderer();
+      Lighting.setupFor3DItems();
+      this.push();
+      this.translate(x + 0.0F, y + 0.0F, 0.0);
+      this.matrices.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+      this.scale(16.0F * scale, 16.0F * scale, 16.0);
+      itemRenderer.renderStatic(stack, TransformType.GUI, packedLight, packedOverlay, this.matrices, this.bufferSource, 0);
+      this.bufferSource.endBatch();
+      this.pop();
+      this.setShaderTexture(previous);
+   }
+
    public void renderStack(ItemStack stack, int x, int y, float scale, boolean withSlotTexture, boolean withTooltip) {
       Minecraft minecraft = Minecraft.getInstance();
       if (withSlotTexture) {
@@ -404,7 +421,7 @@ public class RendererContext {
                String overlayTexture = vaultArmorItem.getArmorTexture(stack, null, armorPiece.getEquipmentSlot(), "overlay");
                this.translate(0.0, -2.0, 0.0);
                this.scale(1.5, 1.5, 1.5);
-               EquipmentSlot intendedSlot = vaultArmorItem.getIntendedSlot(stack);
+               EquipmentSlot intendedSlot = vaultArmorItem.getGearType(stack).getEquipmentSlot();
                if (intendedSlot == EquipmentSlot.HEAD) {
                   this.translate(0.0, 0.25, 0.0);
                } else if (intendedSlot == EquipmentSlot.LEGS) {

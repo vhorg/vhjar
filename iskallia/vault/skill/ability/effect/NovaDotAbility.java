@@ -8,6 +8,7 @@ import iskallia.vault.init.ModParticles;
 import iskallia.vault.skill.ability.effect.spi.AbstractNovaAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.util.damage.DamageOverTimeHelper;
 import java.util.List;
 import java.util.Optional;
@@ -49,8 +50,13 @@ public class NovaDotAbility extends AbstractNovaAbility {
    public NovaDotAbility() {
    }
 
-   public int getDurationSeconds() {
+   public int getDurationSecondsUnmodified() {
       return this.durationSeconds;
+   }
+
+   public int getDurationTicks(LivingEntity entity) {
+      int durationTicks = this.getDurationSecondsUnmodified() * 20;
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, durationTicks);
    }
 
    @Override
@@ -62,8 +68,8 @@ public class NovaDotAbility extends AbstractNovaAbility {
 
          for (LivingEntity targetEntity : targetEntities) {
             DamageOverTimeHelper.invalidateAll(targetEntity);
-            DamageOverTimeHelper.applyDamageOverTime(targetEntity, DamageSource.playerAttack(player), attackDamage, this.getDurationSeconds() * 20);
-            targetEntity.addEffect(new MobEffectInstance(ModEffects.NOVA_DOT, this.getDurationSeconds() * 20, 0, false, true, false));
+            DamageOverTimeHelper.applyDamageOverTime(targetEntity, DamageSource.playerAttack(player), attackDamage, this.getDurationTicks(player));
+            targetEntity.addEffect(new MobEffectInstance(ModEffects.NOVA_DOT, this.getDurationTicks(player), 0, false, true, false));
          }
 
          return Ability.ActionResult.successCooldownImmediate();

@@ -41,7 +41,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.IItemRenderProperties;
 
 public class InfusedCatalystItem extends Item implements VaultLevelItem, IManualModelLoading, DataInitializationItem {
-   public static int MODELS = 14;
+   public static int MODELS = 15;
 
    public InfusedCatalystItem(CreativeModeTab group, ResourceLocation id) {
       super(new Properties().tab(group).stacksTo(1));

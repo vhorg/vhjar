@@ -21,9 +21,12 @@ import iskallia.vault.config.CardEssenceExtractorConfig;
 import iskallia.vault.container.inventory.CardEssenceExtractorContainer;
 import iskallia.vault.core.card.Card;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.CardItem;
 import iskallia.vault.network.message.CardEssenceExtractorUpgradeCardMessage;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -33,6 +36,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.TooltipFlag.Default;
 import org.jetbrains.annotations.NotNull;
 
 public class CardEssenceExtractorScreen extends AbstractElementContainerScreen<CardEssenceExtractorContainer> {
@@ -102,27 +106,34 @@ public class CardEssenceExtractorScreen extends AbstractElementContainerScreen<C
    }
 
    private boolean upgradeCardTooltip(ITooltipRenderer tooltipRenderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, TooltipFlag tooltipFlag) {
-      if (!this.canUpgrade()) {
-         CardEssenceExtractorTileEntity tile = ((CardEssenceExtractorContainer)this.getMenu()).getTileEntity();
-         if (tile != null && !tile.isRemoved()) {
-            ItemStack upgradeable = tile.getCardUpgradeStack();
-            if (!upgradeable.isEmpty() && upgradeable.getItem() instanceof CardItem) {
-               Card card = CardItem.getCard(upgradeable);
-               int tier = card.getTier();
-               CardEssenceExtractorConfig.TierConfig cfg = ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(tier).orElse(null);
-               if (cfg == null) {
-                  return false;
-               } else if (tile.getEssence() < cfg.getEssencePerUpgrade()) {
-                  return Tooltips.single(() -> new TextComponent("Required Essence: " + cfg.getEssencePerUpgrade()).withStyle(ChatFormatting.RED))
-                     .onHoverTooltip(tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag);
-               } else {
-                  return !card.canUpgrade()
-                     ? Tooltips.single(() -> new TextComponent("Maximum Tier Reached").withStyle(ChatFormatting.RED))
-                        .onHoverTooltip(tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag)
-                     : false;
-               }
-            } else {
+      CardEssenceExtractorTileEntity tile = ((CardEssenceExtractorContainer)this.getMenu()).getTileEntity();
+      if (tile != null && !tile.isRemoved()) {
+         ItemStack upgradeable = tile.getCardUpgradeStack();
+         if (!upgradeable.isEmpty() && upgradeable.getItem() instanceof CardItem) {
+            Card card = CardItem.getCard(upgradeable);
+            int tier = card.getTier();
+            CardEssenceExtractorConfig.TierConfig cfg = ModConfigs.CARD_ESSENCE_EXTRACTOR.getConfig(tier).orElse(null);
+            if (cfg == null) {
                return false;
+            } else {
+               List<Component> tooltip = new ArrayList<>();
+               if (card.canUpgrade()) {
+                  tooltip.add(
+                     new TextComponent("Required Essence: ")
+                        .withStyle(ChatFormatting.RED)
+                        .append(new TextComponent(String.valueOf(cfg.getEssencePerUpgrade())).withStyle(ChatFormatting.WHITE))
+                  );
+                  tooltip.add(TextComponent.EMPTY);
+                  ItemStack nextTierCard = new ItemStack(ModItems.CARD);
+                  Card nextTier = CardItem.getCard(upgradeable);
+                  nextTier.onUpgrade();
+                  CardItem.setCard(nextTierCard, nextTier);
+                  tooltip.addAll(nextTierCard.getTooltipLines(null, Default.NORMAL));
+               } else {
+                  tooltip.add(new TextComponent("Maximum Card tier reached").withStyle(ChatFormatting.RED));
+               }
+
+               return Tooltips.multi(() -> tooltip).onHoverTooltip(tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag);
             }
          } else {
             return false;

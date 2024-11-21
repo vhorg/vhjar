@@ -2,13 +2,12 @@ package iskallia.vault.item.tool;
 
 import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.config.VaultRecyclerConfig;
-import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.gear.GearRollHelper;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -33,11 +32,11 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -58,12 +57,22 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
    public Component getName(@NotNull ItemStack stack) {
       int color = getColor(stack);
       GearDataCache cache = GearDataCache.of(stack);
-      VaultGearRarity rarity = (VaultGearRarity)ObjectUtils.firstNonNull(new VaultGearRarity[]{cache.getRarity(), VaultGearRarity.SCRAPPY});
-      if (rarity == VaultGearRarity.SCRAPPY) {
-         return super.getName(stack).copy().setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
+      if (cache.getState() == VaultGearState.UNIDENTIFIED) {
+         return new TranslatableComponent(this.getDescriptionId(stack) + ".unidentified");
       } else {
-         String prefix = this.getDescriptionId() + "." + rarity.name().toLowerCase(Locale.ROOT);
-         return new TranslatableComponent(prefix).append(super.getName(stack)).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
+         VaultGearRarity rarity = (VaultGearRarity)ObjectUtils.firstNonNull(new VaultGearRarity[]{cache.getRarity(), VaultGearRarity.SCRAPPY});
+         if (rarity == VaultGearRarity.SCRAPPY) {
+            return super.getName(stack).copy().setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
+         } else {
+            GearDataCache clientCache = GearDataCache.of(stack);
+            String customName = clientCache.getGearName();
+            if (customName != null) {
+               return new TextComponent(customName).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
+            } else {
+               String prefix = this.getDescriptionId() + "." + rarity.name().toLowerCase(Locale.ROOT);
+               return new TranslatableComponent(prefix).append(super.getName(stack)).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
+            }
+         }
       }
    }
 
@@ -110,7 +119,7 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
 
          for (ItemStack jewel : jewels) {
             VaultGearData data = VaultGearData.read(jewel);
-            data.setRarity(VaultGearRarity.UNIQUE);
+            data.setRarity(VaultGearRarity.OMEGA);
             data.setState(VaultGearState.IDENTIFIED);
             data.write(jewel);
          }
@@ -121,16 +130,16 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
 
    @Override
    public void initialize(ItemStack stack, RandomSource random) {
-      Random rand = ((JavaRandom)random).asRandomView();
+      this.instantIdentify(null, stack);
+   }
+
+   @Override
+   public void onIdentify(ItemStack stack) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearRarity rarity = data.getFirstValue(ModGearAttributes.GEAR_ROLL_TYPE)
-         .flatMap(rollTypeStr -> ModConfigs.VAULT_GEAR_TYPE_CONFIG.getRollPool(rollTypeStr))
-         .orElse(ModConfigs.VAULT_GEAR_TYPE_CONFIG.getDefaultRoll())
-         .getRandom(rand);
-      data.setState(VaultGearState.IDENTIFIED);
-      data.setRarity(rarity);
-      data.write(stack);
-      GearRollHelper.initializeGear(stack);
+      ModConfigs.JEWEL_SIZE.getSize(data.getRarity()).ifPresent(size -> {
+         data.addModifier(VaultGearModifier.AffixType.IMPLICIT, new VaultGearModifier<>(ModGearAttributes.JEWEL_SIZE, size.getRandom(random)));
+         data.write(stack);
+      });
    }
 
    @Override
@@ -155,10 +164,10 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
       return ProficiencyType.UNKNOWN;
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return null;
+   public VaultGearType getGearType(ItemStack stack) {
+      return VaultGearType.JEWEL;
    }
 
    @Nullable
@@ -169,10 +178,14 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
 
    public static int getColor(ItemStack stack) {
       GearDataCache clientCache = GearDataCache.of(stack);
-      ColorBlender blender = new ColorBlender(1.0F);
-      Optional.ofNullable(clientCache.getJewelColorComponents()).ifPresent(colors -> colors.forEach(color -> blender.add(color, 60.0F)));
-      float time = (float)ClientScheduler.INSTANCE.getTickCount();
-      return blender.getColor(time);
+      if (clientCache.getState() == VaultGearState.UNIDENTIFIED) {
+         return -12632257;
+      } else {
+         ColorBlender blender = new ColorBlender(1.0F);
+         Optional.ofNullable(clientCache.getJewelColorComponents()).ifPresent(colors -> colors.forEach(color -> blender.add(color, 60.0F)));
+         float time = (float)ClientScheduler.INSTANCE.getTick();
+         return blender.getColor(time);
+      }
    }
 
    public static ItemStack create(Consumer<VaultGearData> consumer) {

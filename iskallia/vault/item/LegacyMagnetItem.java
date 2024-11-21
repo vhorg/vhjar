@@ -51,16 +51,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemPickupEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
-@EventBusSubscriber(
-   bus = Bus.FORGE
+@Deprecated(
+   forRemoval = true
 )
 public class LegacyMagnetItem extends Item implements DyeableLeatherItem, IConditionalDamageable, ICurioItem, CuriosGearItem {
    private static final UUID HEALTH_MODIFIER_ID = UUID.fromString("6d7e39e3-b6c8-4410-a8ce-d2cd344e465a");
@@ -383,25 +379,25 @@ public class LegacyMagnetItem extends Item implements DyeableLeatherItem, ICondi
       switch (perk) {
          case HOARD: {
             AttributeGearData data = AttributeGearData.read(stack);
-            data.updateAttribute(ModGearAttributes.ITEM_QUANTITY, 0.25F);
+            data.createOrReplaceAttributeValue(ModGearAttributes.ITEM_QUANTITY, 0.25F);
             data.write(stack);
             break;
          }
          case TREASURE: {
             AttributeGearData data = AttributeGearData.read(stack);
-            data.updateAttribute(ModGearAttributes.ITEM_RARITY, 0.25F);
+            data.createOrReplaceAttributeValue(ModGearAttributes.ITEM_RARITY, 0.25F);
             data.write(stack);
             break;
          }
          case SHARP: {
             AttributeGearData data = AttributeGearData.read(stack);
-            data.updateAttribute(ModGearAttributes.DAMAGE_INCREASE, 0.25F);
+            data.createOrReplaceAttributeValue(ModGearAttributes.DAMAGE_INCREASE, 0.25F);
             data.write(stack);
             break;
          }
          case SOUL_HUNTING: {
             AttributeGearData data = AttributeGearData.read(stack);
-            data.updateAttribute(ModGearAttributes.SOUL_CHANCE, 0.5F);
+            data.createOrReplaceAttributeValue(ModGearAttributes.SOUL_QUANTITY, 0.5F);
             data.write(stack);
          }
       }
@@ -424,9 +420,6 @@ public class LegacyMagnetItem extends Item implements DyeableLeatherItem, ICondi
       return true;
    }
 
-   @SubscribeEvent(
-      priority = EventPriority.HIGHEST
-   )
    public static void onBeforeItemPickup(EntityItemPickupEvent event) {
       if (!event.getPlayer().getLevel().isClientSide()) {
          ItemEntity itemBeingPickedUp = event.getItem();
@@ -454,9 +447,6 @@ public class LegacyMagnetItem extends Item implements DyeableLeatherItem, ICondi
       }
    }
 
-   @SubscribeEvent(
-      priority = EventPriority.HIGH
-   )
    public static void onItemActuallyPickedUp(ItemPickupEvent event) {
       ItemEntity itemEntity = event.getOriginalEntity();
       Player player = event.getPlayer();
@@ -485,7 +475,6 @@ public class LegacyMagnetItem extends Item implements DyeableLeatherItem, ICondi
 
          int itemsForOneMana = getUsableStat(magnet, LegacyMagnetItem.Stat.MANA_EFFICIENCY);
          float manaCostPerItem = 1.0F / (itemsForOneMana * 20.0F);
-         Mana.decrease(player, manaCostPerItem * stackSize);
       }
    }
 

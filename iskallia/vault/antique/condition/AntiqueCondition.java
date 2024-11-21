@@ -10,13 +10,23 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import iskallia.vault.VaultMod;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class AntiqueCondition {
    private ResourceLocation providerId;
+   @Nullable
+   private TranslatableComponent display;
 
    public abstract boolean test(DropConditionContext var1);
 
@@ -26,6 +36,42 @@ public abstract class AntiqueCondition {
 
    public final <T> T cast() {
       return (T)this;
+   }
+
+   public List<? extends AntiqueCondition> getChildConditions() {
+      return Collections.emptyList();
+   }
+
+   public void setDisplay(@Nullable String display) {
+      if (display != null) {
+         this.setDisplay(new TranslatableComponent(display));
+      }
+   }
+
+   public void setDisplay(@Nullable TranslatableComponent display) {
+      this.display = display;
+   }
+
+   @Nullable
+   public TranslatableComponent getDisplay() {
+      return this.display;
+   }
+
+   public final List<MutableComponent> collectConditionDisplay() {
+      List<MutableComponent> lines = new ArrayList<>();
+      Deque<AntiqueCondition> conditions = new LinkedList<>();
+      conditions.push(this);
+
+      while (!conditions.isEmpty()) {
+         AntiqueCondition condition = conditions.pop();
+         if (condition.getDisplay() != null) {
+            lines.add(condition.getDisplay());
+         }
+
+         condition.getChildConditions().forEach(conditions::addFirst);
+      }
+
+      return lines;
    }
 
    public abstract static class Provider extends ForgeRegistryEntry<AntiqueCondition.Provider> {
@@ -72,12 +118,18 @@ public abstract class AntiqueCondition {
          if (id == null) {
             throw new JsonSyntaxException("Unknown condition type: " + type);
          } else {
+            String display = null;
+            if (object.has("display")) {
+               display = GsonHelper.getAsString(object, "display");
+            }
+
             AntiqueCondition.Provider provider = (AntiqueCondition.Provider)AntiqueConditionRegistry.getRegistry().getValue(id);
             if (provider == null) {
                throw new JsonSyntaxException("Unknown condition type: " + type);
             } else {
                AntiqueCondition condition = provider.provideCondition();
                condition.deserialize(context, object);
+               condition.setDisplay(display);
                return condition;
             }
          }

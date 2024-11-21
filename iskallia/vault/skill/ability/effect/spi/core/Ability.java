@@ -59,9 +59,6 @@ public abstract class Ability extends LearnableSkill implements TickingSkill, Co
       this.active = active;
    }
 
-   @Deprecated
-   public abstract String getAbilityGroupName();
-
    @Override
    public void onTick(SkillContext context) {
       if (this.cooldown != null) {
@@ -131,7 +128,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill, Co
       context.getSource()
          .as(ServerPlayer.class)
          .ifPresentOrElse(
-            player -> this.setCooldown(CooldownHelper.adjustCooldown(player, this.getId(), this.cooldownTicks), cooldownDelayTicks),
+            player -> this.setCooldown(CooldownHelper.adjustCooldown(player, this, this.cooldownTicks), cooldownDelayTicks),
             () -> this.setCooldown(this.cooldownTicks, cooldownDelayTicks)
          );
    }

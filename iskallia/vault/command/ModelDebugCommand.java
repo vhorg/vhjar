@@ -122,8 +122,8 @@ public class ModelDebugCommand extends Command {
       VaultGearData gearData = VaultGearData.read(gearStack);
       gearData.setState(VaultGearState.IDENTIFIED);
       gearData.setRarity(rarity);
-      gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, modelId);
-      gearData.updateAttribute(ModGearAttributes.GEAR_COLOR, Integer.valueOf(-1));
+      gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, modelId);
+      gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_COLOR, Integer.valueOf(-1));
       gearData.write(gearStack);
    }
 

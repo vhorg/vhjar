@@ -8,28 +8,28 @@ import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 
 public class JewelExpertise extends LearnableSkill {
-   private int numberOfFreeCuts;
+   private int additionalIdentifiedJewels;
 
-   public int getNumberOfFreeCuts() {
-      return this.numberOfFreeCuts;
+   public int getAdditionalIdentifiedJewels() {
+      return this.additionalIdentifiedJewels;
    }
 
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.numberOfFreeCuts), buffer);
+      Adapters.INT.writeBits(Integer.valueOf(this.additionalIdentifiedJewels), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.numberOfFreeCuts = Adapters.INT.readBits(buffer).orElseThrow();
+      this.additionalIdentifiedJewels = Adapters.INT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.INT.writeNbt(Integer.valueOf(this.numberOfFreeCuts)).ifPresent(tag -> nbt.put("numberOfFreeCuts", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.additionalIdentifiedJewels)).ifPresent(tag -> nbt.put("additionalIdentifiedJewels", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -37,13 +37,13 @@ public class JewelExpertise extends LearnableSkill {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.numberOfFreeCuts = Adapters.INT.readNbt(nbt.get("numberOfFreeCuts")).orElse(0);
+      this.additionalIdentifiedJewels = Adapters.INT.readNbt(nbt.get("additionalIdentifiedJewels")).orElse(0);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.INT.writeJson(Integer.valueOf(this.numberOfFreeCuts)).ifPresent(element -> json.add("numberOfFreeCuts", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.additionalIdentifiedJewels)).ifPresent(element -> json.add("additionalIdentifiedJewels", element));
          return (JsonObject)json;
       });
    }
@@ -51,6 +51,6 @@ public class JewelExpertise extends LearnableSkill {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.numberOfFreeCuts = Adapters.INT.readJson(json.get("numberOfFreeCuts")).orElse(0);
+      this.additionalIdentifiedJewels = Adapters.INT.readJson(json.get("additionalIdentifiedJewels")).orElse(0);
    }
 }

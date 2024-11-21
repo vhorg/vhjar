@@ -27,7 +27,7 @@ public class LootChestItemTask extends ProgressConfiguredTask<Integer, LootChest
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.CHEST_LOOT_GENERATION.register(this, data -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             if (!data.getPlayer().getLevel().isClientSide()) {
                if (context.getSource() instanceof EntityTaskSource entitySource) {
                   if (entitySource.matches(data.getPlayer())) {

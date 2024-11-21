@@ -88,8 +88,8 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    public static ItemStack createBaseTrinket(TrinketEffect<?> trinket) {
       ItemStack stack = new ItemStack(ModItems.TRINKET);
       AttributeGearData data = AttributeGearData.read(stack);
-      data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
-      data.updateAttribute(ModGearAttributes.TRINKET_EFFECT, trinket);
+      data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+      data.createOrReplaceAttributeValue(ModGearAttributes.TRINKET_EFFECT, trinket);
       data.write(stack);
       return stack;
    }
@@ -269,7 +269,7 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    @Override
-   public void tickRoll(ItemStack stack, Player player) {
+   public void tickRoll(ItemStack stack, @Nullable Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       TrinketEffect<?> randomTrinket;
       if (player instanceof ServerPlayer sPlayer) {
@@ -285,22 +285,22 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
       }
 
       if (randomTrinket != null) {
-         data.updateAttribute(ModGearAttributes.TRINKET_EFFECT, randomTrinket);
+         data.createOrReplaceAttributeValue(ModGearAttributes.TRINKET_EFFECT, randomTrinket);
       }
 
       data.write(stack);
    }
 
    @Override
-   public void tickFinishRoll(ItemStack stack, Player player) {
+   public void tickFinishRoll(ItemStack stack, @Nullable Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       Optional<TrinketEffect<?>> optTrinketEffect = data.getFirstValue(ModGearAttributes.TRINKET_EFFECT);
       if (optTrinketEffect.isPresent()) {
          TrinketEffect<?> trinketEffect = optTrinketEffect.get();
          setUses(stack, trinketEffect.getTrinketConfig().getRandomUses());
-         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
       } else {
-         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
       }
 
       data.write(stack);

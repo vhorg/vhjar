@@ -7,6 +7,8 @@ import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
+import iskallia.vault.skill.ability.effect.spi.AbstractShellAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.skill.base.Skill;
@@ -186,7 +188,7 @@ public class ShellPorcupineAbility extends AbstractShellAbility {
          );
       CommonEvents.PLAYER_STAT.of(PlayerStat.THORNS_DAMAGE_FLAT).register(ShellPorcupineAbility.class, data -> getAll(data.getEntity()).forEach(skill -> {
          data.setValue(data.getValue() + data.getValue() * skill.getAdditionalThornsDamagePercent());
-         if (data.getEntity() instanceof ServerPlayer player && Mana.decrease(player, skill.getAdditionalManaPerHit()) <= 0.0F) {
+         if (data.getEntity() instanceof ServerPlayer player && Mana.decrease(player, ManaAction.PLAYER_ACTION, skill.getAdditionalManaPerHit()) <= 0.0F) {
             player.removeEffect(ModEffects.SHELL_PORCUPINE);
             skill.putOnCooldown(SkillContext.of(player));
             skill.setActive(false);

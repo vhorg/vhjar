@@ -93,14 +93,14 @@ public class BonkAbility extends AbstractBonkAbility {
 
                if (count > 0) {
                   MobEffectInstance battleCryEffect = new MobEffectInstance(
-                     ModEffects.BATTLE_CRY, this.getStackDuration(), Math.min(count, this.getMaxStacksTotal()) - 1, false, false, true
+                     ModEffects.BATTLE_CRY, this.getStackDuration(player), Math.min(count, this.getMaxStacksTotal()) - 1, false, false, true
                   );
                   if (player.hasEffect(ModEffects.BATTLE_CRY)) {
                      MobEffectInstance effectInstance = player.getEffect(ModEffects.BATTLE_CRY);
                      if (effectInstance != null) {
                         battleCryEffect = new MobEffectInstance(
                            ModEffects.BATTLE_CRY,
-                           this.getStackDuration(),
+                           this.getStackDuration(player),
                            Math.min(effectInstance.getAmplifier() + 1 + count, this.getMaxStacksTotal()) - 1,
                            false,
                            false,

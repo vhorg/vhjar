@@ -8,6 +8,8 @@ public class VaultLevelsConfig extends Config {
    @Expose
    private int maxLevel;
    @Expose
+   private float expMultiplier;
+   @Expose
    private final List<VaultLevelsConfig.VaultLevelMeta> levelMetas = new ArrayList<>();
 
    @Override
@@ -24,9 +26,14 @@ public class VaultLevelsConfig extends Config {
       return this.maxLevel;
    }
 
+   public float getExpMultiplier() {
+      return this.expMultiplier;
+   }
+
    @Override
    protected void reset() {
       this.maxLevel = 100;
+      this.expMultiplier = 1.0F;
       this.levelMetas.clear();
 
       for (int x = 0; x < this.maxLevel; x++) {

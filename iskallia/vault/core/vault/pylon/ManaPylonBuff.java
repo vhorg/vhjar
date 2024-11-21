@@ -2,6 +2,7 @@ package iskallia.vault.core.vault.pylon;
 
 import com.google.gson.JsonObject;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 
@@ -20,7 +21,7 @@ public class ManaPylonBuff extends PylonBuff<ManaPylonBuff.Config> {
       this.getPlayer(server).ifPresent(player -> {
          float current = Mana.get(player);
          float total = Mana.getMax(player);
-         Mana.set(player, this.config.missingManaPercent * (total - current) + current);
+         Mana.set(player, ManaAction.PLAYER_ACTION, this.config.missingManaPercent * (total - current) + current);
       });
    }
 

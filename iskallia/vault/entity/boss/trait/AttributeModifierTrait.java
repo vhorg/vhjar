@@ -1,6 +1,7 @@
 package iskallia.vault.entity.boss.trait;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.entity.boss.VaultBossBaseEntity;
 import iskallia.vault.entity.boss.VaultBossEntity;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +23,7 @@ public class AttributeModifierTrait implements ITrait {
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
+   public void deserializeNBT(CompoundTag nbt, VaultBossBaseEntity boss) {
       this.name = nbt.getString("Name");
       this.value = nbt.getDouble("Value");
       this.operator = nbt.getString("Operator");

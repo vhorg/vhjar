@@ -19,7 +19,6 @@ import iskallia.vault.item.bottle.CleanseBottleEffect;
 import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
 import iskallia.vault.skill.ability.effect.EmpowerSlownessAuraAbility;
-import iskallia.vault.skill.ability.effect.ExecuteAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
 import iskallia.vault.skill.ability.effect.NovaDotAbility;
@@ -47,6 +46,7 @@ import iskallia.vault.skill.expertise.type.AngelExpertise;
 import iskallia.vault.util.PlayerRageHelper;
 import java.awt.Color;
 import java.util.Set;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -62,7 +62,6 @@ public class ModEffects {
    public static final MobEffect GHOST_WALK_SPIRIT_WALK = new GhostWalkAbility.GhostWalkEffect(
       MobEffectCategory.BENEFICIAL, Color.GREEN.getRGB(), VaultMod.id("ghost_walk_spirit_walk")
    );
-   public static final MobEffect EXECUTE = new ExecuteAbility.ExecuteEffect(MobEffectCategory.BENEFICIAL, Color.YELLOW.getRGB(), VaultMod.id("execute"));
    public static final MobEffect TAUNT = new TauntAbility.TauntEffect(Color.RED.getRGB(), VaultMod.id("taunt"));
    public static final MobEffect TARGET_OVERRIDE = new TauntAbility.TargetOverrideEffect(Color.RED.getRGB(), VaultMod.id("target_override"));
    public static final MobEffect TAUNT_REPEL_PLAYER = new TauntRepelAbility.TauntRepelPlayerEffect(Color.DARK_GRAY.getRGB(), VaultMod.id("taunt_repel_player"));
@@ -104,10 +103,8 @@ public class ModEffects {
       Color.WHITE.getRGB(), VaultMod.id("shell_porcupine")
    );
    public static final ToggleAbilityEffect SHELL_QUILL = new ShellQuillAbility.ShellQuillEffect(Color.WHITE.getRGB(), VaultMod.id("shell_quill"));
-   public static final ToggleAbilityEffect MANA_SHIELD = new ManaShieldAbility.ManaShieldEffect(Color.CYAN.getRGB(), VaultMod.id("mana_shield"));
-   public static final ToggleAbilityEffect MANA_SHIELD_RETRIBUTION = new ManaShieldAbility.ManaShieldEffect(
-      Color.CYAN.getRGB(), VaultMod.id("mana_shield_retribution")
-   );
+   public static final MobEffect MANA_SHIELD = new ManaShieldAbility.ManaShieldEffect(Color.CYAN.getRGB(), VaultMod.id("mana_shield"));
+   public static final MobEffect MANA_SHIELD_RETRIBUTION = new ManaShieldAbility.ManaShieldEffect(Color.RED.getRGB(), VaultMod.id("mana_shield_retribution"));
    public static final ToggleAbilityEffect ANGEL = new AngelExpertise.AngelEffect(Color.WHITE.getRGB(), VaultMod.id("angel"));
    public static final ToggleAbilityEffect SMITE = new AbstractSmiteAbility.SmiteEffect(Color.RED.getRGB(), VaultMod.id("smite"));
    public static final ToggleAbilityEffect SMITE_ARCHON = new AbstractSmiteAbility.SmiteEffect(Color.RED.getRGB(), VaultMod.id("smite_archon"));
@@ -129,6 +126,7 @@ public class ModEffects {
    public static final MobEffect IMMORTALITY = new ImmortalityEffect(VaultMod.id("immortality"), MobEffectCategory.BENEFICIAL, -16769217);
    public static final MobEffect PURIFYING_AURA = new CleanseBottleEffect.PurifyingAuraEffect(VaultMod.id("purifying_aura"), -4675);
    public static final MobEffect MANA_STEAL = new ManaStealEffect(VaultMod.id("mana_steal"), MobEffectCategory.HARMFUL, -16777046);
+   public static final MobEffect SHIELD_BASH_RETRIBUTION = new ManaShieldAbility.ManaShieldEffect(Color.CYAN.getRGB(), VaultMod.id("shield_bash_retribution"));
    public static final ThresholdEffect SORCERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("sorcery"));
    public static final ThresholdEffect STONESKIN = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("stoneskin"));
    public static final ThresholdEffect WITCHERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("witchery"));
@@ -148,6 +146,10 @@ public class ModEffects {
    public static final MobEffect RESISTANCE = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.YELLOW.getRGB(), VaultMod.id("resistance"));
    public static final MobEffect REACH = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.BLUE.getRGB(), VaultMod.id("reach"))
       .addAttributeModifier((Attribute)ForgeMod.REACH_DISTANCE.get(), "c55181ae-a259-11ed-a8fc-0242ac120002", 2.0, Operation.ADDITION);
+   private static final String CORRUPTION_HEALTH_MODIFIER_ID_STRING = "9a7103d4-c604-4544-88a9-86775a26af22";
+   public static final UUID CORRUPTION_HEALTH_MODIFIER_ID = UUID.fromString("9a7103d4-c604-4544-88a9-86775a26af22");
+   public static final MobEffect CORRUPTION = new BasicEffect(MobEffectCategory.HARMFUL, 3484199, VaultMod.id("corruption"))
+      .addAttributeModifier(Attributes.MAX_HEALTH, "9a7103d4-c604-4544-88a9-86775a26af22", -2.0, Operation.ADDITION);
    public static final MobEffect TIMER_ACCELERATION = new TimerAccelerationEffect(MobEffectCategory.HARMFUL, -16448251, VaultMod.id("time_acceleration"));
    public static final MobEffect GLACIAL_SHATTER = new GlacialShatterEffect(MobEffectCategory.HARMFUL, -16711681, VaultMod.id("glacial_shatter"));
    public static final MobEffect POISON_OVERRIDE = new PoisonOverrideEffect();
@@ -172,7 +174,8 @@ public class ModEffects {
       TREASURE_SEEKER,
       BOUNTIFUL_HARVEST,
       PRIME_AMPLIFICATION,
-      BLEED
+      BLEED,
+      SHIELD_BASH_RETRIBUTION
    );
    public static final Set<MobEffect> SYNC_TO_CLIENT_ON_MOB = Set.of(
       TAUNT_CHARM,
@@ -202,7 +205,6 @@ public class ModEffects {
                SHELL,
                SHELL_PORCUPINE,
                SHELL_QUILL,
-               EXECUTE,
                MANA_SHIELD,
                MANA_SHIELD_RETRIBUTION,
                ANGEL,
@@ -212,6 +214,7 @@ public class ModEffects {
                NO_AI,
                RESISTANCE,
                REACH,
+               CORRUPTION,
                TAUNT,
                TAUNT_REPEL_MOB,
                TAUNT_REPEL_PLAYER,
@@ -256,7 +259,8 @@ public class ModEffects {
                IMMORTALITY,
                PURIFYING_AURA,
                BLEED,
-               MANA_STEAL
+               MANA_STEAL,
+               SHIELD_BASH_RETRIBUTION
             }
          );
       MobEffects.POISON = POISON_OVERRIDE;

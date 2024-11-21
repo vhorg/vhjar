@@ -8,12 +8,14 @@ import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
+import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +64,7 @@ public interface VaultGearTooltipItem {
             }
 
             if (stack.getItem() instanceof VaultGearItem gearItem) {
-               EquipmentSlot slot = gearItem.getIntendedSlot(stack);
+               EquipmentSlot slot = gearItem.getGearType(stack).getEquipmentSlot();
                if (slot != null) {
                   this.addSlotTooltip(tooltip, slot);
                }
@@ -76,6 +78,7 @@ public interface VaultGearTooltipItem {
                this.addTooltipGearModel(data, stack, tooltip);
             }
 
+            this.addTooltipImportantBaseAttributes(data, stack, tooltip, flag.displayModifierDetail());
             List<VaultGearModifier<?>> implicits = data.getModifiers(VaultGearModifier.AffixType.IMPLICIT);
             if (!implicits.isEmpty()) {
                this.addTooltipAffixGroup(data, VaultGearModifier.AffixType.IMPLICIT, stack, tooltip, flag.displayModifierDetail());
@@ -102,9 +105,9 @@ public interface VaultGearTooltipItem {
          }
 
          if (!data.isModifiable()) {
-            MutableComponent ct = new TextComponent("").append(new TextComponent("Corrupted").setStyle(Style.EMPTY.withColor(12981760)));
+            MutableComponent ct = new TextComponent("").append(new TextComponent("Corrupted").setStyle(Style.EMPTY.withColor(11337728)));
             if (flag.displayModifierDetail()) {
-               ct.append(new TextComponent("  Unmodifiable Item").withStyle(ChatFormatting.GRAY));
+               ct.append(new TextComponent(" (Unmodifiable Item)").withStyle(ChatFormatting.GRAY));
             }
 
             tooltip.add(ct);
@@ -157,6 +160,19 @@ public interface VaultGearTooltipItem {
       });
    }
 
+   default void addTooltipImportantBaseAttributes(VaultGearData data, ItemStack stack, List<Component> tooltip, boolean displayDetail) {
+      int txtLength = tooltip.size();
+      data.getAttributes(ModGearAttributes.DURABILITY)
+         .filter(inst -> inst.getValue() > 0)
+         .forEach(attr -> attr.getDisplay(data, VaultGearModifier.AffixType.IMPLICIT, stack, displayDetail).ifPresent(tooltip::add));
+      data.getAttributes(ModGearAttributes.SOULBOUND)
+         .filter(VaultGearAttributeInstance::getValue)
+         .forEach(attr -> attr.getDisplay(data, VaultGearModifier.AffixType.IMPLICIT, stack, displayDetail).ifPresent(tooltip::add));
+      if (tooltip.size() > txtLength && displayDetail) {
+         tooltip.add(TextComponent.EMPTY);
+      }
+   }
+
    default void addTooltipGearModel(VaultGearData data, ItemStack stack, List<Component> tooltip) {
       data.getFirstValue(ModGearAttributes.GEAR_MODEL)
          .flatMap(modelId -> ModDynamicModels.REGISTRIES.getModel(stack.getItem(), modelId))
@@ -198,28 +214,49 @@ public interface VaultGearTooltipItem {
 
    default void addTooltipItemLevel(VaultGearData data, ItemStack stack, List<Component> tooltip, VaultGearState state) {
       if (VaultBarOverlay.vaultLevel >= data.getItemLevel()) {
-         tooltip.add(new TextComponent("Level: ").append(new TextComponent(data.getItemLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
+         tooltip.add(new TextComponent("Level: ").append(new TextComponent(String.valueOf(data.getItemLevel())).setStyle(Style.EMPTY.withColor(11583738))));
       } else {
          tooltip.add(
             new TextComponent("Requires Level: ")
                .withStyle(ChatFormatting.RED)
-               .append(new TextComponent(data.getItemLevel() + "").withStyle(ChatFormatting.RED))
+               .append(new TextComponent(String.valueOf(data.getItemLevel())).withStyle(ChatFormatting.RED))
          );
       }
    }
 
    default void addTooltipCraftingPotential(VaultGearData data, ItemStack stack, List<Component> tooltip, VaultGearState state) {
       if (state == VaultGearState.IDENTIFIED) {
-         data.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL).ifPresent(craftingPotential -> {
-            MutableComponent potential = new TextComponent(String.valueOf(craftingPotential));
-            if (craftingPotential > 0) {
-               potential.withStyle(Style.EMPTY.withColor(16757593));
-            } else {
-               potential.withStyle(ChatFormatting.RED);
-            }
+         data.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL)
+            .ifPresent(
+               craftingPotential -> {
+                  MutableComponent potential = new TextComponent(String.valueOf(craftingPotential));
+                  int maxPotential = 0;
+                  int color = Color.HSBtoRGB(0.0F, 1.0F, 0.66F);
+                  if (data.hasAttribute(ModGearAttributes.MAX_CRAFTING_POTENTIAL)) {
+                     maxPotential = data.getFirstValue(ModGearAttributes.MAX_CRAFTING_POTENTIAL).orElse(0);
+                     if (maxPotential > 0) {
+                        float percentage = Math.max((float)craftingPotential.intValue() / maxPotential, 0.0F);
+                        color = Color.HSBtoRGB(0.33F * percentage, 1.0F, 0.66F);
+                     }
+                  }
 
-            tooltip.add(new TextComponent("Crafting Potential: ").append(potential));
-         });
+                  if (craftingPotential > 0) {
+                     potential.withStyle(Style.EMPTY.withColor(color));
+                  } else {
+                     potential.withStyle(Style.EMPTY.withColor(color));
+                  }
+
+                  MutableComponent txt = new TextComponent("")
+                     .withStyle(ChatFormatting.GRAY)
+                     .append(new TextComponent("Crafting Potential: ").withStyle(ChatFormatting.WHITE))
+                     .append(potential);
+                  if (maxPotential > 0) {
+                     txt.append("/").append(String.valueOf(maxPotential));
+                  }
+
+                  tooltip.add(txt);
+               }
+            );
       }
    }
 

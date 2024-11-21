@@ -2,6 +2,7 @@ package iskallia.vault.config.card;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.Config;
+import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.core.card.CardDeck;
 import iskallia.vault.core.card.CardPos;
 import iskallia.vault.core.random.RandomSource;
@@ -28,6 +29,10 @@ public class CardDeckConfig extends Config {
 
    public Optional<String> getName(String id) {
       return Optional.ofNullable(this.values.get(id)).map(entry -> entry.name);
+   }
+
+   public Optional<Integer> getEssence(String id) {
+      return Optional.ofNullable(this.values.get(id)).filter(entry -> entry.essence != null).map(entry -> entry.essence.getRandom());
    }
 
    public Set<String> getModels() {
@@ -89,11 +94,14 @@ public class CardDeckConfig extends Config {
       @Expose
       private String name;
       @Expose
+      private IntRangeEntry essence;
+      @Expose
       private WeightedList<String[]> layout;
 
       public Entry(String model, String name, String... layout) {
          this.model = model;
          this.name = name;
+         this.essence = new IntRangeEntry(1, 1);
          this.layout = new WeightedList<>();
          this.layout.put(layout, 1.0);
       }

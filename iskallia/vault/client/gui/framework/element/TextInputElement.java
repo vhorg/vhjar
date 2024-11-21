@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class TextInputElement<E extends TextInputElement<E>> extends AbstractSpatialElement<E> implements IRenderedElement, IGuiEventElement {
    protected boolean visible;
    private final EditBox editBox;
+   private Consumer<String> onChange = str -> {};
 
    public TextInputElement(ISpatial spatial, Font font) {
       super(spatial);
@@ -79,7 +80,8 @@ public class TextInputElement<E extends TextInputElement<E>> extends AbstractSpa
    }
 
    public void onTextChanged(Consumer<String> changeFn) {
-      this.editBox.setResponder(changeFn);
+      this.onChange = this.onChange.andThen(changeFn);
+      this.editBox.setResponder(this.onChange);
    }
 
    public void tickEditBox() {

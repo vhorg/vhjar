@@ -22,7 +22,7 @@ public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractB
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.BLOCK_USE_MERGED.register(this, event -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             if (!event.getWorld().isClientSide()) {
                if (context.getSource() instanceof EntityTaskSource entitySource) {
                   if (entitySource.matches(event.getPlayer())) {

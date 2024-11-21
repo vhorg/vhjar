@@ -11,7 +11,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 
 public class FireballFireshotAbility extends AbstractFireballAbility {
@@ -30,9 +29,9 @@ public class FireballFireshotAbility extends AbstractFireballAbility {
          VaultFireball fireball = new VaultFireball(player.level, player);
          fireball.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.0F, 0.0F);
          fireball.pickup = Pickup.DISALLOWED;
-         fireball.setType("fireshot");
+         fireball.setType(VaultFireball.FireballType.FIRESHOT);
          player.level.addFreshEntity(fireball);
-         player.level.playSound((Player)null, player, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
+         player.level.playSound(null, player, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
    }

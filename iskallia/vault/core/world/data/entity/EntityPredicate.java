@@ -54,7 +54,7 @@ public interface EntityPredicate {
                LIST.writeBits(or.getChildren(), buffer);
             } else {
                buffer.writeBoolean(false);
-               Adapters.UTF_8.writeBits(value.toString(), buffer);
+               Adapters.UTF_8.writeBits(value == EntityPredicate.TRUE ? "" : value.toString(), buffer);
             }
          }
       }

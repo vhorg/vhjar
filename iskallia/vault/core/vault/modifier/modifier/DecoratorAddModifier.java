@@ -10,6 +10,7 @@ import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
+import iskallia.vault.core.world.storage.IZonedWorld;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.core.world.template.EmptyTemplate;
 import iskallia.vault.core.world.template.JigsawTemplate;
@@ -53,22 +54,24 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
                               || serverLevelAccessor.getBlockState(pos.above()).isAir()
                                  && serverLevelAccessor.getBlockState(pos.below()).isFaceSturdy(serverLevelAccessor, pos, Direction.UP)
                         )) {
-                        PartialTile tile = this.properties.output.copy().setPos(pos);
-                        PlacementSettings settings = data.getTemplate().getSettings().copy();
-                        if (data.getTemplate().getParent() instanceof JigsawTemplate jigsaw) {
-                           jigsaw.getConfigurator().accept(settings);
-                        }
-
-                        for (TileProcessor processor : settings.getTileProcessors()) {
-                           tile = processor.process(tile, processorContext);
-                           if (tile == null) {
-                              break;
+                        IZonedWorld.runWithBypass(world, true, () -> {
+                           PartialTile tile = this.properties.output.copy().setPos(pos);
+                           PlacementSettings settings = data.getTemplate().getSettings().copy();
+                           if (data.getTemplate().getParent() instanceof JigsawTemplate jigsaw) {
+                              jigsaw.getConfigurator().accept(settings);
                            }
-                        }
 
-                        if (tile != null) {
-                           tile.place(serverLevelAccessor, pos, 3);
-                        }
+                           for (TileProcessor processor : settings.getTileProcessors()) {
+                              tile = processor.process(tile, processorContext);
+                              if (tile == null) {
+                                 break;
+                              }
+                           }
+
+                           if (tile != null) {
+                              tile.place(serverLevelAccessor, pos, 3);
+                           }
+                        });
                      }
                   }
                }

@@ -24,7 +24,7 @@ public class KillEntityTask extends ProgressConfiguredTask<Integer, KillEntityTa
    @Override
    public void onAttach(TaskContext context) {
       CommonEvents.ENTITY_DROPS.register(this, EventPriority.HIGHEST, event -> {
-         if (this.parent == null || this.parent.isCompleted()) {
+         if (this.parent == null || this.parent.hasActiveChildren()) {
             Entity attacker = event.getSource().getEntity();
             if (attacker != null && !attacker.getLevel().isClientSide()) {
                if (context.getSource() instanceof EntityTaskSource entitySource) {

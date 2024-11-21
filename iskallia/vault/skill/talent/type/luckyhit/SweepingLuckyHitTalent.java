@@ -45,7 +45,7 @@ public class SweepingLuckyHitTalent extends LuckyHitTalent {
          ActiveFlags.IS_AOE_ATTACKING
             .runIfNotSet(
                () -> {
-                  float radius = AreaOfEffectHelper.adjustAreaOfEffect(attacker, this.damageRange);
+                  float radius = AreaOfEffectHelper.adjustAreaOfEffect(attacker, null, this.damageRange);
                   List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), radius, Mob.class);
                   nearby.remove(attacked);
                   nearby.remove(attacker);

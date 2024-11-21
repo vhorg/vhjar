@@ -71,8 +71,8 @@ public class AntiqueRewardSpecificGear extends AntiqueRewardItemList {
          if (cache.hasModifierOfCategory(VaultGearModifier.AffixCategory.LEGENDARY)) {
             return true;
          } else {
-            return VaultGearLegendaryHelper.generateLegendaryModifier(stack.copy(), var8)
-               ? VaultGearLegendaryHelper.generateLegendaryModifier(stack, var8)
+            return VaultGearLegendaryHelper.generateImprovedModifier(stack.copy(), 2, var8, List.of(VaultGearModifier.AffixCategory.LEGENDARY))
+               ? VaultGearLegendaryHelper.generateImprovedModifier(stack, 2, var8, List.of(VaultGearModifier.AffixCategory.LEGENDARY))
                : false;
          }
       } else {
@@ -169,23 +169,25 @@ public class AntiqueRewardSpecificGear extends AntiqueRewardItemList {
 
    private Tuple<VaultGearModifier.AffixType, VaultGearModifier<?>> getByTag(VaultGearTierConfig cfg, int level, RandomSource random) {
       WeightedList<Tuple<VaultGearModifier.AffixType, VaultGearTierConfig.ModifierOutcome<?>>> outcomes = new WeightedList<>();
-      cfg.getGroupsWithModifierTag(this.guaranteedModifier)
+      cfg.getGenericGroupsWithModifierTag(this.guaranteedModifier)
          .forEach(
             tpl -> {
                VaultGearModifier.AffixType affix = ((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).getTargetAffixType();
-               VaultGearTierConfig.ModifierTierGroup group = (VaultGearTierConfig.ModifierTierGroup)tpl.getB();
-               if (this.operation == AntiqueRewardSpecificGear.ModifierOperation.HIGHEST_TIER) {
-                  VaultGearTierConfig.ModifierTier<?> foundTier = group.getHighestForLevel(level);
-                  if (foundTier != null) {
-                     outcomes.add(new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>(foundTier, group)), foundTier.getWeight());
+               if (affix != null) {
+                  VaultGearTierConfig.ModifierTierGroup group = (VaultGearTierConfig.ModifierTierGroup)tpl.getB();
+                  if (this.operation == AntiqueRewardSpecificGear.ModifierOperation.HIGHEST_TIER) {
+                     VaultGearTierConfig.ModifierTier<?> foundTier = group.getHighestForLevel(level);
+                     if (foundTier != null) {
+                        outcomes.add(new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>(foundTier, group)), foundTier.getWeight());
+                     }
+                  } else {
+                     group.getModifiersForLevel(level)
+                        .forEach(
+                           tier -> outcomes.add(
+                              new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group)), tier.getWeight()
+                           )
+                        );
                   }
-               } else {
-                  group.getModifiersForLevel(level)
-                     .forEach(
-                        tier -> outcomes.add(
-                           new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group)), tier.getWeight()
-                        )
-                     );
                }
             }
          );
@@ -199,23 +201,25 @@ public class AntiqueRewardSpecificGear extends AntiqueRewardItemList {
 
    private Tuple<VaultGearModifier.AffixType, VaultGearModifier<?>> getByGroup(VaultGearTierConfig cfg, int level, RandomSource random) {
       WeightedList<Tuple<VaultGearModifier.AffixType, VaultGearTierConfig.ModifierOutcome<?>>> outcomes = new WeightedList<>();
-      cfg.getGroupsWithModifierGroup(this.guaranteedModifier)
+      cfg.getGenericGroupsWithModifierGroup(this.guaranteedModifier)
          .forEach(
             tpl -> {
                VaultGearModifier.AffixType affix = ((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).getTargetAffixType();
-               VaultGearTierConfig.ModifierTierGroup group = (VaultGearTierConfig.ModifierTierGroup)tpl.getB();
-               if (this.operation == AntiqueRewardSpecificGear.ModifierOperation.HIGHEST_TIER) {
-                  VaultGearTierConfig.ModifierTier<?> foundTier = group.getHighestForLevel(level);
-                  if (foundTier != null) {
-                     outcomes.add(new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>(foundTier, group)), foundTier.getWeight());
+               if (affix != null) {
+                  VaultGearTierConfig.ModifierTierGroup group = (VaultGearTierConfig.ModifierTierGroup)tpl.getB();
+                  if (this.operation == AntiqueRewardSpecificGear.ModifierOperation.HIGHEST_TIER) {
+                     VaultGearTierConfig.ModifierTier<?> foundTier = group.getHighestForLevel(level);
+                     if (foundTier != null) {
+                        outcomes.add(new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>(foundTier, group)), foundTier.getWeight());
+                     }
+                  } else {
+                     group.getModifiersForLevel(level)
+                        .forEach(
+                           tier -> outcomes.add(
+                              new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group)), tier.getWeight()
+                           )
+                        );
                   }
-               } else {
-                  group.getModifiersForLevel(level)
-                     .forEach(
-                        tier -> outcomes.add(
-                           new Tuple(affix, new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group)), tier.getWeight()
-                        )
-                     );
                }
             }
          );
@@ -236,28 +240,32 @@ public class AntiqueRewardSpecificGear extends AntiqueRewardItemList {
          if (group == null) {
             return null;
          } else {
-            VaultGearTierConfig.ModifierAffixTagGroup affixGroup = cfg.getAffixGroup(group);
+            VaultGearTierConfig.ModifierAffixTagGroup affixGroup = group.getTargetAffixTagGroup();
             if (affixGroup == null) {
                return null;
             } else {
                VaultGearModifier.AffixType affixType = affixGroup.getTargetAffixType();
-               WeightedList<VaultGearTierConfig.ModifierOutcome<?>> outcomes = new WeightedList<>();
-               if (this.operation == AntiqueRewardSpecificGear.ModifierOperation.HIGHEST_TIER) {
-                  VaultGearTierConfig.ModifierTier<?> foundTier = group.getHighestForLevel(level);
-                  if (foundTier != null) {
-                     outcomes.add(new VaultGearTierConfig.ModifierOutcome<>(foundTier, group), foundTier.getWeight());
-                  }
+               if (affixType == null) {
+                  return null;
                } else {
-                  group.getModifiersForLevel(level)
-                     .forEach(
-                        tier -> outcomes.add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight())
-                     );
-               }
+                  WeightedList<VaultGearTierConfig.ModifierOutcome<?>> outcomes = new WeightedList<>();
+                  if (this.operation == AntiqueRewardSpecificGear.ModifierOperation.HIGHEST_TIER) {
+                     VaultGearTierConfig.ModifierTier<?> foundTier = group.getHighestForLevel(level);
+                     if (foundTier != null) {
+                        outcomes.add(new VaultGearTierConfig.ModifierOutcome<>(foundTier, group), foundTier.getWeight());
+                     }
+                  } else {
+                     group.getModifiersForLevel(level)
+                        .forEach(
+                           tier -> outcomes.add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight())
+                        );
+                  }
 
-               VaultGearModifier<?> generatedModifier = outcomes.getRandom()
-                  .map(modifierOutcome -> modifierOutcome.makeModifier(new Random(random.nextLong())))
-                  .orElse(null);
-               return generatedModifier == null ? null : new Tuple(affixType, generatedModifier);
+                  VaultGearModifier<?> generatedModifier = outcomes.getRandom()
+                     .map(modifierOutcome -> modifierOutcome.makeModifier(new Random(random.nextLong())))
+                     .orElse(null);
+                  return generatedModifier == null ? null : new Tuple(affixType, generatedModifier);
+               }
             }
          }
       }

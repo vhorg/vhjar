@@ -83,6 +83,7 @@ public class TransmogTableContainer extends OverSizedSlotContainer {
       });
       containerSlotIndex++;
       this.addSlot((new OverSizedTabSlot(this.internalInventory, 1, 92, 61) {
+         @Override
          public void setChanged() {
             super.setChanged();
             TransmogTableContainer.this.slotsChanged(this.container);
@@ -127,7 +128,7 @@ public class TransmogTableContainer extends OverSizedSlotContainer {
             ItemStack displayStack = new ItemStack(gearStack.getItem());
             VaultGearData gearData = VaultGearData.read(displayStack);
             gearData.setState(VaultGearState.IDENTIFIED);
-            gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, selectedModelId);
+            gearData.createOrReplaceAttributeValue(ModGearAttributes.GEAR_MODEL, selectedModelId);
             gearData.write(displayStack);
             return displayStack;
          }

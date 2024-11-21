@@ -4,13 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.base.Skill;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.NetcodeUtils;
 import java.util.Comparator;
 import java.util.List;
@@ -19,6 +19,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
@@ -94,6 +95,12 @@ public class AbilityLevelAttribute {
                .max(Comparator.comparingInt(AbilityLevelAttribute.Config::getLevelChange))
                .map(config -> new AbilityLevelAttribute(config.getAbilityKey(), config.getLevelChange()));
          }
+
+         public Optional<Float> getRollPercentage(AbilityLevelAttribute value, List<AbilityLevelAttribute.Config> configurations) {
+            return MiscUtils.getIntValueRange(
+               value.getLevelChange(), this.getMinimumValue(configurations), this.getMaximumValue(configurations), AbilityLevelAttribute::getLevelChange
+            );
+         }
       };
    }
 
@@ -109,7 +116,7 @@ public class AbilityLevelAttribute {
                   .append(type.getAffixPrefixComponent(attribute.getLevelChange() >= 0).withStyle(this.getColoredTextStyle()))
                   .append(valueDisplay.withStyle(this.getColoredTextStyle()))
                   .append(" to level of ")
-                  .append(new TextComponent("all Abilities").withStyle(SpecialAbilityModification.getAbilityStyle()))
+                  .append(new TextComponent("all Abilities").withStyle(this.getAbilityStyle()))
                   .withStyle(this.getColoredTextStyle());
             } else {
                Skill ability = ModConfigs.ABILITIES.getAbilityById(attribute.getAbility()).orElse(null);
@@ -119,9 +126,13 @@ public class AbilityLevelAttribute {
                      .append(type.getAffixPrefixComponent(attribute.getLevelChange() >= 0).withStyle(this.getColoredTextStyle()))
                      .append(valueDisplay.withStyle(this.getColoredTextStyle()))
                      .append(" to level of ")
-                     .append(new TextComponent(ability.getName()).withStyle(SpecialAbilityModification.getAbilityStyle()))
+                     .append(new TextComponent(ability.getName()).withStyle(this.getAbilityStyle()))
                      .withStyle(this.getColoredTextStyle());
             }
+         }
+
+         private Style getAbilityStyle() {
+            return Style.EMPTY.withColor(14076214);
          }
 
          public MutableComponent getValueDisplay(AbilityLevelAttribute value) {

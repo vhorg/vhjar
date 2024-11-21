@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.InputConstants.Type;
 import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.block.entity.VaultJewelApplicationStationTileEntity;
 import iskallia.vault.client.atlas.TextureAtlasRegion;
 import iskallia.vault.client.gui.framework.ScreenRenderers;
 import iskallia.vault.client.gui.framework.ScreenTextures;
@@ -116,20 +117,23 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
       );
       Slot slot = ((VaultJewelApplicationStationContainer)this.getMenu()).getSlot(36);
       IMutableSpatial btnPosition = Spatials.positionXY(slot.x - 1, slot.y - 1).translateX(20);
-      JewelApplicationButtonElement<?> button = new JewelApplicationButtonElement(btnPosition, () -> {
-         VaultJewelApplicationStationMessage msg = new VaultJewelApplicationStationMessage();
-         ModNetwork.CHANNEL.sendToServer(msg);
-      }, (VaultJewelApplicationStationContainer)this.getMenu()).layout((screen, gui, parent, world) -> world.translateXY(gui));
+      JewelApplicationButtonElement<?> button = new JewelApplicationButtonElement(
+            btnPosition,
+            () -> ModNetwork.CHANNEL.sendToServer(VaultJewelApplicationStationMessage.INSTANCE),
+            (VaultJewelApplicationStationContainer)this.getMenu()
+         )
+         .layout((screen, gui, parent, world) -> world.translateXY(gui));
       button.setDisabled(() -> {
-         if (container.getTileEntity().getTotalSizeInJewels() == 0) {
+         VaultJewelApplicationStationTileEntity tile = container.getTileEntity();
+         if (tile.getTotalSizeInJewels() == 0) {
             return true;
-         } else if (container.getTileEntity().getToolItem().getItem() instanceof ToolItem) {
-            VaultGearData toolData = VaultGearData.read(container.getTileEntity().getToolItem());
+         } else if (tile.getToolItem().getItem() instanceof ToolItem) {
+            VaultGearData toolData = VaultGearData.read(tile.getToolItem());
             if (!toolData.isModifiable()) {
                return true;
             } else {
                int capacity = toolData.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
-               return capacity < container.getTileEntity().getTotalSizeInJewels();
+               return capacity < tile.getTotalSizeInJewels();
             }
          } else {
             return true;

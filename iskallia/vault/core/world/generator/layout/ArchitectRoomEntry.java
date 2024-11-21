@@ -80,7 +80,7 @@ public class ArchitectRoomEntry extends DataObject<ArchitectRoomEntry> implement
       }
    }
 
-   public TemplatePoolKey getPool(VaultLayout layout) {
+   public TemplatePoolKey getPool(VaultGridLayout layout) {
       if (this.has(TYPE)) {
          if (layout instanceof ArchitectVaultLayout) {
             return switch ((ArchitectRoomEntry.Type)this.get(TYPE)) {
@@ -176,7 +176,7 @@ public class ArchitectRoomEntry extends DataObject<ArchitectRoomEntry> implement
          super(new ArrayList<>(), CompoundAdapter.of(ArchitectRoomEntry::new));
       }
 
-      public java.util.List<TemplatePoolKey> flatten(VaultLayout layout) {
+      public java.util.List<TemplatePoolKey> flatten(VaultGridLayout layout) {
          java.util.List<TemplatePoolKey> result = new ArrayList<>();
 
          for (ArchitectRoomEntry entry : this) {

@@ -102,7 +102,7 @@ public class VaultPortalBlock extends NetherPortalBlock implements EntityBlock {
                            UUID vaultId = data.getProperties().getVaultId();
                            Vault vault;
                            if (vaultId == null) {
-                              vault = ServerVaults.add(VaultFactory.create(Version.latest(), data.copy()));
+                              vault = ServerVaults.add(VaultFactory.create(Version.latest(), data.copy(), player));
                               this.fill(level, pos, tileEntity -> tileEntity.getData().ifPresent(crystal -> {
                                  crystal.getProperties().setVaultId(vault.get(Vault.ID));
                                  tileEntity.setChanged();

@@ -14,7 +14,7 @@ import iskallia.vault.entity.EntityScaler;
 import iskallia.vault.entity.Targeting;
 import iskallia.vault.entity.entity.EffectCloudEntity;
 import iskallia.vault.entity.entity.EternalEntity;
-import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
+import iskallia.vault.gear.attribute.custom.effect.EffectCloudAttribute;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
@@ -258,7 +258,7 @@ public class ClassicMobLogic extends MobLogic {
                   if (swapItem != null) {
                      if (fromUid == null || !fromUid.equals(toUid)) {
                         if (swapItem.shouldCauseEquipmentCooldown(sPlayer, to, event.slot())) {
-                           EquipmentSlot slot = swapItem.getIntendedSlot(to);
+                           EquipmentSlot slot = swapItem.getGearType(to).getEquipmentSlot();
                            if (slot != null) {
                               List<Item> cooldownItems = ModConfigs.VAULT_GEAR_COMMON.getSwapItems(slot);
                               if (!cooldownItems.isEmpty()) {

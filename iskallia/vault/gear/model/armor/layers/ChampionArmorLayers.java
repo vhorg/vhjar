@@ -2,7 +2,6 @@ package iskallia.vault.gear.model.armor.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import iskallia.vault.client.particles.NovaExplosionCloudParticle;
 import iskallia.vault.dynamodel.model.armor.ArmorLayers;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.gear.data.VaultGearData;
@@ -27,7 +26,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.GlowParticle;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
@@ -102,7 +101,7 @@ public class ChampionArmorLayers extends ArmorLayers {
    private static void addShiningParticle(LivingEntity entity, ClientLevel world, float yOffset) {
       Minecraft minecraft = Minecraft.getInstance();
       if (entity.tickCount % 2 == 0 && world.random.nextBoolean()) {
-         GlowParticle particle = (GlowParticle)minecraft.particleEngine
+         Particle particle = minecraft.particleEngine
             .createParticle(
                ParticleTypes.SCRAPE,
                entity.getX() + (world.random.nextFloat() - 0.5F),
@@ -125,7 +124,7 @@ public class ChampionArmorLayers extends ArmorLayers {
       if (entity.tickCount % 2 == 0 && entity.isOnGround()) {
          Vec3 velocity = entity.getDeltaMovement();
          if (velocity.x != 0.0 && velocity.y != 0.0 && velocity.z != 0.0) {
-            NovaExplosionCloudParticle particle = (NovaExplosionCloudParticle)minecraft.particleEngine
+            Particle particle = minecraft.particleEngine
                .createParticle((ParticleOptions)ModParticles.NOVA_CLOUD.get(), entity.getX(), entity.getY(), entity.getZ(), 0.0, 0.0, 0.0);
             if (particle != null) {
                int color = 14676375;

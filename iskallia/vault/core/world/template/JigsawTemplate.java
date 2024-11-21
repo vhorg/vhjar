@@ -98,70 +98,65 @@ public class JigsawTemplate extends Template {
       if (depth < 0) {
          return this;
       } else {
-         this.root.getTiles(Template.JIGSAWS).forEachRemaining(start -> {
-            JigsawData data1 = new JigsawData(start);
-            TemplatePoolKey pool = VaultRegistry.TEMPLATE_POOL.getKey(data1.getPool());
-            if (pool != null) {
-               TemplateEntry entry = pool.get(version).getRandomFlat(version, random).orElse(null);
-               if (entry != null && entry.getTemplate() != null) {
-                  Template childTemplate = entry.getTemplate().get(version);
-                  JigsawData data2 = null;
-                  Iterator<PartialTile> iterator = childTemplate.getTiles(Template.JIGSAWS);
-                  int size = 0;
+         this.root
+            .getTiles(Template.JIGSAWS)
+            .forEachRemaining(
+               start -> {
+                  JigsawData data1 = new JigsawData(start);
+                  TemplatePoolKey pool = VaultRegistry.TEMPLATE_POOL.getKey(data1.getPool());
+                  if (pool != null) {
+                     TemplateEntry entry = pool.get(version).getRandomFlat(version, random).orElse(null);
+                     if (entry != null && entry.getTemplate() != null) {
+                        Template childTemplate = entry.getTemplate().get(version);
+                        JigsawData data2 = null;
+                        Iterator<PartialTile> iterator = childTemplate.getTiles(Template.JIGSAWS);
+                        int size = 0;
 
-                  while (iterator.hasNext()) {
-                     PartialTile tile = iterator.next();
-                     JigsawData other = new JigsawData(tile);
-                     if (!data1.getTarget().equals(other.getName())) {
-                        return;
-                     }
-
-                     if (data1.getFacing().getAxis().isHorizontal() != other.getFacing().getAxis().isHorizontal()) {
-                        return;
-                     }
-
-                     if (data1.getFacing().getAxis().isHorizontal() && data1.getSide() != other.getSide()) {
-                        return;
-                     }
-
-                     if (random.nextInt(size++ + 1) == 0) {
-                        data2 = other;
-                     }
-                  }
-
-                  if (data2 != null) {
-                     BlockPos target = data2.getPos();
-                     BlockPos offset = start.getPos().subtract(target).relative(data1.getFacing());
-                     Rotation rotation = this.getRotation(data2, data1, random);
-                     JigsawTemplate child = new JigsawTemplate(childTemplate);
-                     child.configurator = settings -> {
-                        int tileIndex = 0;
-                        settings.getTileProcessors().add(tileIndex++, TileProcessor.rotate(rotation, target, true));
-                        settings.getTileProcessors().add(tileIndex++, TileProcessor.translate(offset));
-                        settings.getTileProcessors().add(tileIndex++, TileProcessor.ofJigsaw());
-
-                        for (PaletteKey palette : entry.getPalettes()) {
-                           for (TileProcessor tileProcessor : palette.get(version).getTileProcessors()) {
-                              settings.getTileProcessors().add(tileIndex++, tileProcessor);
+                        while (iterator.hasNext()) {
+                           PartialTile tile = iterator.next();
+                           JigsawData other = new JigsawData(tile);
+                           if (data1.getTarget().equals(other.getName())
+                              && data1.getFacing().getAxis().isHorizontal() == other.getFacing().getAxis().isHorizontal()
+                              && (!data1.getFacing().getAxis().isHorizontal() || data1.getSide() == other.getSide())
+                              && random.nextInt(size++ + 1) == 0) {
+                              data2 = other;
                            }
                         }
 
-                        int entityIndex = 0;
-                        settings.getEntityProcessors().add(entityIndex++, EntityProcessor.rotate(rotation, target, true));
-                        settings.getEntityProcessors().add(entityIndex++, EntityProcessor.translate(offset));
+                        if (data2 != null) {
+                           BlockPos target = data2.getPos();
+                           BlockPos offset = start.getPos().subtract(target).relative(data1.getFacing());
+                           Rotation rotation = this.getRotation(data2, data1, random);
+                           JigsawTemplate child = new JigsawTemplate(childTemplate);
+                           child.configurator = settings -> {
+                              int tileIndex = 0;
+                              settings.getTileProcessors().add(tileIndex++, TileProcessor.rotate(rotation, target, true));
+                              settings.getTileProcessors().add(tileIndex++, TileProcessor.translate(offset));
+                              settings.getTileProcessors().add(tileIndex++, TileProcessor.ofJigsaw());
 
-                        for (PaletteKey palette : entry.getPalettes()) {
-                           for (EntityProcessor entityProcessor : palette.get(version).getEntityProcessors()) {
-                              settings.getEntityProcessors().add(entityIndex++, entityProcessor);
-                           }
+                              for (PaletteKey palette : entry.getPalettes()) {
+                                 for (TileProcessor tileProcessor : palette.get(version).getTileProcessors()) {
+                                    settings.getTileProcessors().add(tileIndex++, tileProcessor);
+                                 }
+                              }
+
+                              int entityIndex = 0;
+                              settings.getEntityProcessors().add(entityIndex++, EntityProcessor.rotate(rotation, target, true));
+                              settings.getEntityProcessors().add(entityIndex++, EntityProcessor.translate(offset));
+
+                              for (PaletteKey palette : entry.getPalettes()) {
+                                 for (EntityProcessor entityProcessor : palette.get(version).getEntityProcessors()) {
+                                    settings.getEntityProcessors().add(entityIndex++, entityProcessor);
+                                 }
+                              }
+                           };
+                           child.computeChildren(version, depth - 1, random);
+                           this.children.add(child);
                         }
-                     };
-                     child.computeChildren(version, depth - 1, random);
-                     this.children.add(child);
+                     }
                   }
                }
-            }
-         });
+            );
          return this;
       }
    }

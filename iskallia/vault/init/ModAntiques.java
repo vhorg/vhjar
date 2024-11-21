@@ -19,34 +19,35 @@ import iskallia.vault.antique.reward.AntiqueRewardSpecificGear;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ModAntiques {
    static final List<Antique> ALL_ANTIQUES = new ArrayList<>();
-   public static final Antique SHIP_IN_A_BOTTLE = register("ship_in_a_bottle");
-   public static final Antique SNOW_FOX = register("snow_fox");
-   public static final Antique THE_LOST_ONE = register("the_lost_one");
-   public static final Antique SOUL_MIRROR = register("soul_mirror");
-   public static final Antique ACQUIRED_TASTE = register("acquired_taste");
-   public static final Antique NAZAR_BONCUGU = register("nazar_boncugu");
-   public static final Antique CREST_ORANGE_BRIGADE = register("crest_orange_brigade");
-   public static final Antique HAGS_COOKING_POT = register("hags_cooking_pot");
-   public static final Antique GEM_KING = register("gem_king");
-   public static final Antique THE_UNICORN = register("the_unicorn");
-   public static final Antique THE_LIFE_KEY = register("the_life_key");
-   public static final Antique ARCANE_SABER = register("arcane_saber");
+   public static final Antique SHIP_IN_A_BOTTLE = register("ship_in_a_bottle", "Guybrush");
+   public static final Antique SNOW_FOX = register("snow_fox", "SilentFoxxy");
+   public static final Antique THE_LOST_ONE = register("the_lost_one", "The_Silver_Kid");
+   public static final Antique SOUL_MIRROR = register("soul_mirror", "Cosmovoli");
+   public static final Antique ACQUIRED_TASTE = register("acquired_taste", "AussieCrafter");
+   public static final Antique NAZAR_BONCUGU = register("nazar_boncugu", "mefallit");
+   public static final Antique CREST_ORANGE_BRIGADE = register("crest_orange_brigade", "IthKamakazi");
+   public static final Antique HAGS_COOKING_POT = register("hags_cooking_pot", "TJH54");
+   public static final Antique GEM_KING = register("gem_king", "King_Sauron");
+   public static final Antique THE_UNICORN = register("the_unicorn", "avian946");
+   public static final Antique THE_LIFE_KEY = register("the_life_key", "GreatLakesGirl");
+   public static final Antique ARCANE_SABER = register("arcane_saber", "ExodiaJedi");
    public static final Antique COMPRESSED_CUBE = register("compressed_cube");
-   public static final Antique THE_BLUE_JAY = register("the_blue_jay");
-   public static final Antique POCKET_PENGUIN = register("pocket_penguin");
-   public static final Antique BOUNTIFUL_HARVEST = register("bountiful_harvest");
-   public static final Antique PIRATES_LOCKPICK = register("pirates_lockpick");
-   public static final Antique LUCKY_CAT_MEDALLION = register("lucky_cat_medallion");
-   public static final Antique THE_SNOW_PAW = register("the_snow_paw");
+   public static final Antique THE_BLUE_JAY = register("the_blue_jay", "Jaysp656");
+   public static final Antique POCKET_PENGUIN = register("pocket_penguin", "RMZing");
+   public static final Antique BOUNTIFUL_HARVEST = register("bountiful_harvest", "jyutta");
+   public static final Antique PIRATES_LOCKPICK = register("pirates_lockpick", "Nafin");
+   public static final Antique LUCKY_CAT_MEDALLION = register("lucky_cat_medallion", "MoonliteDelight");
+   public static final Antique THE_SNOW_PAW = register("the_snow_paw", "DannySnowPaw");
    public static final Antique LUCKY_BAMBOO = register("lucky_bamboo");
-   public static final Antique GLIMPSE_OF_THE_COSMOS = register("glimpse_of_the_cosmos");
-   public static final Antique FOUNTAIN_OF_KNOWLEDGE = register("fountain_of_knowledge");
-   public static final Antique INTERTWINED = register("intertwined");
+   public static final Antique GLIMPSE_OF_THE_COSMOS = register("glimpse_of_the_cosmos", "IzzyBizzy");
+   public static final Antique FOUNTAIN_OF_KNOWLEDGE = register("fountain_of_knowledge", "MuttPacket");
+   public static final Antique INTERTWINED = register("intertwined", "MissAndrea");
 
    public static void registerAntiques(Register<Antique> event) {
       IForgeRegistry<Antique> registry = event.getRegistry();
@@ -54,7 +55,11 @@ public class ModAntiques {
    }
 
    public static Antique register(String antiqueRegistryPath) {
-      return register(new Antique(VaultMod.id(antiqueRegistryPath)));
+      return register(antiqueRegistryPath, null);
+   }
+
+   public static Antique register(String antiqueRegistryPath, @Nullable String author) {
+      return register(new Antique(VaultMod.id(antiqueRegistryPath), author));
    }
 
    public static <T extends Antique> T register(T antique) {

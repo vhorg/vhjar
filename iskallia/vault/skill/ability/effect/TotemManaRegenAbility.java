@@ -65,7 +65,7 @@ public class TotemManaRegenAbility extends AbstractTotemAbility<TotemManaRegenTi
    protected void initializeTotem(TotemManaRegenTileEntity totem, ServerPlayer player) {
       totem.initialize(
          player.getUUID(),
-         TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks()),
+         TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks(player)),
          TotemEffectRadiusHelper.adjustTotemEffectRadiusHelper(player, this.getTotemEffectRadius(player)),
          this.getTotemManaRegenPercent()
       );

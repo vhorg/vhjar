@@ -3,6 +3,7 @@ package iskallia.vault.skill.ability.effect.spi.core;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.calc.ManaCostHelper;
 import java.util.Optional;
@@ -34,7 +35,7 @@ public abstract class HoldManaAbility extends HoldAbility implements IPerSecondM
                return true;
             }
 
-            cost = ManaCostHelper.adjustManaCost(player, this.getAbilityGroupName(), cost);
+            cost = ManaCostHelper.adjustManaCost(player, this, cost);
          }
 
          return mana.getMana() >= cost;
@@ -50,10 +51,10 @@ public abstract class HoldManaAbility extends HoldAbility implements IPerSecondM
                return Ability.TickResult.PASS;
             }
 
-            cost = ManaCostHelper.adjustManaCost(player, this.getAbilityGroupName(), cost);
+            cost = ManaCostHelper.adjustManaCost(player, this, cost);
          }
 
-         return mana.decreaseMana(cost) <= 0.0F ? Ability.TickResult.COOLDOWN : Ability.TickResult.PASS;
+         return mana.decreaseMana(ManaAction.PLAYER_ACTION, cost) <= 0.0F ? Ability.TickResult.COOLDOWN : Ability.TickResult.PASS;
       }).orElse(Ability.TickResult.PASS);
    }
 

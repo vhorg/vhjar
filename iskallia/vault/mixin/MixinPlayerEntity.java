@@ -30,7 +30,6 @@ import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -163,13 +162,8 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
       ActiveFlags.IS_AOE_ATTACKING.push();
       Player thisPlayer = (Player)this;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(thisPlayer);
-      float chance = snapshot.getAttributeValue(ModGearAttributes.SWEEPING_HIT_CHANCE, VaultGearAttributeTypeMerger.floatSum());
-      if (this.random.nextFloat() >= chance) {
-         return EnchantmentHelper.getSweepingDamageRatio(thisPlayer);
-      } else {
-         int level = 1;
-         return 1.0F - 1.0F / (level + 1);
-      }
+      float sweepingDmgRatio = snapshot.getAttributeValue(ModGearAttributes.SWEEPING_HIT_DAMAGE, VaultGearAttributeTypeMerger.floatSum());
+      return sweepingDmgRatio + snapshot.getAttributeValue(ModGearAttributes.SWEEPING_HIT_CHANCE, VaultGearAttributeTypeMerger.floatSum());
    }
 
    @Inject(

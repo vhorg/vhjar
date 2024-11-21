@@ -9,6 +9,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.predicate.IModifierImmunity;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
@@ -31,21 +32,25 @@ public class DropOnKillModifier extends VaultModifier<DropOnKillModifier.Propert
             event -> {
                if (event.getSource().getEntity() instanceof ServerPlayer attacker && !attacker.getLevel().isClientSide()) {
                   if (attacker.level == world) {
-                     if (this.properties.filter.test(event.getEntity())) {
-                        LootTableKey lootTable = VaultRegistry.LOOT_TABLE.getKey(this.properties.lootTable);
-                        if (lootTable != null) {
-                           LootTableGenerator generator = new LootTableGenerator(Version.latest(), lootTable, 0.0F);
-                           generator.generate(JavaRandom.ofNanoTime());
-                           generator.getItems()
-                              .forEachRemaining(
-                                 stack -> {
-                                    ItemEntity itemEntity = new ItemEntity(
-                                       world, event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ(), stack.copy()
+                     if (event.getEntity().getTags().contains("soul_shards")) {
+                        if (!IModifierImmunity.of(event.getEntity()).test(this)) {
+                           if (this.properties.filter.test(event.getEntity())) {
+                              LootTableKey lootTable = VaultRegistry.LOOT_TABLE.getKey(this.properties.lootTable);
+                              if (lootTable != null) {
+                                 LootTableGenerator generator = new LootTableGenerator(Version.latest(), lootTable, 0.0F);
+                                 generator.generate(JavaRandom.ofNanoTime());
+                                 generator.getItems()
+                                    .forEachRemaining(
+                                       stack -> {
+                                          ItemEntity itemEntity = new ItemEntity(
+                                             world, event.getEntity().getX(), event.getEntity().getY(), event.getEntity().getZ(), stack.copy()
+                                          );
+                                          itemEntity.setDefaultPickUpDelay();
+                                          event.getDrops().add(itemEntity);
+                                       }
                                     );
-                                    itemEntity.setDefaultPickUpDelay();
-                                    event.getDrops().add(itemEntity);
-                                 }
-                              );
+                              }
+                           }
                         }
                      }
                   }

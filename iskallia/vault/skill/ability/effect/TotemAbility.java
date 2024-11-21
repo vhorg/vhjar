@@ -54,7 +54,7 @@ public class TotemAbility extends AbstractTotemAbility<TotemPlayerHealthTileEnti
    protected void initializeTotem(TotemPlayerHealthTileEntity totem, ServerPlayer player) {
       totem.initialize(
          player.getUUID(),
-         TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks()),
+         TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks(player)),
          TotemEffectRadiusHelper.adjustTotemEffectRadiusHelper(player, this.getTotemEffectRadius(player)),
          this.totemHealthPerSecond
       );

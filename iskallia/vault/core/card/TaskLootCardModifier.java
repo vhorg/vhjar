@@ -40,7 +40,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class TaskLootCardModifier extends CardModifier<TaskLootCardModifier.Config> {
    private UUID uuid;
-   public Task task;
+   private Task task;
    private final Map<Integer, Integer> counts = new LinkedHashMap<>();
 
    public TaskLootCardModifier() {
@@ -53,6 +53,10 @@ public class TaskLootCardModifier extends CardModifier<TaskLootCardModifier.Conf
 
    public UUID getUuid() {
       return this.uuid;
+   }
+
+   public void setTask(Task task) {
+      this.task = task;
    }
 
    public Task getTask() {

@@ -26,7 +26,7 @@ public class UpdateAchievementDataMessage {
 
    public static void handle(UpdateAchievementDataMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
-      context.enqueueWork(() -> AchievementData.CLIENT_ACHIEVEMENTS = message.task);
+      context.enqueueWork(() -> AchievementData.CLIENT = message.task);
       context.setPacketHandled(true);
    }
 }

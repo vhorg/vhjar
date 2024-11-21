@@ -29,6 +29,7 @@ import iskallia.vault.util.Entropy;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.ChainHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
 import iskallia.vault.util.calc.GrantedEffectHelper;
 import iskallia.vault.util.calc.StunChanceHelper;
@@ -78,6 +79,17 @@ public class GearAttributeEvents {
       if (event.getSource().isFire()) {
          withSnapshot(event, false, (entity, snapshot) -> {
             if (snapshot.getAttributeValue(ModGearAttributes.IS_FIRE_IMMUNE, VaultGearAttributeTypeMerger.anyTrue())) {
+               event.setCanceled(true);
+            }
+         });
+      }
+   }
+
+   @SubscribeEvent
+   public static void kineticImmunePreventKineticDamage(LivingAttackEvent event) {
+      if (event.getSource() == DamageSource.FLY_INTO_WALL) {
+         withSnapshot(event, false, (entity, snapshot) -> {
+            if (snapshot.getAttributeValue(ModGearAttributes.IS_KINETIC_IMMUNE, VaultGearAttributeTypeMerger.anyTrue())) {
                event.setCanceled(true);
             }
          });
@@ -188,7 +200,7 @@ public class GearAttributeEvents {
                            Level world = attacker.getLevel();
                            int chainCount = ChainHelper.getChainCount(attacker);
                            if (chainCount > 0) {
-                              float chainRange = AreaOfEffectHelper.adjustAreaOfEffect(attacker, 5.0F);
+                              float chainRange = AreaOfEffectHelper.adjustAreaOfEffect(attacker, null, 5.0F);
                               ActiveFlags.IS_CHAINING_ATTACKING.runIfNotSet(() -> {
                                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), chainRange, Mob.class);
                                  List<Vec3> nearbyPos = new ArrayList<>();
@@ -345,8 +357,10 @@ public class GearAttributeEvents {
                            LivingEntity attacked = event.getEntityLiving();
                            float stunChance = StunChanceHelper.getStunChance(attacker, attacked);
                            if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
+                              int duration = 30;
+                              duration = EffectDurationHelper.adjustEffectDurationFloor(attacker, duration);
                               attacked.addEffect(
-                                 new MobEffectInstance(ModEffects.NO_AI, 30, 1, false, false) {
+                                 new MobEffectInstance(ModEffects.NO_AI, duration, 1, false, false) {
                                     public boolean tick(LivingEntity livingEntity, Runnable p_19554_) {
                                        if (!livingEntity.isDeadOrDying()) {
                                           ModNetwork.CHANNEL
@@ -459,6 +473,10 @@ public class GearAttributeEvents {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_DWELLER, VaultGearAttributeTypeMerger.floatSum());
             }
 
+            if (attacked.isBaby()) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_BABY, VaultGearAttributeTypeMerger.floatSum());
+            }
+
             if (attacker instanceof Player player) {
                PlayerTalentsData talents = PlayerTalentsData.get(attacker.getServer());
 
@@ -516,8 +534,9 @@ public class GearAttributeEvents {
                      if (Entropy.canExecute(attacker, Entropy.Stat.effectCloud(effect), cloud.getTriggerChance())) {
                         EffectCloudEntity cloudEntity = new EffectCloudEntity(attacker.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
                         cloud.apply(cloudEntity);
-                        cloudEntity.setRadius(AreaOfEffectHelper.adjustAreaOfEffect(attacker, cloudEntity.getRadius()));
+                        cloudEntity.setRadius(AreaOfEffectHelper.adjustAreaOfEffect(attacker, null, cloudEntity.getRadius()));
                         cloudEntity.setOwner(attacker);
+                        cloudEntity.setDuration(EffectDurationHelper.adjustEffectDurationFloor(attacker, cloudEntity.getDuration()));
                         attacker.getLevel().addFreshEntity(cloudEntity);
                      }
                   }
@@ -545,8 +564,9 @@ public class GearAttributeEvents {
                            if (Entropy.canExecute(attacked, Entropy.Stat.effectCloudWhenHit(effect), cloud.getTriggerChance())) {
                               EffectCloudEntity cloudEntity = new EffectCloudEntity(attacked.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
                               cloud.apply(cloudEntity);
-                              cloudEntity.setRadius(AreaOfEffectHelper.adjustAreaOfEffect(attacked, cloudEntity.getRadius()));
+                              cloudEntity.setRadius(AreaOfEffectHelper.adjustAreaOfEffect(attacked, null, cloudEntity.getRadius()));
                               cloudEntity.setOwner(attacked);
+                              cloudEntity.setDuration(EffectDurationHelper.adjustEffectDurationFloor(attacked, cloudEntity.getDuration()));
                               attacked.getLevel().addFreshEntity(cloudEntity);
                            }
                         }

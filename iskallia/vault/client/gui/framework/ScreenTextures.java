@@ -46,6 +46,9 @@ public final class ScreenTextures {
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/omega_black_market_ornament")
    );
    public static final TextureAtlasRegion VAULT_FORGE_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/vault_forge"));
+   public static final TextureAtlasRegion VAULT_FORGE_PROFICIENCY_BAR = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/vault_forge_proficiency_bar")
+   );
    public static final TextureAtlasRegion ANTIQUE_COLLECTOR_BOOK_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/antique_collector_book")
    );
@@ -134,6 +137,21 @@ public final class ScreenTextures {
    );
    public static final ButtonElement.ButtonTextures BUTTON_CRAFT_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_CRAFT, BUTTON_CRAFT_HOVER, BUTTON_CRAFT_PRESSED, BUTTON_CRAFT_DISABLED
+   );
+   public static final TextureAtlasRegion BUTTON_PROFICIENCY = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_proficiency")
+   );
+   public static final TextureAtlasRegion BUTTON_PROFICIENCY_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_proficiency_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_PROFICIENCY_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_proficiency_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_PROFICIENCY_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_proficiency_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_PROFICIENCY__TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_PROFICIENCY, BUTTON_PROFICIENCY_HOVER, BUTTON_PROFICIENCY_PRESSED, BUTTON_PROFICIENCY_DISABLED
    );
    public static final TextureAtlasRegion BUTTON_ALCHEMY_CRAFT = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_craft")
@@ -704,9 +722,23 @@ public final class ScreenTextures {
       BUTTON_EMBER_PAY, BUTTON_EMBER_PAY_HOVER, BUTTON_EMBER_PAY_PRESSED, BUTTON_EMBER_PAY_DISABLED
    );
    public static final TextureAtlasRegion SLIDER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider"));
-   public static final TextureAtlasRegion SLIDER_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_background"));
    public static final TextureAtlasRegion SLIDER_HOVER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_hover"));
+   public static final TextureAtlasRegion SLIDER_SMALL = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_small"));
+   public static final TextureAtlasRegion SLIDER_SMALL_HOVER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_small_hover"));
+   public static final TextureAtlasRegion SLIDER_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_background"));
+   public static final ThreeSliceHorizontal.TextureRegion SLIDER_BAR_SLICES = ThreeSliceHorizontal.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_bar_slices"), ThreeSliceHorizontal.slice(3, 3)
+   );
    public static final TextureAtlasRegion JEWEL_NO_ITEM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/jewel_no_item"));
+   public static final TextureAtlasRegion KEY_ASHIUM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_ashium"));
+   public static final TextureAtlasRegion KEY_BOMIGNITE = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_bomignite"));
+   public static final TextureAtlasRegion KEY_GORGINITE = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_gorginite"));
+   public static final TextureAtlasRegion KEY_ISKALLIUM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_iskallium"));
+   public static final TextureAtlasRegion KEY_PETZANITE = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_petzanite"));
+   public static final TextureAtlasRegion KEY_SPARKLETINE = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_sparkletine"));
+   public static final TextureAtlasRegion KEY_TUBIUM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_tubium"));
+   public static final TextureAtlasRegion KEY_UPALINE = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_upaline"));
+   public static final TextureAtlasRegion KEY_XENIUM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/key/key_xenium"));
    public static final ResourceLocation UI_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree.png");
    public static final ResourceLocation BACKGROUNDS_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree_bgs.png");
 

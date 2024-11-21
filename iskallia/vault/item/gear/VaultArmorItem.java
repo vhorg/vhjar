@@ -5,6 +5,7 @@ import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.VaultGearType;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
@@ -49,6 +50,9 @@ import net.minecraftforge.client.IItemRenderProperties;
 import org.jetbrains.annotations.NotNull;
 
 public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
+   @Nonnull
+   private final VaultGearType gearSlot;
+
    public static VaultArmorItem forSlot(EquipmentSlot equipmentSlot) {
       return switch (equipmentSlot) {
          case HEAD -> ModItems.HELMET;
@@ -59,9 +63,10 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
       };
    }
 
-   public VaultArmorItem(ResourceLocation id, EquipmentSlot slot, Properties builder) {
-      super(VaultGearArmorMaterial.INSTANCE, slot, builder);
+   public VaultArmorItem(ResourceLocation id, VaultGearType slot, Properties builder) {
+      super(VaultGearArmorMaterial.INSTANCE, slot.getEquipmentSlot(), builder);
       this.setRegistryName(id);
+      this.gearSlot = slot;
    }
 
    @Nullable
@@ -92,23 +97,23 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
       }
    }
 
-   @Nullable
+   @Nonnull
    @Override
-   public EquipmentSlot getIntendedSlot(ItemStack stack) {
-      return this.getSlot();
+   public VaultGearType getGearType(ItemStack stack) {
+      return this.gearSlot;
    }
 
    @Nullable
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       VaultGearData gearData = VaultGearData.read(stack);
-      EquipmentSlot intendedSlot = this.getIntendedSlot(stack);
+      EquipmentSlot intendedSlot = this.getGearType(stack).getEquipmentSlot();
       return ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRandomRoll(stack, gearData, intendedSlot, random);
    }
 
    @Override
    public Optional<? extends DynamicModel<?>> resolveDynamicModel(ItemStack stack, ResourceLocation key) {
-      EquipmentSlot intended = this.getIntendedSlot(stack);
+      EquipmentSlot intended = this.getGearType(stack).getEquipmentSlot();
       return intended == null ? Optional.empty() : ModDynamicModels.Armor.MODEL_REGISTRY.get(key).flatMap(model -> model.getPiece(intended));
    }
 

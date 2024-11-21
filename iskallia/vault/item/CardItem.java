@@ -67,7 +67,7 @@ public class CardItem extends Item implements IManualModelLoading {
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
       Card card = getCard(stack);
-      card.addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTickCount());
+      card.addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTick());
    }
 
    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {

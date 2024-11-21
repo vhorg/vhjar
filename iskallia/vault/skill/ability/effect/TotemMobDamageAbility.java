@@ -65,7 +65,7 @@ public class TotemMobDamageAbility extends AbstractTotemAbility<TotemMobDamageTi
    protected void initializeTotem(TotemMobDamageTileEntity totem, ServerPlayer player) {
       totem.initialize(
          player.getUUID(),
-         TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks()),
+         TotemDurationHelper.adjustTotemDurationTicks(player, this.getTotemDurationTicks(player)),
          TotemEffectRadiusHelper.adjustTotemEffectRadiusHelper(player, this.getTotemEffectRadius(player)),
          this.getTotemPercentDamagePerInterval(),
          this.getTotemDamageIntervalTicks()

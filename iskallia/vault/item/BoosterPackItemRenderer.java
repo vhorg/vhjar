@@ -28,7 +28,7 @@ public class BoosterPackItemRenderer extends SpecialItemRenderer {
          .orElse(null);
       if (model == null) {
          List<String> models = ModConfigs.BOOSTER_PACK.getModels().stream().map(BoosterPackConfig.BoosterPackModel::getUnopened).toList();
-         model = models.get((int)(ClientScheduler.INSTANCE.getTickCount() >> 4) % models.size());
+         model = models.get((int)(ClientScheduler.INSTANCE.getTick() >> 4) % models.size());
       }
 
       ModelResourceLocation base = new ModelResourceLocation(model);

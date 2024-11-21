@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.world.data.item.ItemPlacement;
 import iskallia.vault.core.world.data.item.PartialItem;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
@@ -33,7 +34,7 @@ public class PartialCompoundNbt implements TilePlacement<PartialCompoundNbt>, En
    }
 
    public static PartialCompoundNbt empty() {
-      return new PartialCompoundNbt(new CompoundTag());
+      return new PartialCompoundNbt(null);
    }
 
    public static PartialCompoundNbt of(CompoundTag nbt) {
@@ -55,8 +56,7 @@ public class PartialCompoundNbt implements TilePlacement<PartialCompoundNbt>, En
    }
 
    public static PartialCompoundNbt at(BlockGetter world, BlockPos pos) {
-      BlockEntity blockEntity = world.getBlockEntity(pos);
-      return blockEntity == null ? new PartialCompoundNbt(null) : new PartialCompoundNbt(blockEntity.saveWithFullMetadata());
+      return of(world.getBlockEntity(pos));
    }
 
    public static PartialCompoundNbt of(ItemStack stack) {
@@ -217,6 +217,18 @@ public class PartialCompoundNbt implements TilePlacement<PartialCompoundNbt>, En
    }
 
    public static class Adapter implements ISimpleAdapter<PartialCompoundNbt, Tag, JsonElement> {
+      public void writeBits(PartialCompoundNbt value, BitBuffer buffer) {
+         buffer.writeBoolean(value == null);
+         if (value != null) {
+            Adapters.COMPOUND_NBT.asNullable().writeBits(value.nbt, buffer);
+         }
+      }
+
+      @Override
+      public Optional<PartialCompoundNbt> readBits(BitBuffer buffer) {
+         return buffer.readBoolean() ? Optional.empty() : Optional.of(PartialCompoundNbt.of(Adapters.COMPOUND_NBT.asNullable().readBits(buffer).orElse(null)));
+      }
+
       public Optional<Tag> writeNbt(@Nullable PartialCompoundNbt value) {
          return value == null ? Optional.empty() : Adapters.COMPOUND_NBT.writeNbt(value.nbt);
       }

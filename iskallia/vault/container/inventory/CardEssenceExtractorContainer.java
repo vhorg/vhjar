@@ -4,6 +4,7 @@ import iskallia.vault.block.entity.CardEssenceExtractorTileEntity;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.spi.AbstractElementContainer;
 import iskallia.vault.init.ModContainers;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.item.CardItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.SimpleContainer;
@@ -42,7 +43,7 @@ public class CardEssenceExtractorContainer extends AbstractElementContainer {
       SimpleContainer ct = this.tileEntity.getInventory();
       this.addSlot(new Slot(ct, 0, 16, 33) {
          public boolean mayPlace(ItemStack stack) {
-            return stack.isEmpty() ? true : stack.getItem() instanceof CardItem;
+            return stack.isEmpty() ? true : stack.is(ModItems.CARD) || stack.is(ModItems.CARD_DECK);
          }
       });
       this.addSlot(new Slot(ct, 1, 106, 28) {

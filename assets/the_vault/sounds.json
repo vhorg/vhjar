@@ -531,6 +531,78 @@
       }
     ]
   },
+  "bloodhorde.idle": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:bloodhorde/idle1",
+      "the_vault:bloodhorde/idle2"
+    ]
+  },
+  "bloodhorde.tank_idle": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:bloodhorde/tank_idle1",
+      "the_vault:bloodhorde/tank_idle2"
+    ]
+  },
+  "bloodhorde.tank_roar": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:bloodhorde/tank_roar",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:bloodhorde/tank_roar",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:bloodhorde/tank_roar",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "bloodhorde.step": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:bloodhorde/step1",
+      "the_vault:bloodhorde/step2"
+    ]
+  },
+  "bloodhorde.hurt": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:bloodhorde/hurt",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:bloodhorde/hurt",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:bloodhorde/hurt",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "bloodhorde.death": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:bloodhorde/death",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:bloodhorde/death",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:bloodhorde/death",
+        "pitch": 0.9
+      }
+    ]
+  },
   "burp": {
     "sounds": [
       "the_vault:burp/burp1",
@@ -888,6 +960,36 @@
     "category": "players",
     "sounds": [
       "the_vault:booster_pack_open"
+    ]
+  },
+  "raid_gate_open": {
+    "category": "master",
+    "sounds": [
+      "the_vault:raid_gate_open"
+    ]
+  },
+  "raid_chain_lock": {
+    "category": "master",
+    "sounds": [
+      "the_vault:raid_chain_lock"
+    ]
+  },
+  "raid_hatch_open": {
+    "category": "master",
+    "sounds": [
+      "the_vault:raid_hatch_open"
+    ]
+  },
+  "raid_hatch_lock": {
+    "category": "master",
+    "sounds": [
+      "the_vault:raid_hatch_lock"
+    ]
+  },
+  "raid_impact": {
+    "category": "master",
+    "sounds": [
+      "the_vault:raid_impact"
     ]
   }
 }

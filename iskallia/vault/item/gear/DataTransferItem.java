@@ -59,7 +59,7 @@ public interface DataTransferItem {
       if (attr == ModGearAttributes.STATE && data instanceof VaultGearData vaultGearData) {
          vaultGearData.setState(ModGearAttributes.STATE.getType().nbtRead(tag));
       } else {
-         data.updateAttribute(attr, attr.getType().nbtRead(tag));
+         data.createOrReplaceAttributeValue(attr, attr.getType().nbtRead(tag));
       }
    }
 }

@@ -79,8 +79,11 @@ public class LodestoneObjective extends Objective {
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
       BlockState targetState = (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
-      CommonEvents.OBJECTIVE_PIECE_GENERATION
-         .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
+      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> {
+         if (data.getVault() == vault) {
+            this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue()));
+         }
+      });
       CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).in(world).register(this, data -> {
          PartialTile target = PartialTile.of(PartialBlockState.of(ModBlocks.PLACEHOLDER), PartialCompoundNbt.empty());
          target.getState().set(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);

@@ -60,7 +60,7 @@ public class DashDamageAbility extends DashAbility {
             player -> {
                if (this.data != null) {
                   float range = 2.0F;
-                  range = AreaOfEffectHelper.adjustAreaOfEffect(player, range);
+                  range = AreaOfEffectHelper.adjustAreaOfEffect(player, this, range);
                   TargetingConditions conditions = TargetingConditions.forCombat().range(range).selector(entity -> !(entity instanceof Player));
 
                   for (LivingEntity nearbyEntity : player.level

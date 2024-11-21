@@ -219,7 +219,7 @@ public abstract class Template extends Keyed<Template> {
       }
    }
 
-   protected static class TilePlacementResult {
+   public static class TilePlacementResult {
       public final List<PartialTile> placedBlockEntities;
       public final List<BlockPos> flowingPositions;
       public final List<BlockPos> sourcePositions;

@@ -13,6 +13,7 @@ import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mana.Mana;
+import iskallia.vault.mana.ManaAction;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleManaAbility;
@@ -103,7 +104,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    public float getRadius(Entity attacker) {
       float realRadius = this.getUnmodifiedRadius();
       if (attacker instanceof LivingEntity livingEntity) {
-         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, this, realRadius);
       }
 
       return realRadius;
@@ -123,11 +124,6 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
 
    public ToggleAbilityEffect getEffect() {
       return ModEffects.SMITE;
-   }
-
-   @Override
-   public String getAbilityGroupName() {
-      return "Smite";
    }
 
    @Override
@@ -247,7 +243,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
             player.level.addFreshEntity(smiteBolt);
          }
 
-         if (!player.isCreative() && Mana.decrease(player, this.getAdditionalManaPerBolt()) <= 0.0F) {
+         if (!player.isCreative() && Mana.decrease(player, ManaAction.PLAYER_ACTION, this.getAdditionalManaPerBolt()) <= 0.0F) {
             player.removeEffect(this.getEffect());
             applyCooldown = true;
          }

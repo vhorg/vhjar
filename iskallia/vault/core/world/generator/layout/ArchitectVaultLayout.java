@@ -33,7 +33,7 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
-public class ArchitectVaultLayout extends VaultLayout {
+public class ArchitectVaultLayout extends VaultGridLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("architect_vault", GridLayout.class).with(Version.v1_10, ArchitectVaultLayout::new);
    public static final FieldRegistry FIELDS = ClassicVaultLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<TemplatePoolKey> START_POOL = FieldKey.of("start_pool", TemplatePoolKey.class)

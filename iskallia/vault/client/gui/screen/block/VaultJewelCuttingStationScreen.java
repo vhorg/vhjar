@@ -14,11 +14,6 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.IMutableSpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.container.VaultJewelCuttingStationContainer;
-import iskallia.vault.gear.data.VaultGearData;
-import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.tool.JewelItem;
-import iskallia.vault.network.message.VaultJewelCuttingRequestModificationMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -55,23 +50,9 @@ public class VaultJewelCuttingStationScreen extends AbstractElementContainerScre
       Slot slot = ((VaultJewelCuttingStationContainer)this.getMenu()).getJewelInputSlot();
       if (slot != null) {
          IMutableSpatial btnPosition = Spatials.positionXY(slot.x - 1, slot.y - 1).translateY(-10).translateX(40);
-         JewelCuttingButtonElement<?> button = new JewelCuttingButtonElement(btnPosition, () -> {
-            VaultJewelCuttingRequestModificationMessage msg = new VaultJewelCuttingRequestModificationMessage();
-            ModNetwork.CHANNEL.sendToServer(msg);
-         }, (VaultJewelCuttingStationContainer)this.getMenu()).layout((screen, gui, parent, world) -> world.translateXY(gui));
-         button.setDisabled(
-            () -> {
-               if (((VaultJewelCuttingStationContainer)this.getMenu()).getTileEntity() != null
-                  && !((VaultJewelCuttingStationContainer)this.getMenu()).getTileEntity().canCraft()) {
-                  return true;
-               } else if (((VaultJewelCuttingStationContainer)this.getMenu()).getJewelInputSlot().getItem().getItem() instanceof JewelItem) {
-                  VaultGearData data = VaultGearData.read(((VaultJewelCuttingStationContainer)this.getMenu()).getJewelInputSlot().getItem());
-                  return data.getFirstValue(ModGearAttributes.JEWEL_SIZE).orElse(0) <= 10;
-               } else {
-                  return true;
-               }
-            }
-         );
+         JewelCuttingButtonElement<?> button = new JewelCuttingButtonElement(btnPosition, () -> {}, (VaultJewelCuttingStationContainer)this.getMenu())
+            .layout((screen, gui, parent, world) -> world.translateXY(gui));
+         button.setDisabled(true);
          this.addElement(button);
       }
    }

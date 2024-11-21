@@ -57,6 +57,7 @@ public class MonolithRenderer implements BlockEntityRenderer<MonolithTileEntity>
          stack.add(VaultModifierStack.of((VaultModifier<?>)modifier, count));
       }));
       Collections.reverse(lines);
+      Collections.reverse(description);
       Collections.reverse(stack);
 
       for (Component line : description) {

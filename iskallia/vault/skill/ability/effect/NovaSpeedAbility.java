@@ -7,6 +7,11 @@ import iskallia.vault.core.event.common.EntityStunnedEvent;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.effect.InfiniteDurationEffect;
 import iskallia.vault.event.ActiveFlags;
+import iskallia.vault.gear.attribute.ability.special.FrostNovaVulnerabilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.config.IntRangeConfig;
+import iskallia.vault.gear.attribute.ability.special.base.template.value.IntValue;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.init.ModSounds;
@@ -14,7 +19,9 @@ import iskallia.vault.skill.ability.effect.spi.AbstractNovaAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.util.effect.ScheduledEffectHelper;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -73,8 +80,13 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
    public NovaSpeedAbility() {
    }
 
-   public int getDurationTicks() {
+   public int getDurationTicksUnmodified() {
       return this.durationTicks;
+   }
+
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getDurationTicksUnmodified();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
    }
 
    public int getAmplifier() {
@@ -93,20 +105,33 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
             player -> {
                float radius = this.getRadius(player);
                Vec3 pos = context.getSource().getPos().orElse(player.position());
-
-               for (LivingEntity nearbyEntity : player.level
+               List<LivingEntity> nearbyEntities = player.level
                   .getNearbyEntities(
                      LivingEntity.class,
                      TargetingConditions.forCombat().selector(entity -> !(entity instanceof Player)).range(radius),
                      player,
                      AABBHelper.create(pos, radius)
-                  )) {
-                  nearbyEntity.addEffect(new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(), this.getAmplifier(), false, false, false));
+                  );
+               int vulnerabilityLevel = 0;
+
+               for (ConfiguredModification<FrostNovaVulnerabilityModification, IntRangeConfig, IntValue> mod : SpecialAbilityModification.getModifications(
+                  player, FrostNovaVulnerabilityModification.class
+               )) {
+                  vulnerabilityLevel += mod.value().getValue();
+               }
+
+               for (LivingEntity nearbyEntity : nearbyEntities) {
+                  nearbyEntity.addEffect(new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(player), this.getAmplifier(), false, false, false));
                   CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, nearbyEntity));
                   if (!nearbyEntity.hasEffect(ModEffects.HYPOTHERMIA)) {
                      ScheduledEffectHelper.invalidateAll(nearbyEntity, ModEffects.HYPOTHERMIA);
-                     ScheduledEffectHelper.scheduleEffect(nearbyEntity, ModEffects.HYPOTHERMIA.instance(0, true), this.getDurationTicks());
+                     ScheduledEffectHelper.scheduleEffect(nearbyEntity, ModEffects.HYPOTHERMIA.timedInstance(0, 400, true), this.getDurationTicks(player));
                      setAbilityData(nearbyEntity, this.getDamageIntervalTicks(), player.getUUID());
+                  }
+
+                  if (vulnerabilityLevel > 0) {
+                     int amplifier = vulnerabilityLevel - 1;
+                     nearbyEntity.addEffect(new MobEffectInstance(ModEffects.VULNERABLE, this.getDurationTicks(player) * 4, amplifier, false, false));
                   }
                }
 

@@ -52,18 +52,18 @@ public class VaultGearHelper {
 
    public static void initializeGearRollType(ItemStack stack, int gearLevel, RandomSource random) {
       VaultGearData data = VaultGearData.read(stack);
-      if (data.has(ModGearAttributes.GEAR_ROLL_TYPE_POOL) && !data.has(ModGearAttributes.GEAR_ROLL_TYPE)) {
+      if (data.hasAttribute(ModGearAttributes.GEAR_ROLL_TYPE_POOL) && !data.hasAttribute(ModGearAttributes.GEAR_ROLL_TYPE)) {
          data.getFirstValue(ModGearAttributes.GEAR_ROLL_TYPE_POOL).ifPresent(typePool -> {
             String rollType = ModConfigs.VAULT_GEAR_TYPE_POOL_CONFIG.getGearRollType(typePool, gearLevel, random);
             if (rollType != null) {
-               data.updateAttribute(ModGearAttributes.GEAR_ROLL_TYPE, rollType);
+               data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_ROLL_TYPE, rollType);
                data.write(stack);
             }
          });
       }
 
-      if (!data.has(ModGearAttributes.GEAR_ROLL_TYPE)) {
-         data.updateAttribute(ModGearAttributes.GEAR_ROLL_TYPE, ModConfigs.VAULT_GEAR_TYPE_CONFIG.getDefaultRoll().getName());
+      if (!data.hasAttribute(ModGearAttributes.GEAR_ROLL_TYPE)) {
+         data.createOrReplaceAttributeValue(ModGearAttributes.GEAR_ROLL_TYPE, ModConfigs.VAULT_GEAR_TYPE_CONFIG.getDefaultRoll().getName());
          data.write(stack);
       }
    }
@@ -95,7 +95,7 @@ public class VaultGearHelper {
          } else {
             ColorBlender colorBlender = new ColorBlender(1.0F);
             Optional.ofNullable(clientCache.getGearColorComponents()).ifPresent(colors -> colors.forEach(colorx -> colorBlender.add(colorx, 60.0F)));
-            float time = (float)ClientScheduler.INSTANCE.getTickCount();
+            float time = (float)ClientScheduler.INSTANCE.getTick();
             int color = colorBlender.getColor(time);
             Optional<String> customName = Optional.ofNullable(clientCache.getGearName());
             return (Component)customName.<MutableComponent>map(s -> new TextComponent(s).setStyle(Style.EMPTY.withColor(color)))
@@ -134,84 +134,89 @@ public class VaultGearHelper {
    public static Multimap<Attribute, AttributeModifier> getModifiers(UUID uuid, Stream<VaultGearAttributeInstance<?>> instances) {
       AttributeGearData data = AttributeGearData.empty();
       data.setIdentifier(uuid);
-      instances.forEach(instance -> data.updateAttribute(instance.getAttribute(), instance.getValue()));
+      instances.forEach(instance -> data.createOrReplaceAttributeValue(instance.getAttribute(), instance.getValue()));
       return getModifiers(data);
    }
 
    public static Multimap<Attribute, AttributeModifier> getModifiers(AttributeGearData data) {
       Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
       UUID identifier = data.getIdentifier();
-      if (data.has(ModGearAttributes.ATTACK_DAMAGE)) {
+      if (data.hasAttribute(ModGearAttributes.ATTACK_DAMAGE)) {
          double attackDamage = data.get(ModGearAttributes.ATTACK_DAMAGE, VaultGearAttributeTypeMerger.doubleSum());
          addAttribute(builder, Attributes.ATTACK_DAMAGE, attackDamage, identifier);
       }
 
-      if (data.has(ModGearAttributes.ATTACK_SPEED)) {
+      if (data.hasAttribute(ModGearAttributes.ATTACK_SPEED)) {
          double attackSpeed = data.get(ModGearAttributes.ATTACK_SPEED, VaultGearAttributeTypeMerger.doubleSum());
          addAttribute(builder, Attributes.ATTACK_SPEED, attackSpeed, identifier);
       }
 
-      if (data.has(ModGearAttributes.ATTACK_SPEED_PERCENT)) {
+      if (data.hasAttribute(ModGearAttributes.ATTACK_SPEED_PERCENT)) {
          double attackSpeed = data.get(ModGearAttributes.ATTACK_SPEED_PERCENT, VaultGearAttributeTypeMerger.doubleSum());
          addAttribute(builder, Attributes.ATTACK_SPEED, attackSpeed, identifier, Operation.MULTIPLY_BASE);
       }
 
-      if (data.has(ModGearAttributes.ARMOR)) {
+      if (data.hasAttribute(ModGearAttributes.ARMOR)) {
          double armor = data.get(ModGearAttributes.ARMOR, VaultGearAttributeTypeMerger.intSum()).intValue();
          addAttribute(builder, Attributes.ARMOR, armor, identifier);
       }
 
-      if (data.has(ModGearAttributes.ARMOR_PERCENTILE)) {
+      if (data.hasAttribute(ModGearAttributes.ARMOR_PERCENTILE)) {
          double incArmor = data.get(ModGearAttributes.ARMOR_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()).floatValue();
          addAttribute(builder, Attributes.ARMOR, incArmor, identifier, Operation.MULTIPLY_BASE);
       }
 
-      if (data.has(ModGearAttributes.ARMOR_TOUGHNESS)) {
+      if (data.hasAttribute(ModGearAttributes.ARMOR_TOUGHNESS)) {
          double armorToughness = data.get(ModGearAttributes.ARMOR_TOUGHNESS, VaultGearAttributeTypeMerger.intSum()).intValue();
          addAttribute(builder, Attributes.ARMOR_TOUGHNESS, armorToughness, identifier);
       }
 
-      if (data.has(ModGearAttributes.KNOCKBACK_RESISTANCE)) {
+      if (data.hasAttribute(ModGearAttributes.KNOCKBACK_RESISTANCE)) {
          float knockbackResistance = data.get(ModGearAttributes.KNOCKBACK_RESISTANCE, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, Attributes.KNOCKBACK_RESISTANCE, knockbackResistance, identifier);
       }
 
-      if (data.has(ModGearAttributes.HEALTH)) {
+      if (data.hasAttribute(ModGearAttributes.HEALTH)) {
          float health = data.get(ModGearAttributes.HEALTH, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, Attributes.MAX_HEALTH, health, identifier);
       }
 
-      if (data.has(ModGearAttributes.REACH)) {
+      if (data.hasAttribute(ModGearAttributes.HEALTH_PERCENTILE)) {
+         float healthPercent = data.get(ModGearAttributes.HEALTH_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, Attributes.MAX_HEALTH, healthPercent, identifier, Operation.MULTIPLY_BASE);
+      }
+
+      if (data.hasAttribute(ModGearAttributes.REACH)) {
          double reach = data.get(ModGearAttributes.REACH, VaultGearAttributeTypeMerger.doubleSum());
          addAttribute(builder, (Attribute)ForgeMod.REACH_DISTANCE.get(), reach, identifier);
       }
 
-      if (data.has(ModGearAttributes.ATTACK_RANGE)) {
+      if (data.hasAttribute(ModGearAttributes.ATTACK_RANGE)) {
          double reach = data.get(ModGearAttributes.ATTACK_RANGE, VaultGearAttributeTypeMerger.doubleSum());
          addAttribute(builder, (Attribute)ForgeMod.ATTACK_RANGE.get(), reach, identifier);
       }
 
-      if (data.has(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE)) {
+      if (data.hasAttribute(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE)) {
          float manaRegen = data.get(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, ModAttributes.MANA_REGEN, manaRegen, identifier, Operation.MULTIPLY_BASE);
       }
 
-      if (data.has(ModGearAttributes.MANA_ADDITIVE)) {
+      if (data.hasAttribute(ModGearAttributes.MANA_ADDITIVE)) {
          int manaFlat = data.get(ModGearAttributes.MANA_ADDITIVE, VaultGearAttributeTypeMerger.intSum());
          addAttribute(builder, ModAttributes.MANA_MAX, manaFlat, identifier);
       }
 
-      if (data.has(ModGearAttributes.MANA_ADDITIVE_PERCENTILE)) {
+      if (data.hasAttribute(ModGearAttributes.MANA_ADDITIVE_PERCENTILE)) {
          float manaPercent = data.get(ModGearAttributes.MANA_ADDITIVE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, ModAttributes.MANA_MAX, manaPercent, identifier, Operation.MULTIPLY_BASE);
       }
 
-      if (data.has(ModGearAttributes.HEALING_EFFECTIVENESS)) {
+      if (data.hasAttribute(ModGearAttributes.HEALING_EFFECTIVENESS)) {
          float healingPercent = data.get(ModGearAttributes.HEALING_EFFECTIVENESS, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, ModAttributes.HEALING_MAX, healingPercent, identifier, Operation.MULTIPLY_BASE);
       }
 
-      if (data.has(ModGearAttributes.MOVEMENT_SPEED)) {
+      if (data.hasAttribute(ModGearAttributes.MOVEMENT_SPEED)) {
          float movementSpeed = data.get(ModGearAttributes.MOVEMENT_SPEED, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, Attributes.MOVEMENT_SPEED, movementSpeed, identifier, Operation.MULTIPLY_BASE);
       }

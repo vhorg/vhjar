@@ -124,7 +124,7 @@ public class BossMeleeAttackGoal extends Goal {
          this.resetAttackCooldown();
       }
 
-      this.boss.setActiveAttackMove(null);
+      this.boss.setActiveAttackMove("");
    }
 
    private void moveAndTryStartAttack() {
@@ -143,7 +143,7 @@ public class BossMeleeAttackGoal extends Goal {
 
    private boolean tryStartAttack(LivingEntity target, double distToTarget, double reach) {
       if (this.remainingSwingDuration <= 0) {
-         return this.isTimeToRageAttack() && this.getAndInitRandomAttack(this.getRageAttacks()).map(attack -> {
+         return this.isTimeToRageAttack() && this.getAndInitRandomAttack(this.boss, this.getRageAttacks()).map(attack -> {
             this.rageAttack = attack;
             if (this.rageAttack.start(target, distToTarget, reach)) {
                this.remainingSwingDuration = this.rageAttack.getDuration();
@@ -152,7 +152,7 @@ public class BossMeleeAttackGoal extends Goal {
             } else {
                return false;
             }
-         }).orElse(false) ? true : this.isTimeToAttack() && this.getAndInitRandomAttack(this.getMeleeAttacks()).map(attack -> {
+         }).orElse(false) ? true : this.isTimeToAttack() && this.getAndInitRandomAttack(this.boss, this.getMeleeAttacks()).map(attack -> {
             this.meleeAttack = attack;
             if (this.meleeAttack.start(target, distToTarget, reach)) {
                this.remainingSwingDuration = this.meleeAttack.getDuration();
@@ -167,19 +167,19 @@ public class BossMeleeAttackGoal extends Goal {
       }
    }
 
-   protected WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+   protected WeightedList<VaultBossBaseEntity.AttackData> getMeleeAttacks() {
       return this.boss.getMeleeAttacks();
    }
 
-   protected WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+   protected WeightedList<VaultBossBaseEntity.AttackData> getRageAttacks() {
       return this.boss.getRageAttacks();
    }
 
-   private Optional<IMeleeAttack> getAndInitRandomAttack(WeightedList<MeleeAttacks.AttackData> attacks) {
+   private Optional<IMeleeAttack> getAndInitRandomAttack(VaultBossBaseEntity boss, WeightedList<VaultBossBaseEntity.AttackData> attacks) {
       return attacks.getRandom(this.boss.getRandom())
          .flatMap(
-            attackData -> MeleeAttacks.MELEE_ATTACK_FACTORIES.containsKey(attackData.name())
-               ? Optional.of(MeleeAttacks.MELEE_ATTACK_FACTORIES.get(attackData.name()).apply(this.boss, attackData.multiplier()))
+            attackData -> boss.getMeleeAttackFactories().containsKey(attackData.name())
+               ? Optional.of(boss.getMeleeAttackFactories().get(attackData.name()).apply(this.boss, attackData.multiplier()))
                : Optional.empty()
          );
    }
@@ -191,6 +191,8 @@ public class BossMeleeAttackGoal extends Goal {
          && (
             this.pathedTargetX == 0.0 && this.pathedTargetY == 0.0 && this.pathedTargetZ == 0.0
                || target.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= this.getAttackReachSqr(target) - 1.0
+               || this.boss.getNavigation().isDone()
+                  && this.boss.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= this.getAttackReachSqr(target) - 1.0
          )) {
          this.pathedTargetX = target.getX();
          this.pathedTargetY = target.getY();
@@ -225,7 +227,9 @@ public class BossMeleeAttackGoal extends Goal {
          && this.boss.getLevel().getGameTime() - 20L < this.boss.lastDamageStamp
          && !this.boss
             .getLevel()
-            .getNearbyPlayers(IMeleeAttack.PLAYERS_CLOSE_TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(this.boss.getAttackReach()))
+            .getNearbyEntities(
+               LivingEntity.class, IMeleeAttack.ENTITIES_CLOSE_TARGETING_CONDITIONS, this.boss, this.boss.getBoundingBox().inflate(this.boss.getAttackReach())
+            )
             .isEmpty();
    }
 }

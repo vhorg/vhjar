@@ -2,15 +2,17 @@ package iskallia.vault.gear.attribute.talent;
 
 import com.google.gson.JsonArray;
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.IntRollRangeEntry;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
-import iskallia.vault.gear.attribute.config.IntegerAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.NetcodeUtils;
 import java.util.Comparator;
 import java.util.List;
@@ -85,25 +87,32 @@ public class RandomVaultModifierAttribute {
          public MutableComponent getConfigRangeDisplay(
             VaultGearModifierReader<RandomVaultModifierAttribute> reader, RandomVaultModifierAttribute.Config min, RandomVaultModifierAttribute.Config max
          ) {
-            return new TextComponent("%s-%s".formatted(min.getTime().min / 20, max.getTime().max / 20));
+            return new TextComponent("%s-%s".formatted(min.getTime().getMin() / 20, max.getTime().getMax() / 20));
          }
 
          public RandomVaultModifierAttribute generateRandomValue(RandomVaultModifierAttribute.Config object, Random random) {
-            return new RandomVaultModifierAttribute(object.getModifier(), object.getCount(), object.getTime().generateNumber(random));
+            JavaRandom rand = JavaRandom.ofScrambled(random.nextLong());
+            return new RandomVaultModifierAttribute(object.getModifier(), object.getCount(), object.getTime().getRandom(rand));
          }
 
          @Override
          public Optional<RandomVaultModifierAttribute> getMinimumValue(List<RandomVaultModifierAttribute.Config> configurations) {
             return configurations.stream()
                .min(Comparator.comparingInt(RandomVaultModifierAttribute.Config::getCount))
-               .map(config -> new RandomVaultModifierAttribute(config.getModifier(), config.getCount(), config.getTime().min));
+               .map(config -> new RandomVaultModifierAttribute(config.getModifier(), config.getCount(), config.getTime().getMin()));
          }
 
          @Override
          public Optional<RandomVaultModifierAttribute> getMaximumValue(List<RandomVaultModifierAttribute.Config> configurations) {
             return configurations.stream()
                .max(Comparator.comparingInt(RandomVaultModifierAttribute.Config::getCount))
-               .map(config -> new RandomVaultModifierAttribute(config.getModifier(), config.getCount(), config.getTime().generateMaximumNumber()));
+               .map(config -> new RandomVaultModifierAttribute(config.getModifier(), config.getCount(), config.getTime().getRandom()));
+         }
+
+         public Optional<Float> getRollPercentage(RandomVaultModifierAttribute value, List<RandomVaultModifierAttribute.Config> configurations) {
+            return MiscUtils.getIntValueRange(
+               value.getTime(), this.getMinimumValue(configurations), this.getMaximumValue(configurations), RandomVaultModifierAttribute::getTime
+            );
          }
       };
    }
@@ -175,9 +184,9 @@ public class RandomVaultModifierAttribute {
       @Expose
       private int count;
       @Expose
-      private IntegerAttributeGenerator.Range time;
+      private IntRollRangeEntry time;
 
-      public Config(ResourceLocation modifier, int count, IntegerAttributeGenerator.Range time) {
+      public Config(ResourceLocation modifier, int count, IntRollRangeEntry time) {
          this.modifier = modifier;
          this.count = count;
          this.time = time;
@@ -191,7 +200,7 @@ public class RandomVaultModifierAttribute {
          return this.count;
       }
 
-      public IntegerAttributeGenerator.Range getTime() {
+      public IntRollRangeEntry getTime() {
          return this.time;
       }
    }

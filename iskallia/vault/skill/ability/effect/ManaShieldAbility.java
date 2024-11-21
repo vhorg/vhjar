@@ -3,27 +3,32 @@ package iskallia.vault.skill.ability.effect;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.gear.attribute.ability.special.ManaShieldAbsorptionModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
+import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.mana.Mana;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
-import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
-import iskallia.vault.skill.ability.effect.spi.core.ToggleManaAbility;
+import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -34,81 +39,53 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    modid = "the_vault",
    bus = Bus.FORGE
 )
-public class ManaShieldAbility extends ToggleManaAbility {
-   private float percentageDamageAbsorbed;
-   private float manaPerDamageScalar;
+public class ManaShieldAbility extends InstantManaAbility {
+   private int durationTicks;
+   private int healthPoints;
 
-   public ManaShieldAbility(
-      int unlockLevel,
-      int learnPointCost,
-      int regretPointCost,
-      int cooldownTicks,
-      float manaCostPerSecond,
-      float percentageDamageAbsorbed,
-      float manaPerDamageScalar
-   ) {
-      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCostPerSecond);
-      this.percentageDamageAbsorbed = percentageDamageAbsorbed;
-      this.manaPerDamageScalar = manaPerDamageScalar;
+   public ManaShieldAbility(int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks, int manaCost, int duration, int healthPoints) {
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost);
+      this.durationTicks = duration;
+      this.healthPoints = healthPoints;
    }
 
    public ManaShieldAbility() {
    }
 
-   public float getPercentageDamageAbsorbed() {
-      return this.percentageDamageAbsorbed;
+   public int getDurationTicks() {
+      return this.durationTicks;
    }
 
-   public float getManaPerDamageScalar() {
-      return this.manaPerDamageScalar;
+   public int getHealthPoints() {
+      return this.healthPoints;
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Mana Shield";
-   }
-
-   protected ToggleAbilityEffect getEffect() {
+   protected MobEffect getEffect() {
       return ModEffects.MANA_SHIELD;
    }
 
    @Override
-   protected Ability.ActionResult doToggle(SkillContext context) {
-      return context.getSource().as(ServerPlayer.class).map(player -> {
-         if (this.isActive()) {
-            this.getEffect().addTo(player, 0);
-            return Ability.ActionResult.successCooldownDeferred();
-         } else {
-            player.removeEffect(this.getEffect());
-            return Ability.ActionResult.successCooldownImmediate();
-         }
-      }).orElse(Ability.ActionResult.fail());
+   protected boolean canDoAction(SkillContext context) {
+      return context.getSource()
+         .as(ServerPlayer.class)
+         .map(
+            player -> !player.hasEffect(this.getEffect())
+               || player.getAttribute(ModAttributes.MANA_SHIELD).getValue() < this.healthPoints && super.canDoAction(context)
+         )
+         .orElse(false);
    }
 
    @Override
-   protected void doToggleSound(SkillContext context) {
-      context.getSource().as(ServerPlayer.class).ifPresent(player -> {
-         if (this.isActive()) {
-            player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD, SoundSource.MASTER, 0.2F, 1.0F);
-            player.playNotifySound(ModSounds.MANA_SHIELD, SoundSource.MASTER, 0.2F, 1.0F);
-         }
-      });
-   }
-
-   @Override
-   public Ability.TickResult doInactiveTick(SkillContext context) {
+   protected Ability.ActionResult doAction(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          if (player.hasEffect(this.getEffect())) {
             player.removeEffect(this.getEffect());
          }
 
-         return Ability.TickResult.PASS;
-      }).orElse(Ability.TickResult.PASS);
-   }
-
-   @Override
-   protected void doManaDepleted(SkillContext context) {
-      context.getSource().as(ServerPlayer.class).ifPresent(entity -> entity.removeEffect(this.getEffect()));
+         player.addEffect(new MobEffectInstance(this.getEffect(), this.getDurationTicks(), 0, false, false, true));
+         player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD, SoundSource.PLAYERS, 0.2F, 0.2F);
+         return Ability.ActionResult.successCooldownDeferred();
+      }).orElse(Ability.ActionResult.fail());
    }
 
    @Override
@@ -120,37 +97,27 @@ public class ManaShieldAbility extends ToggleManaAbility {
       priority = EventPriority.LOWEST
    )
    public static void on(LivingDamageEvent event) {
-      if (event.getEntity() instanceof ServerPlayer player) {
-         AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
-
-         for (ManaShieldAbility ability : abilities.getAll(ManaShieldAbility.class, Skill::isUnlocked)) {
-            if (player.hasEffect(ability.getEffect())) {
-               float percentageDamageAbsorbed = Mth.clamp(ability.getPercentageDamageAbsorbed(), 0.0F, 1.0F);
-               float manaCostPerDamage = ability.getManaPerDamageScalar();
-
-               for (ConfiguredModification<FloatValueConfig, ManaShieldAbsorptionModification> mod : SpecialAbilityModification.getModifications(
-                  player, ManaShieldAbsorptionModification.class
-               )) {
-                  manaCostPerDamage = mod.modification().adjustAbsorptionDamageCost(mod.config(), manaCostPerDamage);
-               }
-
-               manaCostPerDamage = Math.max(manaCostPerDamage, 1.0E-5F);
-               float manaUsed = Math.min(event.getAmount() * percentageDamageAbsorbed * manaCostPerDamage, Mana.get(player));
-               float damageAbsorbed = manaUsed / manaCostPerDamage;
-               if (Mth.equal(damageAbsorbed, 0.0F)) {
-                  return;
-               }
-
-               if (Mth.equal(damageAbsorbed, event.getAmount())) {
-                  event.setCanceled(true);
+      if (event.getEntity() instanceof ServerPlayer player && !(event.getAmount() <= 0.0F)) {
+         AttributeInstance manaShieldAttribute = player.getAttribute(ModAttributes.MANA_SHIELD);
+         AttributeModifier manaShieldAttributeModifier = manaShieldAttribute.getModifier(ManaShieldAbility.ManaShieldEffect.MANA_SHIELD_MODIFIER_ID);
+         if (manaShieldAttributeModifier != null) {
+            double manaShieldHealthPoints = manaShieldAttributeModifier.getAmount();
+            if (!(manaShieldHealthPoints <= 0.0)) {
+               double manaShieldLost = Math.min(manaShieldHealthPoints, (double)event.getAmount());
+               event.setAmount(event.getAmount() - (float)manaShieldLost);
+               manaShieldAttribute.removeModifier(ManaShieldAbility.ManaShieldEffect.MANA_SHIELD_MODIFIER_ID);
+               double remainingManaShieldHealthPoints = manaShieldHealthPoints - manaShieldLost;
+               float pitch = 0.7F + player.getLevel().getRandom().nextFloat(0.6F);
+               player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD_HIT, SoundSource.PLAYERS, 0.1F, pitch);
+               if (remainingManaShieldHealthPoints <= 0.0) {
+                  player.removeEffect(ModEffects.MANA_SHIELD);
                } else {
-                  event.setAmount(event.getAmount() - damageAbsorbed);
+                  manaShieldAttribute.addTransientModifier(
+                     new AttributeModifier(
+                        ManaShieldAbility.ManaShieldEffect.MANA_SHIELD_MODIFIER_ID, "Mana Shield", remainingManaShieldHealthPoints, Operation.ADDITION
+                     )
+                  );
                }
-
-               float mana = Mana.decrease(player, manaUsed);
-               ability.onDamageAbsorbed(player, damageAbsorbed);
-               float pitch = 1.25F + -0.5F * (mana / Mana.getMax(player));
-               player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD_HIT, SoundSource.PLAYERS, 0.03F, pitch);
             }
          }
       }
@@ -165,22 +132,22 @@ public class ManaShieldAbility extends ToggleManaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.percentageDamageAbsorbed), buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.manaPerDamageScalar), buffer);
+      Adapters.INT.writeBits(Integer.valueOf(this.durationTicks), buffer);
+      Adapters.INT.writeBits(Integer.valueOf(this.healthPoints), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.percentageDamageAbsorbed = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.manaPerDamageScalar = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.durationTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.healthPoints = Adapters.INT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentageDamageAbsorbed)).ifPresent(tag -> nbt.put("percentageDamageAbsorbed", tag));
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.manaPerDamageScalar)).ifPresent(tag -> nbt.put("manaPerDamageScalar", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.durationTicks)).ifPresent(tag -> nbt.put("durationTicks", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.healthPoints)).ifPresent(tag -> nbt.put("healthPoints", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -188,15 +155,15 @@ public class ManaShieldAbility extends ToggleManaAbility {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.percentageDamageAbsorbed = Adapters.FLOAT.readNbt(nbt.get("percentageDamageAbsorbed")).orElse(0.0F);
-      this.manaPerDamageScalar = Adapters.FLOAT.readNbt(nbt.get("manaPerDamageScalar")).orElse(0.0F);
+      this.durationTicks = Adapters.INT.readNbt(nbt.get("durationTicks")).orElse(0);
+      this.healthPoints = Adapters.INT.readNbt(nbt.get("healthPoints")).orElse(0);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.FLOAT.writeJson(Float.valueOf(this.percentageDamageAbsorbed)).ifPresent(element -> json.add("percentageDamageAbsorbed", element));
-         Adapters.FLOAT.writeJson(Float.valueOf(this.manaPerDamageScalar)).ifPresent(element -> json.add("manaPerDamageScalar", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.durationTicks)).ifPresent(element -> json.add("durationTicks", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.healthPoints)).ifPresent(element -> json.add("healthPoints", element));
          return (JsonObject)json;
       });
    }
@@ -204,23 +171,43 @@ public class ManaShieldAbility extends ToggleManaAbility {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.percentageDamageAbsorbed = Adapters.FLOAT.readJson(json.get("percentageDamageAbsorbed")).orElse(0.0F);
-      this.manaPerDamageScalar = Adapters.FLOAT.readJson(json.get("manaPerDamageScalar")).orElse(0.0F);
+      this.durationTicks = Adapters.INT.readJson(json.get("durationTicks")).orElse(0);
+      this.healthPoints = Adapters.INT.readJson(json.get("healthPoints")).orElse(0);
    }
 
-   public static class ManaShieldEffect extends ToggleAbilityEffect {
-      public ManaShieldEffect(int color, ResourceLocation resourceLocation) {
-         super(ManaShieldAbility.class, color, resourceLocation);
+   public static class ManaShieldEffect extends MobEffect {
+      private static final UUID MANA_SHIELD_MODIFIER_ID = UUID.fromString("f0761ea3-2f69-4da3-a1b4-2d7d5ea21f8d");
+
+      public ManaShieldEffect(int color, ResourceLocation registryName) {
+         super(MobEffectCategory.BENEFICIAL, color);
+         this.setRegistryName(registryName);
       }
 
-      @Override
-      protected void removeAttributeModifiers(ServerPlayer player, AttributeMap attributeMap, int amplifier) {
-         super.removeAttributeModifiers(player, attributeMap, amplifier);
-         if (!player.hasEffect(this)) {
+      public void addAttributeModifiers(LivingEntity pLivingEntity, AttributeMap pAttributeMap, int pAmplifier) {
+         super.addAttributeModifiers(pLivingEntity, pAttributeMap, pAmplifier);
+         if (pLivingEntity instanceof ServerPlayer player) {
             AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
+            List<ManaShieldAbility> manaShieldAbilities = abilities.getAll(ManaShieldAbility.class, Skill::isUnlocked);
+            Iterator var7 = manaShieldAbilities.iterator();
+            if (var7.hasNext()) {
+               ManaShieldAbility manaShieldAbility = (ManaShieldAbility)var7.next();
+               player.getAttribute(ModAttributes.MANA_SHIELD)
+                  .addTransientModifier(new AttributeModifier(MANA_SHIELD_MODIFIER_ID, "Mana Shield", manaShieldAbility.getHealthPoints(), Operation.ADDITION));
+            }
+         }
+      }
 
-            for (ManaShieldAbility ability : abilities.getAll(ManaShieldAbility.class, Skill::isUnlocked)) {
-               ability.onEffectRemoved(player);
+      public MobEffect addAttributeModifier(Attribute pAttribute, String pUuid, double pAmount, Operation pOperation) {
+         return super.addAttributeModifier(pAttribute, pUuid, pAmount, pOperation);
+      }
+
+      public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int amplifier) {
+         super.removeAttributeModifiers(livingEntity, attributeMap, amplifier);
+         AttributeInstance attribute = livingEntity.getAttribute(ModAttributes.MANA_SHIELD);
+         if (attribute != null) {
+            attribute.removeModifier(MANA_SHIELD_MODIFIER_ID);
+            if (livingEntity instanceof ServerPlayer player) {
+               PlayerAbilitiesData.setAbilityOnCooldown(player, ManaShieldAbility.class);
             }
          }
       }

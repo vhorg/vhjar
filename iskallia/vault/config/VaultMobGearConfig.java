@@ -6,8 +6,7 @@ import iskallia.vault.config.entry.SingleItemEntry;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
+import iskallia.vault.util.LootInitialization;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -46,8 +45,7 @@ public class VaultMobGearConfig extends Config {
             if (equipment.isEmpty()) {
                entity.setItemSlot(slot, ItemStack.EMPTY);
             } else {
-               equipment = DataTransferItem.doConvertStack(equipment);
-               DataInitializationItem.doInitialize(equipment);
+               equipment = LootInitialization.initializeVaultLoot(equipment, vaultLevel);
                entity.setItemSlot(slot, equipment);
                if (equipment.getItem() instanceof VaultGearItem) {
                   if (entity instanceof AgeableMob ageable) {

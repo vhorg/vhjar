@@ -1,7 +1,8 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.config.gear.VaultGearWorkbenchConfig;
-import iskallia.vault.container.ModifierDiscoveryContainer;
+import iskallia.vault.container.modifier.DiscoverableModifier;
+import iskallia.vault.container.modifier.ModifierArchiveContainer;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
@@ -14,10 +15,12 @@ import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.DiscoveredWorkbenchModifiersData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,14 +44,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -61,7 +62,7 @@ import org.jetbrains.annotations.Nullable;
 public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProvider {
    private static final int NUMBER_OF_MODIFIERS_TO_CHOOSE_FROM = 3;
    private Set<UUID> usedPlayers = new HashSet<>();
-   private Map<UUID, List<Tuple<Item, ResourceLocation>>> playerGearModifiers = new HashMap<>();
+   private Map<UUID, List<DiscoverableModifier>> playerGearModifiers = new HashMap<>();
    private static final Random bookRand = new Random();
    public int time;
    public float flip;
@@ -172,14 +173,15 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
       NBTHelper.writeMap(tag, "playerGearModifiers", this.playerGearModifiers, ListTag.class, ModifierDiscoveryTileEntity::writeGearModifiers);
    }
 
-   public static List<Tuple<Item, ResourceLocation>> readGearModifiers(ListTag gearModifiersTag) {
-      return gearModifiersTag.stream().map(tag -> {
-         if (tag instanceof CompoundTag compoundTag) {
-            String itemRegistryName = compoundTag.getString("item");
+   public static List<DiscoverableModifier> readGearModifiers(ListTag gearModifiersTag) {
+      return gearModifiersTag.stream().map(nbt -> {
+         if (nbt instanceof CompoundTag tag) {
+            String itemRegistryName = tag.getString("item");
             Item item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemRegistryName));
             if (item != null) {
-               ResourceLocation modifier = new ResourceLocation(compoundTag.getString("modifier"));
-               return Optional.of(new Tuple(item, modifier));
+               boolean discovered = tag.contains("discovered") && tag.getBoolean("discovered");
+               ResourceLocation modifier = new ResourceLocation(tag.getString("modifier"));
+               return Optional.of(new DiscoverableModifier(item, modifier, discovered));
             }
          }
 
@@ -187,12 +189,11 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
       }).filter(Optional::isPresent).map(Optional::get).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
    }
 
-   public static ListTag writeGearModifiers(List<Tuple<Item, ResourceLocation>> gearModifiers) {
+   public static ListTag writeGearModifiers(List<DiscoverableModifier> gearModifiers) {
       return gearModifiers.stream().map(gearModifier -> {
-         CompoundTag gmNbt = new CompoundTag();
-         gmNbt.putString("item", ((Item)gearModifier.getA()).getRegistryName().toString());
-         gmNbt.putString("modifier", ((ResourceLocation)gearModifier.getB()).toString());
-         return gmNbt;
+         CompoundTag tag = new CompoundTag();
+         gearModifier.serialize(tag);
+         return tag;
       }).collect(ListTag::new, AbstractList::add, AbstractCollection::addAll);
    }
 
@@ -204,61 +205,68 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
       return this.getLevel() == null
          ? null
-         : new ModifierDiscoveryContainer(id, this.getLevel(), this.getBlockPos(), player, this.playerGearModifiers.get(player.getUUID()));
+         : new ModifierArchiveContainer(id, this.getLevel(), this.getBlockPos(), player, this.playerGearModifiers.get(player.getUUID()));
    }
 
    public void initPlayerGearModifiers(Player player) {
       if (!this.playerGearModifiers.containsKey(player.getUUID())) {
-         if (this.getLevel() instanceof ServerLevel serverLevel) {
-            Map var7 = getUndiscoveredGearModifiers(player, serverLevel);
-            int combinations = 0;
-
-            for (Entry<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> entry : var7.entrySet()) {
-               combinations += entry.getValue().size();
-            }
-
-            if (combinations <= 3) {
-               this.playerGearModifiers
-                  .put(
-                     player.getUUID(),
-                     var7.entrySet()
-                        .stream()
-                        .flatMap(
-                           entryx -> ((HashMap)entryx.getValue())
-                              .values()
-                              .stream()
-                              .flatMap(innerEntry -> innerEntry.stream().map(modifier -> new Tuple((Item)entryx.getKey(), modifier)))
-                        )
-                        .toList()
-                  );
-            } else {
-               this.selectRandomModifiers(player, combinations, var7);
-               this.setChanged();
-            }
+         if (player instanceof ServerPlayer sPlayer) {
+            this.playerGearModifiers.put(player.getUUID(), generateRandomDiscoverableModifiers(sPlayer, 3));
+            this.setChanged();
          }
       }
    }
 
-   private void selectRandomModifiers(Player player, int combinations, Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> undiscovered) {
+   public static List<DiscoverableModifier> generateRandomDiscoverableModifiers(ServerPlayer player, int amountToSelect) {
+      List<DiscoverableModifier> modifiers = new ArrayList<>();
+      Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> undiscovered = getUndiscoveredGearModifiers(player, player.getLevel());
+      int combinations = 0;
+
+      for (Entry<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> entry : undiscovered.entrySet()) {
+         combinations += entry.getValue().size();
+      }
+
+      if (combinations <= amountToSelect) {
+         undiscovered.entrySet()
+            .stream()
+            .flatMap(
+               entryx -> ((HashMap)entryx.getValue())
+                  .values()
+                  .stream()
+                  .flatMap(innerEntry -> innerEntry.stream().map(modifier -> new DiscoverableModifier((Item)entryx.getKey(), modifier, false)))
+            )
+            .forEach(modifiers::add);
+      } else {
+         selectRandomModifiers(player, combinations, undiscovered, modifiers);
+      }
+
+      return modifiers;
+   }
+
+   private static void selectRandomModifiers(
+      Player player, int combinations, Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> undiscovered, List<DiscoverableModifier> modifiers
+   ) {
       Set<Integer> selectedIndices = new HashSet<>();
 
       while (selectedIndices.size() < 3) {
-         int randomIndex = this.getLevel().getRandom().nextInt(combinations);
+         int randomIndex = player.getLevel().getRandom().nextInt(combinations);
          if (!selectedIndices.contains(randomIndex)) {
             selectedIndices.add(randomIndex);
-            this.addGearModifierAtIndex(player, undiscovered, randomIndex);
+            addGearModifierAtIndex(player, undiscovered, modifiers, randomIndex);
          }
       }
    }
 
-   private void addGearModifierAtIndex(Player player, Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> undiscovered, int randomIndex) {
+   private static void addGearModifierAtIndex(
+      Player player, Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> undiscovered, List<DiscoverableModifier> modifiers, int randomIndex
+   ) {
       int currentIndex = 0;
 
       for (Entry<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> entry : undiscovered.entrySet()) {
          for (Entry<ResourceLocation, ArrayList<ResourceLocation>> innerEntry : entry.getValue().entrySet()) {
             for (ResourceLocation modifier : innerEntry.getValue()) {
                if (currentIndex == randomIndex) {
-                  this.playerGearModifiers.computeIfAbsent(player.getUUID(), uuid -> new ArrayList<>()).add(new Tuple(entry.getKey(), modifier));
+                  modifiers.add(new DiscoverableModifier(entry.getKey(), modifier, false));
                   return;
                }
 
@@ -268,10 +276,16 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
       }
    }
 
-   private static Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> getUndiscoveredGearModifiers(Player player, ServerLevel serverLevel) {
+   public static Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> getUndiscoveredGearModifiers(Player player, ServerLevel serverLevel) {
       Vault vault = ServerVaults.get(serverLevel).orElse(null);
-      int vaultLevel = vault.has(Vault.LEVEL) ? vault.get(Vault.LEVEL).get() : 0;
       Map<Item, HashMap<ResourceLocation, ArrayList<ResourceLocation>>> itemCfg = new HashMap<>();
+      int vaultLevel;
+      if (vault == null) {
+         vaultLevel = PlayerVaultStatsData.get(serverLevel).getVaultStats(player).getVaultLevel();
+      } else {
+         vaultLevel = vault.has(Vault.LEVEL) ? vault.get(Vault.LEVEL).get() : 0;
+      }
+
       Set<ResourceLocation> availableIdolCraftIds = new HashSet<>();
       DiscoveredWorkbenchModifiersData discoveredModifiers = DiscoveredWorkbenchModifiersData.get(serverLevel);
 
@@ -333,11 +347,11 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
 
    public void use(ServerPlayer player) {
       this.initPlayerGearModifiers(player);
-      List<Tuple<Item, ResourceLocation>> gearModifiers = this.playerGearModifiers.get(player.getUUID());
+      List<DiscoverableModifier> gearModifiers = this.playerGearModifiers.get(player.getUUID());
       if (gearModifiers.isEmpty()) {
          player.sendMessage(new TextComponent("No modifiers left to discover").withStyle(ChatFormatting.RED), Util.NIL_UUID);
       } else if (gearModifiers.size() == 1) {
-         this.discoverGearModifier(player, gearModifiers.get(0));
+         discoverGearModifier(player, gearModifiers.get(0));
       } else {
          NetworkHooks.openGui(player, this, buffer -> {
             buffer.writeBlockPos(this.getBlockPos());
@@ -348,19 +362,28 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
       }
    }
 
-   public void discoverGearModifier(ServerPlayer player, Tuple<Item, ResourceLocation> gearModifier) {
+   public void discoverModifierOnTile(ServerPlayer player, DiscoverableModifier gearModifier) {
       this.setUsedByPlayer(player);
+      List<DiscoverableModifier> modifiers = this.playerGearModifiers.getOrDefault(player.getUUID(), Collections.emptyList());
+      if (modifiers.contains(gearModifier)) {
+         discoverGearModifier(player, gearModifier);
+      }
+   }
+
+   public static void discoverGearModifier(ServerPlayer player, DiscoverableModifier gearModifier) {
+      Item gearItem = gearModifier.item();
+      ResourceLocation modifierId = gearModifier.modifierId();
       DiscoveredWorkbenchModifiersData discoveredModifiers = DiscoveredWorkbenchModifiersData.get(player.getLevel());
-      if (discoveredModifiers.compoundDiscoverWorkbenchCraft(player, (Item)gearModifier.getA(), (ResourceLocation)gearModifier.getB())) {
-         VaultGearWorkbenchConfig.getConfig((Item)gearModifier.getA())
+      if (discoveredModifiers.compoundDiscoverWorkbenchCraft(player, gearItem, modifierId)) {
+         VaultGearWorkbenchConfig.getConfig(gearItem)
             .ifPresent(
                cfg -> {
-                  VaultGearWorkbenchConfig.CraftableModifierConfig modifierCfg = cfg.getConfig((ResourceLocation)gearModifier.getB());
+                  VaultGearWorkbenchConfig.CraftableModifierConfig modifierCfg = cfg.getConfig(modifierId);
                   if (modifierCfg != null) {
                      modifierCfg.createModifier()
                         .ifPresent(
                            modifier -> {
-                              ItemStack stack = new ItemStack((ItemLike)gearModifier.getA());
+                              ItemStack stack = new ItemStack(gearItem);
                               if (stack.getItem() instanceof VaultGearItem) {
                                  VaultGearData vgData = VaultGearData.read(stack);
                                  vgData.setState(VaultGearState.IDENTIFIED);

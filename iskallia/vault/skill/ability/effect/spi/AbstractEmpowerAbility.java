@@ -18,11 +18,6 @@ public abstract class AbstractEmpowerAbility extends ToggleManaAbility {
    protected AbstractEmpowerAbility() {
    }
 
-   @Override
-   public String getAbilityGroupName() {
-      return "Empower";
-   }
-
    public int getDurationTicks() {
       return this.durationTicks;
    }

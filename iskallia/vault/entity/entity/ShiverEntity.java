@@ -1,5 +1,7 @@
 package iskallia.vault.entity.entity;
 
+import iskallia.vault.config.VaultEntitiesConfig;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.util.EntityHelper;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -43,13 +45,13 @@ public class ShiverEntity extends Zombie {
 
    public void tick() {
       super.tick();
-      float range = 2.0F;
-      EntityHelper.getNearby(this.level, this.blockPosition(), range, Player.class).forEach(player -> {
+      VaultEntitiesConfig.AuraEffect config = ModConfigs.VAULT_ENTITIES.getShiverEffect();
+      EntityHelper.getNearby(this.level, this.blockPosition(), config.getRange(), Player.class).forEach(player -> {
          player.wasInPowderSnow = true;
          player.isInPowderSnow = true;
          player.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), this.getTicksFrozen() + 1));
          if (!this.level.isClientSide()) {
-            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 3, true, true));
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, config.getEffectDuration(), config.getEffectAmplifier(), true, true));
          }
 
          if (this.level.isClientSide() || this.tickCount % 10 >= 5) {
@@ -57,7 +59,7 @@ public class ShiverEntity extends Zombie {
             float stepAngle = (float) (Math.PI * 2) / particleCount;
 
             for (int i = 0; i < particleCount; i++) {
-               Vec3 offset = new Vec3(range, 0.0, 0.0).yRot(i * stepAngle);
+               Vec3 offset = new Vec3(config.getRange(), 0.0, 0.0).yRot(i * stepAngle);
                Vec3 pos = this.position().add(offset);
                this.level.addParticle(ParticleTypes.SNOWFLAKE, pos.x, pos.y + 0.1F, pos.z, 0.0, 0.1, 0.0);
             }

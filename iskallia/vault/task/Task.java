@@ -130,6 +130,10 @@ public abstract class Task implements ISerializable<CompoundTag, JsonObject> {
 
    public abstract boolean isCompleted();
 
+   public boolean hasActiveChildren() {
+      return this.isCompleted() && (this.parent == null || this.parent.hasActiveChildren());
+   }
+
    public void onAttach(TaskContext context) {
       this.getChildren().forEach(task -> task.onAttach(context));
    }
@@ -258,8 +262,12 @@ public abstract class Task implements ISerializable<CompoundTag, JsonObject> {
       public Adapter() {
          super("type", false);
          this.register("timed", TimedTask.class, TimedTask::new);
+         this.register("repeated", RepeatedTask.class, RepeatedTask::new);
+         this.register("single_vault", SingleVaultTask.class, SingleVaultTask::new);
+         this.register("multi_vault", MultiVaultTask.class, MultiVaultTask::new);
+         this.register("player_divided", PlayerDividedTask.class, PlayerDividedTask::new);
          this.register("achievement", AchievementTask.class, AchievementTask::new);
-         this.register("in_vault", InVaultTask.class, InVaultTask::new);
+         this.register("finish_vault", FinishVaultTask.class, FinishVaultTask::new);
          this.register("bingo", BingoTask.class, BingoTask::new);
          this.register("god_altar", GodAltarTask.class, GodAltarTask::new);
          this.register("kill_entity", KillEntityTask.class, KillEntityTask::new);
@@ -278,6 +286,12 @@ public abstract class Task implements ISerializable<CompoundTag, JsonObject> {
          this.register("deal_no_damage", DealNoDamageTask.class, DealNoDamageTask::new);
          this.register("use_no_mana", UseNoManaTask.class, UseNoManaTask::new);
          this.register("find_vault_room", FindVaultRoomTask.class, FindVaultRoomTask::new);
+         this.register("deal_damage", DealDamageTask.class, DealDamageTask::new);
+         this.register("take_damage", TakeDamageTask.class, TakeDamageTask::new);
+         this.register("collection", CollectionTask.class, CollectionTask::new);
+         this.register("cake_objective", CakeObjectiveTask.class, CakeObjectiveTask::new);
+         this.register("bingo_objective", BingoObjectiveTask.class, BingoObjectiveTask::new);
+         this.register("vault_timed", VaultTimedTask.class, VaultTimedTask::new);
       }
 
       @Nullable
@@ -288,18 +302,20 @@ public abstract class Task implements ISerializable<CompoundTag, JsonObject> {
             if (types.length > 1) {
                Task root = null;
                Task leaf = null;
-               TaskRenderer<?, ?> renderer = null;
 
                for (int i = 0; i < types.length; i++) {
                   String t = types[i];
                   Task other = this.getValue(t);
                   if (other != null) {
                      other.readJson(object);
-                     renderer = other.getRenderer();
-                     other.setId(null);
-                     other.setRenderer(null);
+                     if (i != types.length - 1) {
+                        other.setId(null);
+                        other.setRenderer(null);
+                     }
+
                      if (leaf != null) {
                         if (leaf instanceof NodeTask node) {
+                           node.setChildren(new ArrayList());
                            node.addChildren(other);
                         }
                      } else {
@@ -310,7 +326,6 @@ public abstract class Task implements ISerializable<CompoundTag, JsonObject> {
                   }
                }
 
-               leaf.setRenderer(renderer);
                return root;
             }
          }

@@ -3,6 +3,8 @@
     "values": [
         "the_vault:treasure_sand",
         "the_vault:soot",
-        "the_vault:compressed_soot_block"
+        "the_vault:compressed_soot_block",
+        "the_vault:vault_ash",
+        "the_vault:dry_vault_ash"
     ]
 }

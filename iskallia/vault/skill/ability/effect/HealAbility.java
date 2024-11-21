@@ -1,9 +1,5 @@
 package iskallia.vault.skill.ability.effect;
 
-import iskallia.vault.gear.attribute.ability.special.HealAdditionalHealthModification;
-import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
-import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
-import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractHealAbility;
@@ -27,23 +23,11 @@ public class HealAbility extends AbstractHealAbility {
 
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
-      return context.getSource()
-         .as(ServerPlayer.class)
-         .map(
-            player -> {
-               float healed = this.getFlatLifeHealed();
-
-               for (ConfiguredModification<IntValueConfig, HealAdditionalHealthModification> mod : SpecialAbilityModification.getModifications(
-                  player, HealAdditionalHealthModification.class
-               )) {
-                  healed = mod.modification().adjustHealHealth(mod.config(), healed);
-               }
-
-               player.heal(healed);
-               return Ability.ActionResult.successCooldownImmediate();
-            }
-         )
-         .orElse(Ability.ActionResult.fail());
+      return context.getSource().as(ServerPlayer.class).map(player -> {
+         float healed = this.getFlatLifeHealed();
+         player.heal(healed);
+         return Ability.ActionResult.successCooldownImmediate();
+      }).orElse(Ability.ActionResult.fail());
    }
 
    @Override

@@ -14,6 +14,7 @@ import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.VHSmpUtil;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -44,8 +45,8 @@ public class EtchingItem extends BasicItem implements DataTransferItem, Identifi
    public static ItemStack createEtchingStack(EtchingSet<?> etchingSet) {
       ItemStack etchingStack = new ItemStack(ModItems.ETCHING);
       AttributeGearData data = AttributeGearData.read(etchingStack);
-      data.updateAttribute(ModGearAttributes.ETCHING, etchingSet);
-      data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+      data.createOrReplaceAttributeValue(ModGearAttributes.ETCHING, etchingSet);
+      data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
       data.write(etchingStack);
       return etchingStack;
    }
@@ -98,24 +99,24 @@ public class EtchingItem extends BasicItem implements DataTransferItem, Identifi
    }
 
    @Override
-   public void tickRoll(ItemStack stack, Player player) {
+   public void tickRoll(ItemStack stack, @Nullable Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       EtchingSet<?> etchingSet = ModConfigs.ETCHING.getRandomEtchingSet();
       if (etchingSet != null) {
-         data.updateAttribute(ModGearAttributes.ETCHING, etchingSet);
+         data.createOrReplaceAttributeValue(ModGearAttributes.ETCHING, etchingSet);
       }
 
       data.write(stack);
    }
 
    @Override
-   public void tickFinishRoll(ItemStack stack, Player player) {
+   public void tickFinishRoll(ItemStack stack, @Nullable Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       Optional<EtchingSet<?>> optEtchingSet = data.getFirstValue(ModGearAttributes.ETCHING);
       if (optEtchingSet.isPresent()) {
-         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
       } else {
-         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
+         data.createOrReplaceAttributeValue(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
       }
 
       data.write(stack);

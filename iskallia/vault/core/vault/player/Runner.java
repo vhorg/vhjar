@@ -75,16 +75,7 @@ public class Runner extends Listener {
                      if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getItemStack())) {
                         event.setCanceled(true);
                      }
-                  }
-               }
-            }
-         }
-      });
-      CommonEvents.PLAYER_INTERACT.register(this, event -> {
-         if (event.getPlayer().level == world) {
-            if (event.isCancelable()) {
-               if (event.getPlayer().getUUID().equals(this.get(ID))) {
-                  if (!event.getPlayer().isCreative()) {
+
                      if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getWorld().getBlockState(event.getPos()))) {
                         event.setCanceled(true);
                      }

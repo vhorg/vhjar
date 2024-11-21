@@ -7,7 +7,7 @@ import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.core.vault.modifier.modifier.EntityEffectModifier;
 import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.entity.entity.FighterEntity;
-import iskallia.vault.entity.entity.VaultGuardianEntity;
+import iskallia.vault.entity.entity.guardian.AbstractGuardianEntity;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -159,6 +159,7 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
          .add(ModAttributes.TP_CHANCE)
          .add(ModAttributes.TP_INDIRECT_CHANCE)
          .add(ModAttributes.TP_RANGE)
+         .add(ModAttributes.DURABILITY_WEAR_REDUCTION_CAP)
          .add(ModAttributes.POTION_RESISTANCE)
          .add(ModAttributes.SIZE_SCALE)
          .add(ModAttributes.BREAK_ARMOR_CHANCE)
@@ -166,8 +167,10 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
          .add(ModAttributes.MANA_REGEN)
          .add(ModAttributes.REACH)
          .add(ModAttributes.CROSSBOW_CHARGE_TIME)
+         .add(ModAttributes.BOW_CHARGE_TIME)
          .add(ModAttributes.THORNS_CHANCE)
-         .add(ModAttributes.THORNS_DAMAGE);
+         .add(ModAttributes.THORNS_DAMAGE)
+         .add(ModAttributes.MANA_SHIELD);
    }
 
    @Inject(
@@ -208,6 +211,12 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
             int value = this.useItem.getUseDuration() - this.getUseItemRemainingTicks();
             ci.setReturnValue((int)(this.useItem.getUseDuration() / attribute.getValue() * value));
          }
+      } else if (this.useItem.getItem() == Items.BOW && this.isUsingItem()) {
+         AttributeInstance attribute = this.getAttribute(ModAttributes.BOW_CHARGE_TIME);
+         if (attribute != null && attribute.getValue() > 0.0) {
+            int value = this.useItem.getUseDuration() - this.getUseItemRemainingTicks();
+            ci.setReturnValue((int)(20.0 / attribute.getValue() * value));
+         }
       }
    }
 
@@ -247,7 +256,7 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
       )
    )
    public void preventHurtArmor(LivingEntity entity, DamageSource src, float damage) {
-      if (!(src.getEntity() instanceof VaultGuardianEntity)) {
+      if (!(src.getEntity() instanceof AbstractGuardianEntity)) {
          this.hurtArmor(src, damage);
       }
    }
@@ -373,25 +382,25 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
             this.rawHealth = health;
             this.useRawHealth = true;
          }
+      }
 
-         if (nbt.contains("championLogic", 10)) {
-            this.championLogic = ChampionLogic.deserialize(nbt.getCompound("championLogic"));
-         }
+      if (nbt.contains("championLogic", 10)) {
+         this.championLogic = ChampionLogic.deserialize(nbt.getCompound("championLogic"));
+      }
 
-         if (nbt.contains("Modifiers", 10)) {
-            CompoundTag modifiers = nbt.getCompound("Modifiers");
+      if (nbt.contains("Modifiers", 10)) {
+         CompoundTag modifiers = nbt.getCompound("Modifiers");
 
-            for (String key : modifiers.getAllKeys()) {
-               Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(key)).ifPresent(attribute -> {
-                  AttributeInstance instance = this.getAttribute(attribute);
-                  if (instance != null) {
-                     CompoundTag entry = modifiers.getCompound(key);
-                     double amount = entry.getDouble("Value");
-                     Operation operation = Operation.fromValue(entry.getInt("Operation"));
-                     instance.addPermanentModifier(new AttributeModifier(UUID.randomUUID(), "Unspecified", amount, operation));
-                  }
-               });
-            }
+         for (String key : modifiers.getAllKeys()) {
+            Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(key)).ifPresent(attribute -> {
+               AttributeInstance instance = this.getAttribute(attribute);
+               if (instance != null) {
+                  CompoundTag entry = modifiers.getCompound(key);
+                  double amount = entry.getDouble("Value");
+                  Operation operation = Operation.fromValue(entry.getInt("Operation"));
+                  instance.addPermanentModifier(new AttributeModifier(UUID.randomUUID(), "Unspecified", amount, operation));
+               }
+            });
          }
       }
    }

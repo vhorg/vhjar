@@ -47,13 +47,13 @@ public class AncientCopperConduitBlockISTER extends BlockEntityWithoutLevelRende
    }
 
    public float getActiveRotation(float p_59198_) {
-      return ((float)ClientScheduler.INSTANCE.getTickCount() + p_59198_) * -0.0375F;
+      return ((float)ClientScheduler.INSTANCE.getTick() + p_59198_) * -0.0375F;
    }
 
    public void renderByItem(ItemStack stack, TransformType type, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
       if (stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof AncientCopperConduitBlock) {
          pPackedLight = 15728880;
-         float f = (float)ClientScheduler.INSTANCE.getTickCount() + Minecraft.getInstance().getFrameTime();
+         float f = (float)ClientScheduler.INSTANCE.getTick() + Minecraft.getInstance().getFrameTime();
          float f1 = this.getActiveRotation(Minecraft.getInstance().getFrameTime()) * (180.0F / (float)Math.PI);
          pPoseStack.pushPose();
          pPoseStack.translate(0.5, 0.5, 0.5);

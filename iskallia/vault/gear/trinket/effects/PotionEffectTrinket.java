@@ -3,7 +3,7 @@ package iskallia.vault.gear.trinket.effects;
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
-import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
+import iskallia.vault.gear.attribute.custom.effect.EffectGearAttribute;
 import iskallia.vault.gear.trinket.GearAttributeTrinket;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.init.ModGearAttributes;

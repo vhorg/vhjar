@@ -70,6 +70,12 @@ public class ModSounds {
    public static SoundEvent SHIVER_IDLE;
    public static SoundEvent SHIVER_HURT;
    public static SoundEvent SHIVER_DEATH;
+   public static SoundEvent BLOODHORDE_IDLE;
+   public static SoundEvent BLOODHORDE_TANK_IDLE;
+   public static SoundEvent BLOODHORDE_TANK_ROAR;
+   public static SoundEvent BLOODHORDE_STEP;
+   public static SoundEvent BLOODHORDE_HURT;
+   public static SoundEvent BLOODHORDE_DEATH;
    public static SoundEvent BURP;
    public static SoundEvent PUZZLE_COMPLETION_MAJOR;
    public static SoundEvent PUZZLE_COMPLETION_MINOR;
@@ -125,6 +131,11 @@ public class ModSounds {
    public static SoundEvent ICE_BOLT_ARROW;
    public static SoundEvent ICE_BOLT_CHUNK;
    public static SoundEvent BOOSTER_PACK_OPEN;
+   public static SoundEvent RAID_GATE_OPEN;
+   public static SoundEvent RAID_CHAIN_LOCK;
+   public static SoundEvent RAID_HATCH_OPEN;
+   public static SoundEvent RAID_HATCH_LOCK;
+   public static SoundEvent RAID_IMPACT;
    public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
       0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
    );
@@ -198,6 +209,12 @@ public class ModSounds {
       SHIVER_IDLE = registerSound(event, "shiver.idle");
       SHIVER_HURT = registerSound(event, "shiver.hurt");
       SHIVER_DEATH = registerSound(event, "shiver.death");
+      BLOODHORDE_IDLE = registerSound(event, "bloodhorde.idle");
+      BLOODHORDE_TANK_IDLE = registerSound(event, "bloodhorde.tank_idle");
+      BLOODHORDE_TANK_ROAR = registerSound(event, "bloodhorde.tank_roar");
+      BLOODHORDE_STEP = registerSound(event, "bloodhorde.step");
+      BLOODHORDE_HURT = registerSound(event, "bloodhorde.hurt");
+      BLOODHORDE_DEATH = registerSound(event, "bloodhorde.death");
       BURP = registerSound(event, "burp");
       PUZZLE_COMPLETION_MAJOR = registerSound(event, "puzzle_completion_major");
       PUZZLE_COMPLETION_MINOR = registerSound(event, "puzzle_completion_minor");
@@ -253,6 +270,11 @@ public class ModSounds {
       ICE_BOLT_ARROW = registerSound(event, "ice_bolt_arrow");
       ICE_BOLT_CHUNK = registerSound(event, "ice_bolt_chunk");
       BOOSTER_PACK_OPEN = registerSound(event, "booster_pack_open");
+      RAID_GATE_OPEN = registerSound(event, "raid_gate_open");
+      RAID_CHAIN_LOCK = registerSound(event, "raid_chain_lock");
+      RAID_HATCH_OPEN = registerSound(event, "raid_hatch_open");
+      RAID_HATCH_LOCK = registerSound(event, "raid_hatch_lock");
+      RAID_IMPACT = registerSound(event, "raid_impact");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

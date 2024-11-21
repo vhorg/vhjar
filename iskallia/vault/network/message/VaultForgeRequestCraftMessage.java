@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.NetworkEvent.Context;
@@ -26,19 +27,22 @@ import net.minecraftforge.network.NetworkEvent.Context;
 public class VaultForgeRequestCraftMessage {
    private final ResourceLocation recipe;
    private final int level;
+   private final boolean shift;
 
-   public VaultForgeRequestCraftMessage(ResourceLocation recipe, int level) {
+   public VaultForgeRequestCraftMessage(ResourceLocation recipe, int level, boolean shift) {
       this.recipe = recipe;
       this.level = level;
+      this.shift = shift;
    }
 
    public static void encode(VaultForgeRequestCraftMessage message, FriendlyByteBuf buffer) {
       buffer.writeResourceLocation(message.recipe);
       buffer.writeInt(message.level);
+      buffer.writeBoolean(message.shift);
    }
 
    public static VaultForgeRequestCraftMessage decode(FriendlyByteBuf buffer) {
-      return new VaultForgeRequestCraftMessage(buffer.readResourceLocation(), buffer.readInt());
+      return new VaultForgeRequestCraftMessage(buffer.readResourceLocation(), buffer.readInt(), buffer.readBoolean());
    }
 
    public static void handle(VaultForgeRequestCraftMessage message, Supplier<Context> contextSupplier) {
@@ -67,7 +71,15 @@ public class VaultForgeRequestCraftMessage {
                         if (InventoryUtil.consumeInputs(recipe.getInputs(), playerInventory, tileInventory, true)
                            && InventoryUtil.consumeInputs(recipe.getInputs(), playerInventory, tileInventory, false, consumed)) {
                            int level = Mth.clamp(message.level, 0, Math.min(ModConfigs.LEVELS_META.getMaxLevel(), SidedHelper.getVaultLevel(requester)));
-                           container.getResultSlot().set(recipe.createOutput(consumed, requester, level));
+                           ItemStack output = recipe.createOutput(consumed, requester, level);
+                           if (message.shift) {
+                              if (!requester.getInventory().add(output)) {
+                                 container.getResultSlot().set(output);
+                              }
+                           } else {
+                              container.getResultSlot().set(output);
+                           }
+
                            requester.level.levelEvent(1030, tile.getBlockPos(), 0);
                            container.broadcastChanges();
                            ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ForgeParticleMessage(tile.getBlockPos()));

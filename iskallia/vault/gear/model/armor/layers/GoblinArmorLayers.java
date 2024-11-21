@@ -20,7 +20,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.particle.GlowParticle;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -89,7 +89,7 @@ public class GoblinArmorLayers extends ArmorLayers {
    private static void addShiningParticle(LivingEntity entity, Level world, float yOffset) {
       Minecraft minecraft = Minecraft.getInstance();
       if (entity.tickCount % 4 == 0 && world.random.nextBoolean()) {
-         GlowParticle particle = (GlowParticle)minecraft.particleEngine
+         Particle particle = minecraft.particleEngine
             .createParticle(
                ParticleTypes.SCRAPE,
                entity.getX() + (world.random.nextFloat() - 0.5F),

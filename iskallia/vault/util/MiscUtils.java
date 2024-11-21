@@ -8,7 +8,6 @@ import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.integration.IntegrationCurios;
 import java.awt.Rectangle;
-import java.awt.geom.Point2D.Float;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,12 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
@@ -44,6 +46,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -65,8 +69,12 @@ public class MiscUtils {
       return Stream.concat(list1.stream(), list2.stream()).collect(Collectors.toList());
    }
 
-   public static Float getMidpoint(Rectangle r) {
-      return new Float(r.x + r.width / 2.0F, r.y + r.height / 2.0F);
+   public static <T> Set<T> intersection(Collection<T> list1, Collection<T> list2) {
+      return Stream.concat(list1.stream(), list2.stream()).filter(list1::contains).filter(list2::contains).collect(Collectors.toSet());
+   }
+
+   public static java.awt.geom.Point2D.Float getMidpoint(Rectangle r) {
+      return new java.awt.geom.Point2D.Float(r.x + r.width / 2.0F, r.y + r.height / 2.0F);
    }
 
    public static boolean hasEmptySlot(Container inventory) {
@@ -396,6 +404,26 @@ public class MiscUtils {
       }
    }
 
+   public static <T> Optional<Float> getIntValueRange(int value, Optional<T> min, Optional<T> max, Function<T, Integer> valueFn) {
+      return min.isPresent() && max.isPresent() ? Optional.of(getValueRange(value, valueFn.apply(min.get()), valueFn.apply(max.get()))) : Optional.empty();
+   }
+
+   public static float getValueRange(int value, int min, int max) {
+      int range = max - min;
+      int valueRange = value - min;
+      return Mth.clamp((float)valueRange / range, 0.0F, 1.0F);
+   }
+
+   public static <T> Optional<Float> getFloatValueRange(float value, Optional<T> min, Optional<T> max, Function<T, Float> valueFn) {
+      return min.isPresent() && max.isPresent() ? Optional.of(getValueRange(value, valueFn.apply(min.get()), valueFn.apply(max.get()))) : Optional.empty();
+   }
+
+   public static float getValueRange(float value, float min, float max) {
+      float range = max - min;
+      float valueRange = value - min;
+      return Mth.clamp(valueRange / range, 0.0F, 1.0F);
+   }
+
    @Nullable
    public static Player findPlayerUsingAnvil(ItemStack left, ItemStack right) {
       for (Player player : SidedHelper.getSidedPlayers()) {
@@ -458,6 +486,17 @@ public class MiscUtils {
             dropped.setOwner(player.getUUID());
          }
       }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public static double getClientDistance(Vec3i pos) {
+      Vec3 src = Vec3.ZERO;
+      Player player = Minecraft.getInstance().player;
+      if (player != null) {
+         src = player.position();
+      }
+
+      return src.distanceTo(Vec3.atCenterOf(pos));
    }
 
    public static Vector3f getRandomCirclePosition(Vector3f centerOffset, Vector3f axis, float radius) {

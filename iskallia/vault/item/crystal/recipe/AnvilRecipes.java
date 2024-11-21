@@ -27,8 +27,11 @@ public class AnvilRecipes {
       register(new SoulFlameAnvilRecipe());
       register(new TreasureKeyAnvilRecipe());
       register(new WardensPearlAnvilRecipe());
+      register(new PeacefulAnvilRecipe());
       register(new DungeonCapstoneAnvilRecipe());
       register(new TreasureCapstoneAnvilRecipe());
+      register(new PylonHunterCapstoneAnvilRecipe());
+      register(new VendoorCapstoneAnvilRecipe());
    }
 
    public static void registerJEI(IRecipeRegistration registry) {

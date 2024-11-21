@@ -174,7 +174,7 @@ public class ClickableItemSlotElement<E extends ClickableItemSlotElement<E>> ext
       }
 
       this.renderItemStack(this.getDisplayStack(), this.worldSpatial.x() + 1, this.worldSpatial.y() + 1, this.isDisabled());
-      this.renderLabel(poseStack);
+      this.renderLabel(this.getDisplayStack(), poseStack);
       if (this.containsMouse(mouseX, mouseY)) {
          renderSlotHighlight(poseStack, this.worldSpatial.x() + 1, this.worldSpatial.y() + 1, 20, -2130706433);
       }
@@ -222,30 +222,26 @@ public class ClickableItemSlotElement<E extends ClickableItemSlotElement<E>> ext
       pBuilder.vertex(pMatrix, pX2, pY2, pBlitOffset).color(f5, f6, f7, f4).endVertex();
    }
 
-   protected void renderLabel(PoseStack poseStack) {
+   protected void renderLabel(ItemStack stack, PoseStack poseStack) {
+      String lblStr = "";
       Component label = this.labelSupplier.get();
       if (label != null && !label.getString().isEmpty()) {
-         poseStack.pushPose();
-         poseStack.translate(0.0, 0.0, this.worldSpatial.z() + 370);
-         BufferSource buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-         Font defaultFont = Minecraft.getInstance().font;
-         int xOffset = defaultFont.width(label);
-         defaultFont.drawInBatch(
-            label,
-            this.worldSpatial.x() + 18 - xOffset,
-            this.worldSpatial.y() + 10,
-            -1,
-            true,
-            poseStack.last().pose(),
-            buffers,
-            false,
-            0,
-            LightmapHelper.getPackedFullbrightCoords()
-         );
-         buffers.endBatch();
-         poseStack.popPose();
-         RenderSystem.enableDepthTest();
+         lblStr = label.getString();
       }
+
+      ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
+      Font font = Minecraft.getInstance().font;
+      poseStack.pushPose();
+      poseStack.translate(0.0, 0.0, this.worldSpatial.z() + 400);
+      PoseStack modelStack = RenderSystem.getModelViewStack();
+      modelStack.pushPose();
+      modelStack.mulPoseMatrix(poseStack.last().pose());
+      RenderSystem.applyModelViewMatrix();
+      renderer.renderGuiItemDecorations(font, stack, this.worldSpatial.x() + 1, this.worldSpatial.y() + 1, lblStr);
+      modelStack.popPose();
+      RenderSystem.applyModelViewMatrix();
+      poseStack.popPose();
+      RenderSystem.enableDepthTest();
    }
 
    protected void renderItemStack(ItemStack itemStack, float x, float y, boolean disabled) {

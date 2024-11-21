@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
-import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
+import iskallia.vault.gear.attribute.custom.effect.EffectCloudAttribute;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +23,10 @@ public class VaultEntitiesConfig extends Config {
    private final List<VaultEntitiesConfig.DeathEffect> deathEffects = new ArrayList<>();
    @Expose
    private final List<VaultEntitiesConfig.ThrowEffect> throwEffects = new ArrayList<>();
+   @Expose
+   private final VaultEntitiesConfig.AuraEffect shiverEffect = new VaultEntitiesConfig.AuraEffect();
+   @Expose
+   private final VaultEntitiesConfig.AuraEffect swampZombieEffect = new VaultEntitiesConfig.AuraEffect();
 
    public List<EffectCloudAttribute.CloudConfig> getDeathEffects(int level, Entity entity) {
       List<EffectCloudAttribute.CloudConfig> effects = new ArrayList<>();
@@ -54,6 +58,14 @@ public class VaultEntitiesConfig extends Config {
       return effects;
    }
 
+   public VaultEntitiesConfig.AuraEffect getShiverEffect() {
+      return this.shiverEffect;
+   }
+
+   public VaultEntitiesConfig.AuraEffect getSwampZombieEffect() {
+      return this.swampZombieEffect;
+   }
+
    @Override
    public String getName() {
       return "vault_entities";
@@ -71,6 +83,27 @@ public class VaultEntitiesConfig extends Config {
             new VaultEntitiesConfig.ThrowEffect(EntityPredicate.of("minecraft:witch", true).orElseThrow())
                .put(0, new VaultEntitiesConfig.ThrowEffect.CustomEffect(MobEffects.POISON, 0, 120))
          );
+   }
+
+   public static class AuraEffect {
+      @Expose
+      protected int range;
+      @Expose
+      protected int effectDuration;
+      @Expose
+      protected int effectAmplifier;
+
+      public int getRange() {
+         return this.range;
+      }
+
+      public int getEffectDuration() {
+         return this.effectDuration;
+      }
+
+      public int getEffectAmplifier() {
+         return this.effectAmplifier;
+      }
    }
 
    public static class DeathEffect {

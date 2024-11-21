@@ -2,6 +2,7 @@ package iskallia.vault.gear.attribute.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import iskallia.vault.util.MiscUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -45,6 +46,10 @@ public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, Int
    @Override
    public Optional<Integer> getMaximumValue(List<IntegerAttributeGenerator.Range> configurations) {
       return configurations.stream().map(IntegerAttributeGenerator.Range::generateMaximumNumber).min(Double::compare);
+   }
+
+   public Optional<Float> getRollPercentage(Integer value, List<IntegerAttributeGenerator.Range> configurations) {
+      return MiscUtils.getIntValueRange(value, this.getMinimumValue(configurations), this.getMaximumValue(configurations), i -> i);
    }
 
    public static class Range extends NumberRangeGenerator.NumberRange<Integer> {

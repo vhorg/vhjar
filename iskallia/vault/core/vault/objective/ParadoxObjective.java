@@ -78,7 +78,11 @@ public class ParadoxObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> data.setProbability(0.0));
+      CommonEvents.OBJECTIVE_PIECE_GENERATION.register(this, data -> {
+         if (data.getVault() == vault) {
+            data.setProbability(0.0);
+         }
+      });
       CommonEvents.LOOT_GENERATION.register(this, data -> {
          if (this.get(TYPE) == ParadoxObjective.Type.BUILD) {
             if (data.getGenerator() instanceof LootTableGenerator generator) {

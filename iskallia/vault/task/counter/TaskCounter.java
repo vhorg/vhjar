@@ -6,6 +6,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.core.world.roll.FloatRoll;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.item.crystal.data.adapter.INbtAdapter;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
@@ -58,45 +59,41 @@ public abstract class TaskCounter<T, C extends TaskCounter.Config> implements IS
 
    public abstract void onPopulate(TaskContext var1);
 
+   public void populate(TaskContext context) {
+      if (!this.isPopulated()) {
+         this.onPopulate(context);
+         this.setPopulated(true);
+      }
+   }
+
    public abstract TaskProgress getProgress();
 
    public void onSet(T value, TaskContext context) {
-      if (!this.populated) {
-         this.onPopulate(context);
-         this.populated = true;
-      }
+      this.populate(context);
    }
 
    public void onAdd(T value, TaskContext context) {
-      if (!this.populated) {
-         this.onPopulate(context);
-         this.populated = true;
-      }
+      this.populate(context);
    }
 
    public void onRemove(T value, TaskContext context) {
-      if (!this.populated) {
-         this.onPopulate(context);
-         this.populated = true;
-      }
+      this.populate(context);
    }
 
    public boolean isCompleted() {
-      return this.populated;
+      return this.isPopulated();
    }
 
    public void onAttach(TaskContext context) {
-      if (!this.populated) {
-         this.onPopulate(context);
-         this.populated = true;
-      }
+      this.populate(context);
    }
 
    public void onReset(TaskContext context) {
-      if (!this.populated) {
-         this.onPopulate(context);
-         this.populated = true;
-      }
+      this.populate(context);
+   }
+
+   public void onRepeat(TaskContext context) {
+      this.populate(context);
    }
 
    public void onDetach() {
@@ -163,11 +160,11 @@ public abstract class TaskCounter<T, C extends TaskCounter.Config> implements IS
    }
 
    public static TargetTaskCounter<Integer, TargetTaskCounter.Config<Integer, ?>> ofTargetInt() {
-      return ofTargetInt(null);
+      return ofTargetInt(null, null);
    }
 
-   public static TargetTaskCounter<Integer, TargetTaskCounter.Config<Integer, ?>> ofTargetInt(IntRoll target) {
-      return new TargetTaskCounter<>(TaskCounter.Group.INT, new TargetTaskCounter.Config<>(target, Adapters.INT_ROLL, IntRoll::get));
+   public static TargetTaskCounter<Integer, TargetTaskCounter.Config<Integer, ?>> ofTargetInt(IntRoll target, TaskCounterPredicate predicate) {
+      return new TargetTaskCounter<>(TaskCounter.Group.INT, new TargetTaskCounter.Config<>(target, predicate, Adapters.INT_ROLL, IntRoll::get));
    }
 
    public static SlidingTimedTargetTaskCounter<Integer, SlidingTimedTargetTaskCounter.Config<Integer, ?>> ofSlidingTargetInt() {
@@ -180,11 +177,35 @@ public abstract class TaskCounter<T, C extends TaskCounter.Config> implements IS
       );
    }
 
+   public static TargetTaskCounter<Float, TargetTaskCounter.Config<Float, ?>> ofTargetFloat() {
+      return ofTargetFloat(null, null);
+   }
+
+   public static TargetTaskCounter<Float, TargetTaskCounter.Config<Float, ?>> ofTargetFloat(FloatRoll target, TaskCounterPredicate predicate) {
+      return new TargetTaskCounter<>(TaskCounter.Group.FLOAT, new TargetTaskCounter.Config<>(target, predicate, Adapters.FLOAT_ROLL, FloatRoll::get));
+   }
+
+   public static SlidingTimedTargetTaskCounter<Float, SlidingTimedTargetTaskCounter.Config<Float, ?>> ofSlidingTargetFloat() {
+      return ofSlidingTargetFloat(null, null);
+   }
+
+   public static SlidingTimedTargetTaskCounter<Float, SlidingTimedTargetTaskCounter.Config<Float, ?>> ofSlidingTargetFloat(FloatRoll target, IntRoll window) {
+      return new SlidingTimedTargetTaskCounter<>(
+         TaskCounter.Group.FLOAT, new SlidingTimedTargetTaskCounter.Config<>(target, Adapters.FLOAT_ROLL, FloatRoll::get, window)
+      );
+   }
+
    public static class Adapter {
       public static TypeSupplierAdapter<? extends TaskCounter<Integer, ?>> INT = new TypeSupplierAdapter<TaskCounter<Integer, ?>>("type", true) {
          {
             this.register("target", TargetTaskCounter.class, TaskCounter::ofTargetInt);
             this.register("sliding_timed_target", SlidingTimedTargetTaskCounter.class, TaskCounter::ofSlidingTargetInt);
+         }
+      };
+      public static TypeSupplierAdapter<? extends TaskCounter<Float, ?>> FLOAT = new TypeSupplierAdapter<TaskCounter<Float, ?>>("type", true) {
+         {
+            this.register("target", TargetTaskCounter.class, TaskCounter::ofTargetFloat);
+            this.register("sliding_timed_target", SlidingTimedTargetTaskCounter.class, TaskCounter::ofSlidingTargetFloat);
          }
       };
    }
@@ -252,6 +273,7 @@ public abstract class TaskCounter<T, C extends TaskCounter.Config> implements IS
 
    public static class Group<T> {
       public static final TaskCounter.Group<Integer> INT = new TaskCounter.Group<>(Adapters.INT_SEGMENTED_7, 0, Integer::sum, Integer::compare, i -> -i);
+      public static final TaskCounter.Group<Float> FLOAT = new TaskCounter.Group<>(Adapters.FLOAT, 0.0F, Float::sum, Float::compare, i -> -i);
       private final ISimpleAdapter<T, ? super Tag, ? super JsonElement> adapter;
       private final T identity;
       private final BinaryOperator<T> operator;

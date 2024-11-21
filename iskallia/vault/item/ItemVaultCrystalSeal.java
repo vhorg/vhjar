@@ -37,7 +37,7 @@ public class ItemVaultCrystalSeal extends Item {
          CrystalData crystal = CrystalData.empty();
          if (this.configure(crystal)) {
             if (crystal.getObjective() != NullCrystalObjective.INSTANCE) {
-               crystal.getObjective().addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTickCount());
+               crystal.getObjective().addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTick());
             }
          }
       }

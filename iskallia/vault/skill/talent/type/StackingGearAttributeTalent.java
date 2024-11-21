@@ -8,6 +8,7 @@ import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.TalentTree;
+import iskallia.vault.util.calc.EffectDurationHelper;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -48,6 +50,15 @@ public class StackingGearAttributeTalent extends GearAttributeTalent {
       return this.effect;
    }
 
+   public int getUnmodifiedDurationTicks() {
+      return this.durationTicks;
+   }
+
+   public int getDurationTicks(LivingEntity entity) {
+      int duration = this.getUnmodifiedDurationTicks();
+      return EffectDurationHelper.adjustEffectDurationFloor(entity, duration);
+   }
+
    @Override
    public double getValue() {
       return super.getValue() * this.stacks;
@@ -60,12 +71,13 @@ public class StackingGearAttributeTalent extends GearAttributeTalent {
 
    @Override
    public void onTick(SkillContext context) {
-      super.onTick(context);
       if (--this.timeLeft < 0) {
          this.timeLeft = 0;
          this.stacks = 0;
+         context.getSource().as(ServerPlayer.class).ifPresent(this::refreshSnapshot);
       }
 
+      super.onTick(context);
       if (this.isUnlocked() && this.effect != null && this.timeLeft > 0 && this.stacks > 0) {
          context.getSource().as(ServerPlayer.class).ifPresent(player -> {
             player.removeEffect(this.effect);
@@ -79,7 +91,7 @@ public class StackingGearAttributeTalent extends GearAttributeTalent {
          this.stacks = this.maxStacks;
       }
 
-      this.timeLeft = this.durationTicks;
+      this.timeLeft = this.getDurationTicks(player);
       this.refreshSnapshot(player);
    }
 
@@ -152,8 +164,13 @@ public class StackingGearAttributeTalent extends GearAttributeTalent {
          Entity attacker = event.getSource().getEntity();
          if (attacker instanceof ServerPlayer player && !attacker.getLevel().isClientSide()) {
             if (attacker.getLevel() == event.getEntity().getLevel()) {
-               TalentTree tree = PlayerTalentsData.get(attacker.getServer()).getTalents(player);
-               tree.getAll(StackingGearAttributeTalent.class, Skill::isUnlocked).forEach(talent -> talent.onStack(player));
+               if (player.getServer() != null) {
+                  ServerPlayer existing = player.getServer().getPlayerList().getPlayer(player.getUUID());
+                  if (existing == player) {
+                     TalentTree tree = PlayerTalentsData.get(attacker.getServer()).getTalents(player);
+                     tree.getAll(StackingGearAttributeTalent.class, Skill::isUnlocked).forEach(talent -> talent.onStack(player));
+                  }
+               }
             }
          }
       });

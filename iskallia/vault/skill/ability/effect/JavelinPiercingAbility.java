@@ -49,7 +49,7 @@ public class JavelinPiercingAbility extends AbstractJavelinAbility {
          VaultThrownJavelin thrownJavelin = new VaultThrownJavelin(player.level, player);
          thrownJavelin.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, this.getThrowPower(player), 1.0F);
          thrownJavelin.pickup = Pickup.DISALLOWED;
-         thrownJavelin.setType("piercing");
+         thrownJavelin.setType(VaultThrownJavelin.JavelinType.PIERCING);
          TalentTree talents = PlayerTalentsData.get(player.getLevel()).getTalents(player);
 
          for (JavelinFrugalTalent talent : talents.getAll(JavelinFrugalTalent.class, Skill::isUnlocked)) {

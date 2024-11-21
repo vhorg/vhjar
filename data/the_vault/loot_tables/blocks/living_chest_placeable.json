@@ -3,11 +3,10 @@
   "pools": [
     {
       "rolls": 1.0,
-      "bonus_rolls": 0.0,
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "the_vault:living_chest_placeable"
+          "name": "the_vault:living_chest"
         }
       ],
       "conditions": [

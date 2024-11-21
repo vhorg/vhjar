@@ -17,8 +17,8 @@ import iskallia.vault.core.world.template.data.TemplatePool;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 
-public abstract class ClassicVaultLayout extends VaultLayout {
-   public static final FieldRegistry FIELDS = VaultLayout.FIELDS.merge(new FieldRegistry());
+public abstract class ClassicVaultLayout extends VaultGridLayout {
+   public static final FieldRegistry FIELDS = VaultGridLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<TemplatePoolKey> START_POOL = FieldKey.of("start_pool", TemplatePoolKey.class)
       .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);

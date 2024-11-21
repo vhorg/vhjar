@@ -62,7 +62,8 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
    }
 
    public boolean stillValid(Player player) {
-      return player.distanceToSqr(this.pos.getX() + 0.5, this.pos.getY() + 0.5, this.pos.getZ() + 0.5) <= 64.0;
+      return player.distanceToSqr(this.pos.getX() + 0.5, this.pos.getY() + 0.5, this.pos.getZ() + 0.5) <= 64.0
+         && (this.tileEntity == null || this.tileEntity.getLevel().getBlockEntity(this.tileEntity.getBlockPos()) == this.tileEntity);
    }
 
    protected int initSlots(Inventory playerInventory) {

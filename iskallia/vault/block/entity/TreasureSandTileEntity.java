@@ -3,6 +3,7 @@ package iskallia.vault.block.entity;
 import iskallia.vault.block.base.LootableTileEntity;
 import iskallia.vault.block.entity.base.TemplateTagContainer;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.util.MiscUtils;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,33 +38,37 @@ public class TreasureSandTileEntity extends LootableTileEntity implements Templa
    @OnlyIn(Dist.CLIENT)
    private static void clientTick(Level level, BlockPos pos, BlockState state, TreasureSandTileEntity tile) {
       if (rand.nextInt(14) == 0) {
-         boolean hasEmptyBlockAround = false;
+         if (!(MiscUtils.getClientDistance(pos) > 48.0)) {
+            boolean hasEmptyBlockAround = false;
 
-         for (Direction dir : Direction.values()) {
-            BlockPos offsetPos = pos.relative(dir);
-            if (level.isEmptyBlock(offsetPos)) {
-               hasEmptyBlockAround = true;
-               break;
+            for (Direction dir : Direction.values()) {
+               BlockPos offsetPos = pos.relative(dir);
+               if (level.isEmptyBlock(offsetPos)) {
+                  hasEmptyBlockAround = true;
+                  break;
+               }
             }
-         }
 
-         if (hasEmptyBlockAround) {
-            ParticleEngine engine = Minecraft.getInstance().particleEngine;
-            float hueGold = 0.125F;
-            int color = Color.HSBtoRGB(hueGold, 0.2F + rand.nextFloat() * 0.6F, 1.0F);
-            float r = (color >> 16 & 0xFF) / 255.0F;
-            float g = (color >> 8 & 0xFF) / 255.0F;
-            float b = (color & 0xFF) / 255.0F;
-            SimpleAnimatedParticle particle = (SimpleAnimatedParticle)engine.createParticle(
-               ParticleTypes.FIREWORK.getType(),
-               pos.getX() + 0.5 + rand.nextFloat() * (rand.nextBoolean() ? 1 : -1),
-               pos.getY() + 0.5 + rand.nextFloat() * (rand.nextBoolean() ? 1 : -1),
-               pos.getZ() + 0.5 + rand.nextFloat() * (rand.nextBoolean() ? 1 : -1),
-               0.0,
-               rand.nextFloat() * 0.01F,
-               0.0
-            );
-            particle.setColor(r, g, b);
+            if (hasEmptyBlockAround) {
+               ParticleEngine engine = Minecraft.getInstance().particleEngine;
+               float hueGold = 0.125F;
+               int color = Color.HSBtoRGB(hueGold, 0.2F + rand.nextFloat() * 0.6F, 1.0F);
+               float r = (color >> 16 & 0xFF) / 255.0F;
+               float g = (color >> 8 & 0xFF) / 255.0F;
+               float b = (color & 0xFF) / 255.0F;
+               SimpleAnimatedParticle particle = (SimpleAnimatedParticle)engine.createParticle(
+                  ParticleTypes.FIREWORK.getType(),
+                  pos.getX() + 0.5 + rand.nextFloat() * (rand.nextBoolean() ? 1 : -1),
+                  pos.getY() + 0.5 + rand.nextFloat() * (rand.nextBoolean() ? 1 : -1),
+                  pos.getZ() + 0.5 + rand.nextFloat() * (rand.nextBoolean() ? 1 : -1),
+                  0.0,
+                  rand.nextFloat() * 0.01F,
+                  0.0
+               );
+               if (particle != null) {
+                  particle.setColor(r, g, b);
+               }
+            }
          }
       }
    }

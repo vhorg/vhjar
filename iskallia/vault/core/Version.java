@@ -35,7 +35,9 @@ public enum Version implements IVersion<Version> {
    v1_26("1.26"),
    v1_27("1.27"),
    v1_28("1.28"),
-   v1_29("1.29");
+   v1_29("1.29"),
+   v1_30("1.30"),
+   v1_31("1.31");
 
    private static final Map<String, Version> NAME_TO_VERSION = Arrays.stream(values()).collect(Collectors.toMap(Version::getName, Function.identity()));
    private final String name;

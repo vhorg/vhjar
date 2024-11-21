@@ -144,7 +144,7 @@ public class InscriptionItem extends Item implements VaultLevelItem, IManualMode
             blender.add(entry.color, 60.0F);
          }
 
-         float time = (float)ClientScheduler.INSTANCE.getTickCount();
+         float time = (float)ClientScheduler.INSTANCE.getTick();
          return blender.getColor(time);
       }
    }

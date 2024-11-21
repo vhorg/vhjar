@@ -43,7 +43,7 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
    }
 
    public final Slot getResultSlot() {
-      return this.getSlot(this.slots.size() - 1);
+      return this.slots.stream().filter(slot -> slot instanceof RecipeOutputSlot).findFirst().orElseGet(() -> this.getSlot(this.slots.size() - 1));
    }
 
    public BlockPos getTilePos() {
@@ -91,7 +91,7 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
       if (slot != null && slot.hasItem()) {
          ItemStack slotStack = slot.getItem();
          itemstack = slotStack.copy();
-         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, this.slots.size() - 1, false)) {
+         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, this.slots.size(), false)) {
             return itemstack;
          }
 

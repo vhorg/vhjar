@@ -50,7 +50,8 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
                   ItemStack gearStack = container.getGearInputSlot().getItem();
                   AttributeGearData itemData = AttributeGearData.read(gearStack);
                   int potential = itemData.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL).orElse(Integer.MIN_VALUE);
-                  boolean hasInput = !gearStack.isEmpty() && potential != Integer.MIN_VALUE;
+                  int maxPotential = itemData.getFirstValue(ModGearAttributes.MAX_CRAFTING_POTENTIAL).orElse(Integer.MIN_VALUE);
+                  boolean hasInput = !gearStack.isEmpty() && potential != Integer.MIN_VALUE && maxPotential != Integer.MIN_VALUE;
                   boolean failedModification = false;
                   List<Component> tooltip = new ArrayList<>(modification.getDescription(inputItem));
                   if (hasInput && !itemData.isModifiable()) {
@@ -83,7 +84,7 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
                         if (!failedModification && !inputItem.isEmpty()) {
                            VaultGearData data = VaultGearData.read(gearStack);
                            String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
-                           GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential, modification);
+                           GearModificationCost cost = GearModificationCost.getCost(potential, maxPotential, modification);
                            ItemStack plating = container.getPlatingSlot().getItem();
                            ItemStack bronze = container.getBronzeSlot().getItem();
                            tooltip.add(

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sps",
+    "dgd",
+    "dpd"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:chromatic_steel_ingot"
+    },
+    "p": {
+      "item": "the_vault:extraordinary_larimar"
+    },
+    "d": {
+      "item": "the_vault:driftwood"
+    },
+    "g": {
+      "item": "minecraft:glass_pane"
+    }
+  },
+  "result": {
+    "item": "the_vault:jewel_crafting_table",
+    "count": 1
+  }
+}

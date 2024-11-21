@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.levelgen.GenerationStep.Carving;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class DummyChunkGenerator extends ChunkGenerator {
    public static final Codec<DummyChunkGenerator> CODEC = RecordCodecBuilder.create(
@@ -77,6 +79,11 @@ public class DummyChunkGenerator extends ChunkGenerator {
 
    public void spawnOriginalMobs(WorldGenRegion genRegion) {
       CommonEvents.SPAWN_GENERATION.invoke(this, genRegion);
+   }
+
+   public void createStructures(
+      RegistryAccess registries, StructureFeatureManager structureFeatureManager, ChunkAccess chunk, StructureManager structureManager, long seed
+   ) {
    }
 
    public int getSeaLevel() {
